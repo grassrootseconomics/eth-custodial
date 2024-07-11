@@ -1,4 +1,4 @@
-package keystore
+package keypair
 
 import (
 	"crypto/ecdsa"
@@ -12,7 +12,7 @@ type Key struct {
 	Private string
 }
 
-func generateKeyPair() (Key, error) {
+func GenerateKeyPair() (Key, error) {
 	privateKey, err := crypto.GenerateKey()
 	if err != nil {
 		return Key{}, err
