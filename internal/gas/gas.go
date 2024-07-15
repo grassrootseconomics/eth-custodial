@@ -15,13 +15,13 @@ type (
 		GasLimit  uint64
 	}
 
-	Gas interface {
+	GasOracle interface {
 		GetSettings() (*GasSettings, error)
 	}
 )
 
-func New(o GasOpts) Gas {
-	var gasOracle Gas
+func New(o GasOpts) GasOracle {
+	var gasOracle GasOracle
 
 	switch o.OracleType {
 	case "static":

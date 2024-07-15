@@ -8,6 +8,7 @@ require (
 	github.com/jackc/pgx/v5 v5.6.0
 	github.com/jackc/tern/v2 v2.2.1
 	github.com/knadh/goyesql/v2 v2.2.0
+	github.com/lmittmann/w3 v0.16.7
 )
 
 require (
@@ -33,7 +34,6 @@ require (
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20231201235250-de7065d80cb9 // indirect
 	github.com/jackc/puddle/v2 v2.2.1 // indirect
-	github.com/lmittmann/w3 v0.16.7 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	github.com/mmcloughlin/addchain v0.4.0 // indirect
