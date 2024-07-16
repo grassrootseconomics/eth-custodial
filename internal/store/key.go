@@ -5,12 +5,13 @@ import (
 	"crypto/ecdsa"
 
 	"github.com/grassrootseconomics/celo-custodial/internal/keypair"
+	"github.com/jackc/pgx/v5"
 )
 
-func (pg *Pg) InsertKeyPair(ctx context.Context, keypair keypair.Key) error {
+func (pg *Pg) InsertKeyPair(ctx context.Context, tx pgx.Tx, keypair keypair.Key) error {
 	return nil
 }
 
-func (pg *Pg) LoadPrivateKey(ctx context.Context, address string) (*ecdsa.PrivateKey, error) {
+func (pg *Pg) LoadPrivateKey(ctx context.Context, tx pgx.Tx, address string) (*ecdsa.PrivateKey, error) {
 	return nil, nil
 }

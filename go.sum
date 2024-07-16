@@ -149,6 +149,14 @@ github.com/prometheus/common v0.32.1 h1:hWIdL3N2HoUx3B8j3YN9mWor0qhY/NlEKZEaXxuI
 github.com/prometheus/common v0.32.1/go.mod h1:vu+V0TpY+O6vW9J44gczi3Ap/oXXR10b+M/gUGO4Hls=
 github.com/prometheus/procfs v0.7.3 h1:4jVXhlkAyzOScmCkXBTOLRLTz8EeU+eyjrwB/EPq0VU=
 github.com/prometheus/procfs v0.7.3/go.mod h1:cz+aTbrPOrUb4q7XlbU9ygM+/jj0fzG6c1xBZuNvfVA=
+github.com/riverqueue/river v0.9.0 h1:DRPJ9paWMC++k2OLXrrsK/Z5XqyqsRq/JLaEDEkxCw4=
+github.com/riverqueue/river v0.9.0/go.mod h1:6fDqGoygzuEr0fEJQLUbDJC3e7XAUKASRN66IwX2wA4=
+github.com/riverqueue/river/riverdriver v0.9.0 h1:Vmk1LC9z1tLLK+/5YtHgEiXBLaA55kumwA4fBnANj2s=
+github.com/riverqueue/river/riverdriver v0.9.0/go.mod h1:qxipkiGng0CmvFeZGjlKDEfUkbZzPHi8OnQSAyhTjjQ=
+github.com/riverqueue/river/riverdriver/riverpgxv5 v0.9.0 h1:xTWB6jcYiXRqm7Mxi802IiG2D94Yx3Bj3otcmUfmWq4=
+github.com/riverqueue/river/riverdriver/riverpgxv5 v0.9.0/go.mod h1:CLE9Q4N0uOEMATc47WxUUU81dcGaMqmyrY4PMLePDF8=
+github.com/riverqueue/river/rivertype v0.9.0 h1:xr2ktQ55lqqKgXIm0Z7GJDtGuKk9BUD9kbchoUL69Lg=
+github.com/riverqueue/river/rivertype v0.9.0/go.mod h1:nDd50b/mIdxR/ezQzGS/JiAhBPERA7tUIne21GdfspQ=
 github.com/rivo/uniseg v0.2.0 h1:S1pD9weZBuJdFmowNwbpi7BJ8TNftyUImj/0WQi72jY=
 github.com/rivo/uniseg v0.2.0/go.mod h1:J6wj4VEh+S6ZtnVlnTBMWIodfgj8LQOQFoIToxlJtxc=
 github.com/rogpeppe/go-internal v1.9.0 h1:73kH8U+JUqXU8lRuOHeVHaa/SZPifC7BkcraZVejAe8=

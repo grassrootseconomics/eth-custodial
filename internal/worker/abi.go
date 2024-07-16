@@ -1,4 +1,4 @@
-package signer
+package worker
 
 import "github.com/lmittmann/w3"
 

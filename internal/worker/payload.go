@@ -1,14 +1,6 @@
-package signer
+package worker
 
 type (
-	TokenTransferPayload struct {
-		TrackingId     string `json:"trackingId"`
-		From           string `json:"from"`
-		To             string `json:"to"`
-		VoucherAddress string `json:"tokenAddress"`
-		Amount         uint64 `json:"amount"`
-	}
-
 	GasTransferPayload struct {
 		TrackingId string `json:"trackingId"`
 		From       string `json:"from"`

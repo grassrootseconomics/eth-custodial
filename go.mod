@@ -37,6 +37,10 @@ require (
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	github.com/mmcloughlin/addchain v0.4.0 // indirect
+	github.com/riverqueue/river v0.9.0 // indirect
+	github.com/riverqueue/river/riverdriver v0.9.0 // indirect
+	github.com/riverqueue/river/riverdriver/riverpgxv5 v0.9.0 // indirect
+	github.com/riverqueue/river/rivertype v0.9.0 // indirect
 	github.com/shirou/gopsutil v3.21.4-0.20210419000835-c7a38de76ee5+incompatible // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect
 	github.com/spf13/cast v1.6.0 // indirect
