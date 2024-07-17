@@ -4,6 +4,7 @@ import (
 	"context"
 	"math/big"
 
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/grassrootseconomics/ethutils"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/riverqueue/river"
@@ -34,7 +35,13 @@ func (w *TokenTransferWorker) Work(ctx context.Context, job *river.Job[TokenTran
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback(ctx)
+	defer func() {
+		if err != nil {
+			tx.Rollback(ctx)
+		} else {
+			tx.Commit(ctx)
+		}
+	}()
 
 	key, err := w.signer.store.LoadPrivateKey(ctx, tx, job.Args.From)
 	if err != nil {
@@ -59,7 +66,7 @@ func (w *TokenTransferWorker) Work(ctx context.Context, job *river.Job[TokenTran
 		return err
 	}
 
-	_, err = w.signer.chainProvider.SignContractExecutionTx(key, ethutils.ContractExecutionTxOpts{
+	builtTx, err := w.signer.chainProvider.SignContractExecutionTx(key, ethutils.ContractExecutionTxOpts{
 		ContractAddress: ethutils.HexToAddress(job.Args.VoucherAddress),
 		InputData:       input,
 		GasFeeCap:       gasSettings.GasFeeCap,
@@ -71,8 +78,14 @@ func (w *TokenTransferWorker) Work(ctx context.Context, job *river.Job[TokenTran
 		return err
 	}
 
-	// return builtTx, nil
-	// Save to OTX
+	rawTx, err := builtTx.MarshalBinary()
+	if err != nil {
+		return err
+	}
+
+	if err := w.signer.store.InsertOTX(ctx, tx, builtTx.Hash().Hex(), hexutil.Encode(rawTx)); err != nil {
+		return nil
+	}
 
 	return nil
 }

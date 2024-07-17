@@ -16,4 +16,6 @@ type Store interface {
 	PeekNonce(context.Context, pgx.Tx, string) (uint64, error)
 	AcquireNonce(context.Context, pgx.Tx, string) (uint64, error)
 	SetAccountNonce(context.Context, pgx.Tx, string, uint64) error
+	// OTX
+	InsertOTX(context.Context, pgx.Tx, string, string) error
 }
