@@ -2,13 +2,17 @@ package main
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"log/slog"
+	"net/http"
 	"os"
 	"os/signal"
 	"sync"
 	"syscall"
 	"time"
 
+	"github.com/grassrootseconomics/celo-custodial/internal/api"
 	"github.com/grassrootseconomics/celo-custodial/internal/gas"
 	"github.com/grassrootseconomics/celo-custodial/internal/queue"
 	"github.com/grassrootseconomics/celo-custodial/internal/store"
@@ -64,7 +68,7 @@ func main() {
 	}
 
 	workers, err := worker.New(worker.WorkerOpts{
-		ChainID:   ko.MustInt64("chain.chan_id"),
+		ChainID:   ko.MustInt64("chain.id"),
 		GasOracle: gasOracle,
 		Store:     store,
 		Logg:      lo,
@@ -74,6 +78,7 @@ func main() {
 		os.Exit(1)
 	}
 
+	// use maxprocs
 	queue, err := queue.New(queue.QueueOpts{
 		MaxWorkers: ko.MustInt("workers.max"),
 		Logg:       lo,
@@ -81,7 +86,52 @@ func main() {
 		Workers:    workers,
 	})
 
-	// init go routines
+	apiServer := api.New(api.APIOpts{
+		EnableMetrics: ko.Bool("metrics.enable"),
+		ListenAddress: ko.MustString("api.address"),
+		Logg:          lo,
+	})
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		if err := apiServer.Start(); err != http.ErrServerClosed {
+			lo.Error("failed to start HTTP server", "err", fmt.Sprintf("%T", err))
+			os.Exit(1)
+		}
+	}()
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		queue.Start(ctx)
+	}()
+
+	<-ctx.Done()
+	lo.Info("shutdown signal received")
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), defaultGracefulShutdownPeriod)
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		apiServer.Stop(shutdownCtx)
+		queue.Stop(shutdownCtx)
+	}()
+
+	go func() {
+		wg.Wait()
+		stop()
+		cancel()
+		os.Exit(0)
+	}()
+
+	<-shutdownCtx.Done()
+	if errors.Is(shutdownCtx.Err(), context.DeadlineExceeded) {
+		stop()
+		cancel()
+		lo.Error("graceful shutdown period exceeded, forcefully shutting down")
+	}
+	os.Exit(1)
 }
 
 func notifyShutdown() (context.Context, context.CancelFunc) {

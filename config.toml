@@ -1,0 +1,17 @@
+[metrics]
+enable = true
+
+[api]
+address = ":5004"
+
+[postgres]
+dsn = "postgres://postgres:postgres@127.0.0.1:5432/ge_celo_custodial"
+
+[workers]
+max = 0
+
+[gas]
+oracle = "static"
+
+[chain]
+id = 42220
