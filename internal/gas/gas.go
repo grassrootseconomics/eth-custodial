@@ -20,7 +20,7 @@ type (
 	}
 )
 
-func New(o GasOpts) GasOracle {
+func New(o GasOpts) (GasOracle, error) {
 	var gasOracle GasOracle
 
 	switch o.OracleType {
@@ -30,5 +30,5 @@ func New(o GasOpts) GasOracle {
 		gasOracle = &StaticGas{}
 	}
 
-	return gasOracle
+	return gasOracle, nil
 }

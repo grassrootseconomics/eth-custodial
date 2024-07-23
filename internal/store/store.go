@@ -6,9 +6,11 @@ import (
 
 	"github.com/grassrootseconomics/celo-custodial/internal/keypair"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type Store interface {
+	Pool() *pgxpool.Pool
 	// Keys
 	InsertKeyPair(context.Context, pgx.Tx, keypair.Key) error
 	LoadPrivateKey(context.Context, pgx.Tx, string) (*ecdsa.PrivateKey, error)

@@ -2,11 +2,12 @@ package worker
 
 import (
 	"context"
+	"log/slog"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/grassrootseconomics/celo-custodial/internal/store"
 	"github.com/grassrootseconomics/ethutils"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/riverqueue/river"
 )
 
@@ -21,8 +22,9 @@ type (
 
 	TokenTransferWorker struct {
 		river.WorkerDefaults[TokenTransferArgs]
-		pgxPool *pgxpool.Pool
-		signer  *signer
+		store  store.Store
+		logg   *slog.Logger
+		signer *signer
 	}
 )
 
@@ -31,7 +33,7 @@ const tokenTransferID = "TOKEN_TRANSFER"
 func (TokenTransferArgs) Kind() string { return tokenTransferID }
 
 func (w *TokenTransferWorker) Work(ctx context.Context, job *river.Job[TokenTransferArgs]) error {
-	tx, err := w.pgxPool.Begin(ctx)
+	tx, err := w.store.Pool().Begin(ctx)
 	if err != nil {
 		return err
 	}
@@ -43,12 +45,12 @@ func (w *TokenTransferWorker) Work(ctx context.Context, job *river.Job[TokenTran
 		}
 	}()
 
-	key, err := w.signer.store.LoadPrivateKey(ctx, tx, job.Args.From)
+	key, err := w.store.LoadPrivateKey(ctx, tx, job.Args.From)
 	if err != nil {
 		return err
 	}
 
-	nonce, err := w.signer.store.AcquireNonce(ctx, tx, job.Args.From)
+	nonce, err := w.store.AcquireNonce(ctx, tx, job.Args.From)
 	if err != nil {
 		return err
 	}
@@ -83,7 +85,7 @@ func (w *TokenTransferWorker) Work(ctx context.Context, job *river.Job[TokenTran
 		return err
 	}
 
-	if err := w.signer.store.InsertOTX(ctx, tx, builtTx.Hash().Hex(), hexutil.Encode(rawTx)); err != nil {
+	if err := w.store.InsertOTX(ctx, tx, builtTx.Hash().Hex(), hexutil.Encode(rawTx)); err != nil {
 		return nil
 	}
 

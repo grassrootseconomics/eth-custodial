@@ -59,6 +59,10 @@ func NewPgStore(o PgOpts) (Store, error) {
 	}, nil
 }
 
+func (s *Pg) Pool() *pgxpool.Pool {
+	return s.db
+}
+
 func loadQueries(queriesPath string) (*Queries, error) {
 	parsedQueries, err := goyesql.ParseFile(queriesPath)
 	if err != nil {

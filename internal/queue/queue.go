@@ -23,6 +23,7 @@ type (
 		MaxWorkers int
 		Logg       *slog.Logger
 		PgxPool    *pgxpool.Pool
+		Workers    *river.Workers
 	}
 
 	Queue struct {
@@ -52,15 +53,13 @@ func New(o QueueOpts) (*Queue, error) {
 		return nil, err
 	}
 
-	workers := river.NewWorkers()
-
 	riverClient, err := river.NewClient(riverPgxDriver, &river.Config{
 		Queues: map[string]river.QueueConfig{
 			river.QueueDefault: {
 				MaxWorkers: o.MaxWorkers,
 			},
 		},
-		Workers: workers,
+		Workers: o.Workers,
 	})
 
 	return &Queue{
@@ -68,7 +67,15 @@ func New(o QueueOpts) (*Queue, error) {
 	}, nil
 }
 
-func (t *Queue) Queue(ctx context.Context, tx pgx.Tx, jobArgs river.JobArgs) error {
-	_, err := t.client.InsertTx(ctx, tx, jobArgs, nil)
+func (q *Queue) Queue(ctx context.Context, tx pgx.Tx, jobArgs river.JobArgs) error {
+	_, err := q.client.InsertTx(ctx, tx, jobArgs, nil)
 	return err
+}
+
+func (q *Queue) Start(ctx context.Context) error {
+	return q.client.Start(ctx)
+}
+
+func (q *Queue) Stop(ctx context.Context) error {
+	return q.client.Stop(ctx)
 }

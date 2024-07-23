@@ -6,6 +6,7 @@ import (
 	"github.com/grassrootseconomics/celo-custodial/internal/gas"
 	"github.com/grassrootseconomics/celo-custodial/internal/store"
 	"github.com/grassrootseconomics/ethutils"
+	"github.com/riverqueue/river"
 )
 
 type (
@@ -18,18 +19,25 @@ type (
 
 	signer struct {
 		gasOracle     gas.GasOracle
-		store         store.Store
-		logg          *slog.Logger
 		chainProvider *ethutils.Provider
 	}
 )
 
-func New(o WorkerOpts) {
-	// bootstrap inidividal workers
-	_ = &signer{
+func New(o WorkerOpts) (*river.Workers, error) {
+	signer := &signer{
 		gasOracle:     o.GasOracle,
-		store:         o.Store,
-		logg:          o.Logg,
 		chainProvider: ethutils.NewProvider("https://offline.only", o.ChainID),
 	}
+
+	workers := river.NewWorkers()
+
+	if err := river.AddWorkerSafely(workers, &TokenTransferWorker{
+		store:  o.Store,
+		logg:   o.Logg,
+		signer: signer,
+	}); err != nil {
+		return nil, err
+	}
+
+	return workers, nil
 }
