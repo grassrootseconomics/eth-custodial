@@ -3,11 +3,13 @@ package main
 import (
 	"context"
 	"errors"
+	"flag"
 	"fmt"
 	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
+	"runtime"
 	"sync"
 	"syscall"
 	"time"
@@ -34,7 +36,15 @@ var (
 )
 
 func init() {
+	flag.StringVar(&confFlag, "config", "config.toml", "Config file location")
+	flag.StringVar(&migrationsFolderFlag, "migrations", "migrations/", "Migrations folder location")
+	flag.StringVar(&queriesFlag, "queries", "queries.sql", "Queries file location")
+	flag.Parse()
 
+	lo = initLogger()
+	ko = initConfig()
+
+	lo.Info("starting celo indexer", "build", build)
 }
 
 func main() {
@@ -78,13 +88,16 @@ func main() {
 		os.Exit(1)
 	}
 
-	// use maxprocs
-	queue, err := queue.New(queue.QueueOpts{
+	queueOpts := queue.QueueOpts{
 		MaxWorkers: ko.MustInt("workers.max"),
 		Logg:       lo,
 		PgxPool:    store.Pool(),
 		Workers:    workers,
-	})
+	}
+	if ko.Int("workers.max") <= 0 {
+		queueOpts.MaxWorkers = runtime.NumCPU() * 2
+	}
+	queue, err := queue.New(queueOpts)
 
 	apiServer := api.New(api.APIOpts{
 		EnableMetrics: ko.Bool("metrics.enable"),
