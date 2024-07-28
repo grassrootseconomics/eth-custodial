@@ -1,23 +1,11 @@
 package api
 
 import (
-	"net/http"
-
 	"github.com/VictoriaMetrics/metrics"
+	"github.com/labstack/echo/v4"
 )
 
-type metricsHandler struct {
-	enabled bool
-}
-
-func newMetricshandler(enabled bool) *metricsHandler {
-	return &metricsHandler{enabled: enabled}
-}
-
-func (m *metricsHandler) handle(w http.ResponseWriter, r *http.Request) {
-	if !m.enabled {
-		http.Error(w, "Metrics are disabled", http.StatusNotFound)
-		return
-	}
-	metrics.WritePrometheus(w, true)
+func (a *API) metricsHandler(c echo.Context) error {
+	metrics.WritePrometheus(c.Response(), true)
+	return nil
 }

@@ -1,5 +1,5 @@
 services:
-  postgres:
+  custodial-pg-store:
     image: postgres:16-alpine
     restart: unless-stopped
     user: postgres
@@ -8,7 +8,7 @@ services:
       - POSTGRES_USER=postgres
     volumes:
       - ./init_db.sql:/docker-entrypoint-initdb.d/init_db.sql
-      - indexer-pg:/var/lib/postgresql/data
+      - custodial-pg:/var/lib/postgresql/data
     ports:
       - "127.0.0.1:5432:5432"
     healthcheck:
@@ -18,5 +18,5 @@ services:
       retries: 5
 
 volumes:
-  indexer-pg:
+  custodial-pg:
     driver: local

@@ -18,4 +18,4 @@ run:
 	${BUILD_CONF} go run cmd/*
 
 run-debug:
-	${BUILD_CONF} DEBUG=* go run cmd/*
+	${BUILD_CONF} DEV=true go run cmd/*

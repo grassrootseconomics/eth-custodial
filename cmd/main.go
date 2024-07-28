@@ -89,7 +89,7 @@ func main() {
 	}
 
 	queueOpts := queue.QueueOpts{
-		MaxWorkers: ko.MustInt("workers.max"),
+		MaxWorkers: ko.Int("workers.max"),
 		Logg:       lo,
 		PgxPool:    store.Pool(),
 		Workers:    workers,
@@ -98,11 +98,16 @@ func main() {
 		queueOpts.MaxWorkers = runtime.NumCPU() * 2
 	}
 	queue, err := queue.New(queueOpts)
+	if err != nil {
+		lo.Error("could not initialize river queue", "error", err)
+		os.Exit(1)
+	}
 
 	apiServer := api.New(api.APIOpts{
 		EnableMetrics: ko.Bool("metrics.enable"),
 		ListenAddress: ko.MustString("api.address"),
 		Logg:          lo,
+		Debug:         true,
 	})
 
 	wg.Add(1)
@@ -127,7 +132,9 @@ func main() {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		apiServer.Stop(shutdownCtx)
+		if err := apiServer.Stop(shutdownCtx); err != nil {
+			lo.Error("failed to stop HTTP server", "err", fmt.Sprintf("%T", err))
+		}
 		queue.Stop(shutdownCtx)
 	}()
 

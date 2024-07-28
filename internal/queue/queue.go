@@ -13,9 +13,7 @@ import (
 )
 
 const (
-	// https://github.com/riverqueue/river/blob/master/CHANGELOG.md
-	riverMigrationVersion = 4
-	migrationTimeout      = 15 * time.Second
+	migrationTimeout = 15 * time.Second
 )
 
 type (
@@ -28,6 +26,7 @@ type (
 
 	Queue struct {
 		client *river.Client[pgx.Tx]
+		logg   *slog.Logger
 	}
 )
 
@@ -39,16 +38,20 @@ func New(o QueueOpts) (*Queue, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer tx.Rollback(ctx)
+	defer func() {
+		if err != nil {
+			tx.Rollback(ctx)
+		} else {
+			tx.Commit(ctx)
+		}
+	}()
 
 	riverPgxDriver := riverpgxv5.New(o.PgxPool)
 	riverMigrator := rivermigrate.New(riverPgxDriver, &rivermigrate.Config{
 		Logger: o.Logg,
 	})
 
-	_, err = riverMigrator.MigrateTx(ctx, tx, rivermigrate.DirectionUp, &rivermigrate.MigrateOpts{
-		TargetVersion: riverMigrationVersion,
-	})
+	_, err = riverMigrator.MigrateTx(ctx, tx, rivermigrate.DirectionUp, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -60,10 +63,12 @@ func New(o QueueOpts) (*Queue, error) {
 			},
 		},
 		Workers: o.Workers,
+		Logger:  o.Logg,
 	})
 
 	return &Queue{
 		client: riverClient,
+		logg:   o.Logg,
 	}, nil
 }
 
@@ -77,5 +82,6 @@ func (q *Queue) Start(ctx context.Context) error {
 }
 
 func (q *Queue) Stop(ctx context.Context) error {
+	q.logg.Info("shutting down river queue")
 	return q.client.Stop(ctx)
 }

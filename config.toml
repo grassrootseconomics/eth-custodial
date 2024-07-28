@@ -11,7 +11,7 @@ dsn = "postgres://postgres:postgres@127.0.0.1:5432/ge_celo_custodial"
 max = 0
 
 [gas]
-oracle = "static"
+oracle_type = "static"
 
 [chain]
 id = 42220

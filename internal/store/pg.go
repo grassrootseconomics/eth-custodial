@@ -15,6 +15,7 @@ import (
 type (
 	Queries struct {
 		InsertKeyPair string `query:"insert-keypair"`
+		LoadKey       string `query:"load-key"`
 	}
 
 	PgOpts struct {
