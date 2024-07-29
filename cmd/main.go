@@ -68,6 +68,10 @@ func main() {
 		lo.Error("could not initialize postgres store", "error", err)
 		os.Exit(1)
 	}
+	if err := store.Bootstrap(); err != nil {
+		lo.Error("store bootstrap actions failed", "error", err)
+		os.Exit(1)
+	}
 
 	gasOracle, err := gas.New(gas.GasOpts{
 		OracleType: ko.MustString("gas.oracle_type"),
@@ -104,6 +108,7 @@ func main() {
 	}
 
 	apiServer := api.New(api.APIOpts{
+		APIKey:        ko.MustString("api.key"),
 		EnableMetrics: ko.Bool("metrics.enable"),
 		ListenAddress: ko.MustString("api.address"),
 		Logg:          lo,

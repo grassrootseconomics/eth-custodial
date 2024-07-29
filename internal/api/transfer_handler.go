@@ -23,7 +23,8 @@ func (a *API) transferHandler(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, okResp{
-		Ok: true,
+		Ok:          true,
+		Description: "Transfer request successfully created",
 		Result: H{
 			"trackingId": 1,
 		},

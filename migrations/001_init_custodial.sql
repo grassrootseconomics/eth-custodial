@@ -8,6 +8,12 @@ CREATE TABLE IF NOT EXISTS keystore (
 );
 CREATE INDEX IF NOT EXISTS public_key_idx ON keystore(public_key);
 
+CREATE TABLE IF NOT EXISTS master_key (
+    id INT PRIMARY KEY,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 -- updated_at function
 create function update_timestamp()
     returns trigger
@@ -20,5 +26,10 @@ $$ language plpgsql;
 
 create trigger update_keystore_timestamp
     before update on keystore
+for each row
+execute procedure update_timestamp();
+
+create trigger update_master_key_timestamp
+    before update on master_key
 for each row
 execute procedure update_timestamp();

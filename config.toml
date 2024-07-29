@@ -3,6 +3,7 @@ enable = true
 
 [api]
 address = ":5004"
+key = "xd"
 
 [postgres]
 dsn = "postgres://postgres:postgres@127.0.0.1:5432/ge_celo_custodial"

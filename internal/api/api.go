@@ -12,6 +12,7 @@ import (
 
 type (
 	APIOpts struct {
+		APIKey        string
 		Debug         bool
 		EnableMetrics bool
 		ListenAddress string
@@ -19,6 +20,7 @@ type (
 	}
 
 	API struct {
+		apiKey        string
 		listenAddress string
 		logg          *slog.Logger
 		router        *echo.Echo
@@ -30,12 +32,11 @@ const (
 	maxBodySize        = "1M"
 	allowedContentType = "application/json"
 	slaTimeout         = 15 * time.Second
-
-	authorizationHeader = "X-GE-KEY"
 )
 
 func New(o APIOpts) *API {
 	api := &API{
+		apiKey:        o.APIKey,
 		listenAddress: o.ListenAddress,
 		logg:          o.Logg,
 	}
@@ -80,19 +81,12 @@ func New(o APIOpts) *API {
 	}
 
 	apiGroup := router.Group(apiVersion)
-	// TODO: Use JWT handler and bypass with Key whenever present
-	apiGroup.Use(middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
-		Skipper: func(c echo.Context) bool {
-			_, err := c.Cookie("_ge_auth")
-			return !(err != nil)
-		},
-		KeyLookup: "header:" + authorizationHeader,
-		Validator: func(auth string, c echo.Context) (bool, error) {
-			return auth == "xd", nil
-		},
-	}))
 
-	apiGroup.POST("/transfer", api.transferHandler)
+	serviceGroup := apiGroup.Group("/service")
+	serviceGroup.Use(middleware.KeyAuthWithConfig(api.serviceAPIAuthConfig()))
+
+	serviceGroup.POST("/account/create", api.accountCreateHandler)
+	serviceGroup.POST("/transfer", api.transferHandler)
 
 	api.router = router
 	return api

@@ -14,8 +14,10 @@ import (
 
 type (
 	Queries struct {
-		InsertKeyPair string `query:"insert-keypair"`
-		LoadKey       string `query:"load-key"`
+		InsertKeyPair      string `query:"insert-keypair"`
+		LoadKey            string `query:"load-key"`
+		LoadMasterKey      string `query:"load-master-key"`
+		BootstrapMasterKey string `query:"bootstrap-master-key"`
 	}
 
 	PgOpts struct {
@@ -48,7 +50,7 @@ func NewPgStore(o PgOpts) (Store, error) {
 		return nil, err
 	}
 
-	if err := runMigrations(context.Background(), dbPool, o.MigrationsFolderPath); err != nil {
+	if err := runMigrations(dbPool, o.MigrationsFolderPath); err != nil {
 		return nil, err
 	}
 	o.Logg.Info("migrations ran successfully")
@@ -58,6 +60,25 @@ func NewPgStore(o PgOpts) (Store, error) {
 		db:      dbPool,
 		queries: queries,
 	}, nil
+}
+
+func (s *Pg) Bootstrap() error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	tx, err := s.db.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err != nil {
+			tx.Rollback(ctx)
+		} else {
+			tx.Commit(ctx)
+		}
+	}()
+
+	return s.bootstrapMasterSigner(ctx, tx)
 }
 
 func (s *Pg) Pool() *pgxpool.Pool {
@@ -79,8 +100,8 @@ func loadQueries(queriesPath string) (*Queries, error) {
 	return loadedQueries, nil
 }
 
-func runMigrations(ctx context.Context, dbPool *pgxpool.Pool, migrationsPath string) error {
-	ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
+func runMigrations(dbPool *pgxpool.Pool, migrationsPath string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
 	conn, err := dbPool.Acquire(ctx)
