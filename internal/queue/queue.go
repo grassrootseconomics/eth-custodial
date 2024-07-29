@@ -72,9 +72,8 @@ func New(o QueueOpts) (*Queue, error) {
 	}, nil
 }
 
-func (q *Queue) Queue(ctx context.Context, tx pgx.Tx, jobArgs river.JobArgs) error {
-	_, err := q.client.InsertTx(ctx, tx, jobArgs, nil)
-	return err
+func (q *Queue) Client() *river.Client[pgx.Tx] {
+	return q.client
 }
 
 func (q *Queue) Start(ctx context.Context) error {

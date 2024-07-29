@@ -4,15 +4,15 @@ import (
 	"context"
 	"log/slog"
 
+	"github.com/grassrootseconomics/celo-custodial/internal/keypair"
 	"github.com/grassrootseconomics/celo-custodial/internal/store"
 	"github.com/riverqueue/river"
 )
 
 type (
 	AccountCreateArgs struct {
-		TrackingId string `json:"trackingId"`
-		PublicKey  string `json:"from"`
-		PrivateKey string `json:"to"`
+		TrackingId string      `json:"trackingId"`
+		KeyPair    keypair.Key `json:"keypair"`
 	}
 
 	AccountCreateWorker struct {
@@ -39,6 +39,10 @@ func (w *AccountCreateWorker) Work(ctx context.Context, job *river.Job[AccountCr
 			tx.Commit(ctx)
 		}
 	}()
+
+	if err := w.store.InsertKeyPair(ctx, tx, job.Args.KeyPair); err != nil {
+		return err
+	}
 
 	return nil
 }

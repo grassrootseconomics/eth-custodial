@@ -5,6 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/grassrootseconomics/celo-custodial/internal/keypair"
+	"github.com/grassrootseconomics/celo-custodial/internal/worker"
 	"github.com/labstack/echo/v4"
 )
 
@@ -15,6 +16,14 @@ func (a *API) accountCreateHandler(c echo.Context) error {
 	}
 
 	trackingId := uuid.NewString()
+
+	_, err = a.queue.Client().Insert(c.Request().Context(), worker.AccountCreateArgs{
+		TrackingId: trackingId,
+		KeyPair:    generatedKeyPair,
+	}, nil)
+	if err != nil {
+		return err
+	}
 
 	return c.JSON(http.StatusOK, okResp{
 		Ok:          true,

@@ -39,5 +39,13 @@ func New(o WorkerOpts) (*river.Workers, error) {
 		return nil, err
 	}
 
+	if err := river.AddWorkerSafely(workers, &AccountCreateWorker{
+		store:  o.Store,
+		logg:   o.Logg,
+		signer: signer,
+	}); err != nil {
+		return nil, err
+	}
+
 	return workers, nil
 }

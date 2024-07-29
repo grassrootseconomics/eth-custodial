@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/grassrootseconomics/celo-custodial/internal/queue"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -17,6 +18,7 @@ type (
 		EnableMetrics bool
 		ListenAddress string
 		Logg          *slog.Logger
+		Queue         *queue.Queue
 	}
 
 	API struct {
@@ -24,6 +26,7 @@ type (
 		listenAddress string
 		logg          *slog.Logger
 		router        *echo.Echo
+		queue         queue.Queue
 	}
 )
 
@@ -39,6 +42,7 @@ func New(o APIOpts) *API {
 		apiKey:        o.APIKey,
 		listenAddress: o.ListenAddress,
 		logg:          o.Logg,
+		queue:         *o.Queue,
 	}
 
 	customValidator := validator.New(validator.WithRequiredStructEnabled())

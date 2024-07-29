@@ -16,6 +16,16 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+  custodial-river-ui:
+    image: ghcr.io/riverqueue/riverui:latest
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@custodial-pg-store:5432/ge_celo_custodial
+    ports:
+      - "127.0.0.1:8080:8080"
+    depends_on:
+      custodial-pg-store:
+        condition: service_healthy  
 
 volumes:
   custodial-pg:
