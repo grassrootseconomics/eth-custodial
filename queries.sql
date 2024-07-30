@@ -69,3 +69,62 @@ SET next_nonce = $2
 WHERE keystore_id = (
     SELECT id FROM keystore WHERE public_key = $1
 );
+
+--name: create-otx
+-- Create a new locally originating tx
+-- $1: tracking_id
+-- $2: otx_type
+-- $3: signer_account
+-- $4: raw_tx
+-- $5: tx_hash
+-- $6: nonce
+-- $7: replaced
+INSERT INTO otx(
+    tracking_id,
+    otx_type,
+    signer_account,
+    raw_tx,
+    tx_hash,
+    nonce,
+    replaced
+) VALUES($1, $2, $3, $4, $5, $6, $7) RETURNING id;
+
+--name: get-otx-by-tracking-id
+-- Get OTX by tracking id
+-- $1: tracking_id
+SELECT otx.id, otx.tracking_id, otx.otx_type, keystore.public_key, otx.raw_tx, otx.tx_hash, otx.nonce, otx.replaced FROM otx
+INNER JOIN keystore ON otx.signer_account = keystore.id
+WHERE otx.tracking_id = $1;
+
+--name: get-otx-by-account
+-- Get OTX by account
+-- $1: public_key
+-- $2: limit
+SELECT otx.id, otx.tracking_id, otx.otx_type, keystore.public_key, otx.raw_tx, otx.tx_hash, otx.nonce, otx.replaced FROM keystore
+INNER JOIN otx ON keystore.id = otx.signer_account
+WHERE keystore.public_key = $1
+ORDER BY otx.id ASC LIMIT $2;
+
+--name: get-otx-by-account-next
+-- Get OTX by account
+-- $1: public_key
+-- $2: cursor
+-- $3: limit
+SELECT otx.id, otx.tracking_id, otx.otx_type, keystore.public_key, otx.raw_tx, otx.tx_hash, otx.nonce, otx.replaced FROM keystore
+INNER JOIN otx ON keystore.id = otx.signer_account
+WHERE keystore.public_key = $1
+AND otx.id > $2
+ORDER BY otx.id ASC LIMIT $3;
+
+--name: get-otx-by-account-previous
+-- Get OTX by account
+-- $1: public_key
+-- $2: cursor
+-- $3: limit
+SELECT * FROM (
+  SELECT otx.id, otx.tracking_id, otx.otx_type, keystore.public_key, otx.raw_tx, otx.tx_hash, otx.nonce, otx.replaced FROM keystore
+	INNER JOIN otx ON keystore.id = otx.signer_account
+	WHERE keystore.public_key = $1
+  AND otx.id < $2
+  ORDER BY otx.id DESC LIMIT $3
+) AS previous_page ORDER BY id ASC;
