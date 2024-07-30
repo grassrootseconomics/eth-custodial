@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/google/uuid"
-	"github.com/grassrootseconomics/celo-custodial/internal/keypair"
-	"github.com/grassrootseconomics/celo-custodial/internal/worker"
+	"github.com/grassrootseconomics/eth-custodial/internal/keypair"
+	"github.com/grassrootseconomics/eth-custodial/internal/worker"
 	"github.com/labstack/echo/v4"
 )
 

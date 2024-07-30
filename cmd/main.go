@@ -14,11 +14,11 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/grassrootseconomics/celo-custodial/internal/api"
-	"github.com/grassrootseconomics/celo-custodial/internal/gas"
-	"github.com/grassrootseconomics/celo-custodial/internal/queue"
-	"github.com/grassrootseconomics/celo-custodial/internal/store"
-	"github.com/grassrootseconomics/celo-custodial/internal/worker"
+	"github.com/grassrootseconomics/eth-custodial/internal/api"
+	"github.com/grassrootseconomics/eth-custodial/internal/gas"
+	"github.com/grassrootseconomics/eth-custodial/internal/queue"
+	"github.com/grassrootseconomics/eth-custodial/internal/store"
+	"github.com/grassrootseconomics/eth-custodial/internal/worker"
 	"github.com/knadh/koanf/v2"
 )
 
@@ -44,7 +44,7 @@ func init() {
 	lo = initLogger()
 	ko = initConfig()
 
-	lo.Info("starting celo indexer", "build", build)
+	lo.Info("starting eth custodial", "build", build)
 }
 
 func main() {

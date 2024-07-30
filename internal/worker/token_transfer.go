@@ -6,7 +6,7 @@ import (
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/grassrootseconomics/celo-custodial/internal/store"
+	"github.com/grassrootseconomics/eth-custodial/internal/store"
 	"github.com/grassrootseconomics/ethutils"
 	"github.com/riverqueue/river"
 )

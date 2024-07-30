@@ -5,7 +5,7 @@ import (
 	"crypto/ecdsa"
 
 	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/grassrootseconomics/celo-custodial/internal/keypair"
+	"github.com/grassrootseconomics/eth-custodial/internal/keypair"
 	"github.com/jackc/pgx/v5"
 )
 

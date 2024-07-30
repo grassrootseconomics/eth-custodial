@@ -4,8 +4,8 @@ import (
 	"context"
 	"log/slog"
 
-	"github.com/grassrootseconomics/celo-custodial/internal/keypair"
-	"github.com/grassrootseconomics/celo-custodial/internal/store"
+	"github.com/grassrootseconomics/eth-custodial/internal/keypair"
+	"github.com/grassrootseconomics/eth-custodial/internal/store"
 	"github.com/riverqueue/river"
 )
 

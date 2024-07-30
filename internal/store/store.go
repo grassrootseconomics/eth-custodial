@@ -4,7 +4,7 @@ import (
 	"context"
 	"crypto/ecdsa"
 
-	"github.com/grassrootseconomics/celo-custodial/internal/keypair"
+	"github.com/grassrootseconomics/eth-custodial/internal/keypair"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )

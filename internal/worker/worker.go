@@ -3,8 +3,8 @@ package worker
 import (
 	"log/slog"
 
-	"github.com/grassrootseconomics/celo-custodial/internal/gas"
-	"github.com/grassrootseconomics/celo-custodial/internal/store"
+	"github.com/grassrootseconomics/eth-custodial/internal/gas"
+	"github.com/grassrootseconomics/eth-custodial/internal/store"
 	"github.com/grassrootseconomics/ethutils"
 	"github.com/riverqueue/river"
 )
