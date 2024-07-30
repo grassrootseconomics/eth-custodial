@@ -18,6 +18,9 @@ type (
 		LoadKey            string `query:"load-key"`
 		LoadMasterKey      string `query:"load-master-key"`
 		BootstrapMasterKey string `query:"bootstrap-master-key"`
+		PeekNonce          string `query:"peek-nonce"`
+		AcquireNonce       string `query:"acquire-nonce"`
+		SetAcccountNonce   string `query:"set-account-nonce"`
 	}
 
 	PgOpts struct {
