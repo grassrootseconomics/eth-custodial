@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/grassrootseconomics/eth-custodial/internal/queue"
+	"github.com/grassrootseconomics/eth-custodial/internal/store"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -17,6 +18,7 @@ type (
 		Debug         bool
 		EnableMetrics bool
 		ListenAddress string
+		Store         store.Store
 		Logg          *slog.Logger
 		Queue         *queue.Queue
 	}
@@ -24,6 +26,7 @@ type (
 	API struct {
 		apiKey        string
 		listenAddress string
+		store         store.Store
 		logg          *slog.Logger
 		router        *echo.Echo
 		queue         queue.Queue
@@ -42,6 +45,7 @@ func New(o APIOpts) *API {
 		apiKey:        o.APIKey,
 		listenAddress: o.ListenAddress,
 		logg:          o.Logg,
+		store:         o.Store,
 		queue:         *o.Queue,
 	}
 

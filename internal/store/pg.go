@@ -14,13 +14,19 @@ import (
 
 type (
 	Queries struct {
-		InsertKeyPair      string `query:"insert-keypair"`
-		LoadKey            string `query:"load-key"`
-		LoadMasterKey      string `query:"load-master-key"`
-		BootstrapMasterKey string `query:"bootstrap-master-key"`
-		PeekNonce          string `query:"peek-nonce"`
-		AcquireNonce       string `query:"acquire-nonce"`
-		SetAcccountNonce   string `query:"set-account-nonce"`
+		InsertKeyPair           string `query:"insert-keypair"`
+		LoadKey                 string `query:"load-key"`
+		CheckKeypair            string `query:"check-keypair"`
+		LoadMasterKey           string `query:"load-master-key"`
+		BootstrapMasterKey      string `query:"bootstrap-master-key"`
+		PeekNonce               string `query:"peek-nonce"`
+		AcquireNonce            string `query:"acquire-nonce"`
+		SetAcccountNonce        string `query:"set-account-nonce"`
+		InsertOTX               string `query:"insert-otx"`
+		GetOTXByTrackingID      string `query:"get-otx-by-tracking-id"`
+		GetOTXByAccount         string `query:"get-otx-by-account"`
+		GetOTXByAccountNext     string `query:"get-otx-by-account-next"`
+		GetOTXByAccountPrevious string `query:"get-otx-by-account-previous"`
 	}
 
 	PgOpts struct {

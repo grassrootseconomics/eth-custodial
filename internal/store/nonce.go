@@ -31,7 +31,7 @@ func (pg *Pg) AcquireNonce(ctx context.Context, tx pgx.Tx, publicKey string) (ui
 		return 0, err
 	}
 
-	return 0, nil
+	return nonce, nil
 }
 
 func (pg *Pg) SetAccountNonce(ctx context.Context, tx pgx.Tx, publicKey string, nonce uint64) error {

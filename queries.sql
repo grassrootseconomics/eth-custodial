@@ -9,6 +9,11 @@ INSERT INTO keystore(public_key, private_key) VALUES($1, $2) RETURNING id;
 -- $1: public_key
 SELECT private_key FROM keystore WHERE public_key=$1;
 
+--name: check-keypair
+-- Check if a key exists in the keystore and is activated
+-- $1: public_key
+SELECT active FROM keystore WHERE public_key=$1;
+
 --name: load-master-key
 -- Load saved master key pair
 SELECT private_key FROM keystore
@@ -70,7 +75,7 @@ WHERE keystore_id = (
     SELECT id FROM keystore WHERE public_key = $1
 );
 
---name: create-otx
+--name: insert-otx
 -- Create a new locally originating tx
 -- $1: tracking_id
 -- $2: otx_type
@@ -78,16 +83,14 @@ WHERE keystore_id = (
 -- $4: raw_tx
 -- $5: tx_hash
 -- $6: nonce
--- $7: replaced
 INSERT INTO otx(
     tracking_id,
     otx_type,
     signer_account,
     raw_tx,
     tx_hash,
-    nonce,
-    replaced
-) VALUES($1, $2, $3, $4, $5, $6, $7) RETURNING id;
+    nonce
+) VALUES($1, $2, (SELECT id FROM keystore WHERE public_key = $3), $4, $5, $6) RETURNING id;
 
 --name: get-otx-by-tracking-id
 -- Get OTX by tracking id
@@ -100,7 +103,7 @@ WHERE otx.tracking_id = $1;
 -- Get OTX by account
 -- $1: public_key
 -- $2: limit
-SELECT otx.id, otx.tracking_id, otx.otx_type, keystore.public_key, otx.raw_tx, otx.tx_hash, otx.nonce, otx.replaced FROM keystore
+SELECT otx.id, otx.tracking_id, otx.otx_type, keystore.public_key, otx.raw_tx, otx.tx_hash, otx.nonce, otx.replaced, otx.created_at FROM keystore
 INNER JOIN otx ON keystore.id = otx.signer_account
 WHERE keystore.public_key = $1
 ORDER BY otx.id ASC LIMIT $2;
@@ -110,7 +113,7 @@ ORDER BY otx.id ASC LIMIT $2;
 -- $1: public_key
 -- $2: cursor
 -- $3: limit
-SELECT otx.id, otx.tracking_id, otx.otx_type, keystore.public_key, otx.raw_tx, otx.tx_hash, otx.nonce, otx.replaced FROM keystore
+SELECT otx.id, otx.tracking_id, otx.otx_type, keystore.public_key, otx.raw_tx, otx.tx_hash, otx.nonce, otx.replaced, otx.created_at, FROM keystore
 INNER JOIN otx ON keystore.id = otx.signer_account
 WHERE keystore.public_key = $1
 AND otx.id > $2
@@ -122,7 +125,7 @@ ORDER BY otx.id ASC LIMIT $3;
 -- $2: cursor
 -- $3: limit
 SELECT * FROM (
-  SELECT otx.id, otx.tracking_id, otx.otx_type, keystore.public_key, otx.raw_tx, otx.tx_hash, otx.nonce, otx.replaced FROM keystore
+  SELECT otx.id, otx.tracking_id, otx.otx_type, keystore.public_key, otx.raw_tx, otx.tx_hash, otx.nonce, otx.replaced, otx.created_at FROM keystore
 	INNER JOIN otx ON keystore.id = otx.signer_account
 	WHERE keystore.public_key = $1
   AND otx.id < $2

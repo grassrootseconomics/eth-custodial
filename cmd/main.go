@@ -111,6 +111,7 @@ func main() {
 		APIKey:        ko.MustString("api.key"),
 		EnableMetrics: ko.Bool("metrics.enable"),
 		ListenAddress: ko.MustString("api.address"),
+		Store:         store,
 		Queue:         queue,
 		Logg:          lo,
 		Debug:         true,

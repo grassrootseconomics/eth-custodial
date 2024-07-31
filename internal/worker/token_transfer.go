@@ -3,7 +3,6 @@ package worker
 import (
 	"context"
 	"log/slog"
-	"math/big"
 
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/grassrootseconomics/eth-custodial/internal/store"
@@ -13,11 +12,11 @@ import (
 
 type (
 	TokenTransferArgs struct {
-		TrackingId     string `json:"trackingId"`
-		From           string `json:"from"`
-		To             string `json:"to"`
-		VoucherAddress string `json:"tokenAddress"`
-		Amount         uint64 `json:"amount"`
+		TrackingId   string `json:"trackingId"`
+		From         string `json:"from"`
+		To           string `json:"to"`
+		TokenAddress string `json:"tokenAddress"`
+		Amount       string `json:"amount"`
 	}
 
 	TokenTransferWorker struct {
@@ -28,22 +27,14 @@ type (
 	}
 )
 
-const tokenTransferID = "TOKEN_TRANSFER"
-
-func (TokenTransferArgs) Kind() string { return tokenTransferID }
+func (TokenTransferArgs) Kind() string { return store.TOKEN_TRANSFER }
 
 func (w *TokenTransferWorker) Work(ctx context.Context, job *river.Job[TokenTransferArgs]) error {
 	tx, err := w.store.Pool().Begin(ctx)
 	if err != nil {
 		return err
 	}
-	defer func() {
-		if err != nil {
-			tx.Rollback(ctx)
-		} else {
-			tx.Commit(ctx)
-		}
-	}()
+	defer tx.Rollback(ctx)
 
 	key, err := w.store.LoadPrivateKey(ctx, tx, job.Args.From)
 	if err != nil {
@@ -55,9 +46,14 @@ func (w *TokenTransferWorker) Work(ctx context.Context, job *river.Job[TokenTran
 		return err
 	}
 
+	amount, err := StringToBigInt(job.Args.Amount)
+	if err != nil {
+		return err
+	}
+
 	input, err := abi[Transfer].EncodeArgs(
 		ethutils.HexToAddress(job.Args.To),
-		new(big.Int).SetUint64(job.Args.Amount),
+		amount,
 	)
 	if err != nil {
 		return err
@@ -69,7 +65,7 @@ func (w *TokenTransferWorker) Work(ctx context.Context, job *river.Job[TokenTran
 	}
 
 	builtTx, err := w.signer.chainProvider.SignContractExecutionTx(key, ethutils.ContractExecutionTxOpts{
-		ContractAddress: ethutils.HexToAddress(job.Args.VoucherAddress),
+		ContractAddress: ethutils.HexToAddress(job.Args.TokenAddress),
 		InputData:       input,
 		GasFeeCap:       gasSettings.GasFeeCap,
 		GasTipCap:       gasSettings.GasTipCap,
@@ -85,9 +81,16 @@ func (w *TokenTransferWorker) Work(ctx context.Context, job *river.Job[TokenTran
 		return err
 	}
 
-	if err := w.store.InsertOTX(ctx, tx, builtTx.Hash().Hex(), hexutil.Encode(rawTx)); err != nil {
-		return nil
+	if err := w.store.InsertOTX(ctx, tx, store.OTX{
+		TrackingID:    job.Args.TrackingId,
+		OTXType:       store.TOKEN_TRANSFER,
+		SignerAccount: job.Args.From,
+		RawTx:         hexutil.Encode(rawTx),
+		TxHash:        builtTx.Hash().Hex(),
+		Nonce:         nonce,
+	}); err != nil {
+		return err
 	}
 
-	return nil
+	return tx.Commit(ctx)
 }

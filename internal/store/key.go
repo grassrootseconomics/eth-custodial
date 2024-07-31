@@ -42,6 +42,23 @@ func (pg *Pg) LoadPrivateKey(ctx context.Context, tx pgx.Tx, publicKey string) (
 	return privateKey, nil
 }
 
+func (pg *Pg) CheckKeypair(ctx context.Context, tx pgx.Tx, publicKey string) (bool, error) {
+	var active bool
+
+	if err := tx.QueryRow(
+		ctx,
+		pg.queries.CheckKeypair,
+		publicKey,
+	).Scan(&active); err != nil {
+		if err == pgx.ErrNoRows {
+			return false, nil
+		}
+		return false, err
+	}
+
+	return active, nil
+}
+
 func (pg *Pg) LoadMasterSignerKey(ctx context.Context, tx pgx.Tx) (*ecdsa.PrivateKey, error) {
 	var privateKeyString string
 
