@@ -8,6 +8,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/grassrootseconomics/eth-custodial/internal/queue"
 	"github.com/grassrootseconomics/eth-custodial/internal/store"
+	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -95,6 +96,10 @@ func New(o APIOpts) *API {
 
 	serviceGroup.POST("/account/create", api.accountCreateHandler)
 	serviceGroup.POST("/transfer", api.transferHandler)
+
+	userGroup := apiGroup.Group("/user")
+	userGroup.Use(echojwt.WithConfig(api.userAPIJWTAuthConfig()))
+	userGroup.GET("/test", api.testRestircted)
 
 	api.router = router
 	return api
