@@ -8,7 +8,7 @@ require (
 	github.com/go-playground/validator/v10 v10.22.0
 	github.com/golang-jwt/jwt/v5 v5.0.0
 	github.com/google/uuid v1.6.0
-	github.com/grassrootseconomics/ethutils v1.1.0
+	github.com/grassrootseconomics/ethutils v1.2.0
 	github.com/jackc/pgx/v5 v5.6.0
 	github.com/jackc/tern/v2 v2.2.1
 	github.com/kamikazechaser/common v0.2.0
