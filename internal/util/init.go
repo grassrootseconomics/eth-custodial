@@ -1,4 +1,4 @@
-package main
+package util
 
 import (
 	"log/slog"
@@ -12,7 +12,7 @@ import (
 	"github.com/knadh/koanf/v2"
 )
 
-func initLogger() *slog.Logger {
+func InitLogger() *slog.Logger {
 	loggOpts := logg.LoggOpts{
 		FormatType: logg.Logfmt,
 		LogLevel:   slog.LevelInfo,
@@ -30,20 +30,20 @@ func initLogger() *slog.Logger {
 	return logg.NewLogg(loggOpts)
 }
 
-func initConfig() *koanf.Koanf {
+func InitConfig(lo *slog.Logger, confFilePath string) *koanf.Koanf {
 	var (
 		ko = koanf.New(".")
 	)
 
-	confFile := file.Provider(confFlag)
+	confFile := file.Provider(confFilePath)
 	if err := ko.Load(confFile, toml.Parser()); err != nil {
 		lo.Error("could not parse configuration file", "error", err)
 		os.Exit(1)
 	}
 
-	if err := ko.Load(env.Provider("CUSTODIAL_", ".", func(s string) string {
+	if err := ko.Load(env.Provider("CUSTODIAL", ".", func(s string) string {
 		return strings.ReplaceAll(strings.ToLower(
-			strings.TrimPrefix(s, "CUSTODIAL_")), "__", ".")
+			strings.TrimPrefix(s, "CUSTODIAL")), "__", ".")
 	}), nil); err != nil {
 		lo.Error("could not override config from env vars", "error", err)
 		os.Exit(1)

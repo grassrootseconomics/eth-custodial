@@ -1,11 +1,12 @@
 module github.com/grassrootseconomics/eth-custodial
 
-go 1.22.5
+go 1.23.0
 
 require (
 	github.com/VictoriaMetrics/metrics v1.35.1
 	github.com/ethereum/go-ethereum v1.14.6
 	github.com/go-playground/validator/v10 v10.22.0
+	github.com/golang-jwt/jwt/v5 v5.0.0
 	github.com/google/uuid v1.6.0
 	github.com/grassrootseconomics/ethutils v1.1.0
 	github.com/jackc/pgx/v5 v5.6.0
@@ -16,6 +17,7 @@ require (
 	github.com/knadh/koanf/providers/env v0.1.0
 	github.com/knadh/koanf/providers/file v1.0.0
 	github.com/knadh/koanf/v2 v2.1.1
+	github.com/labstack/echo-jwt/v4 v4.2.0
 	github.com/labstack/echo/v4 v4.12.0
 	github.com/lmittmann/w3 v0.16.7
 	github.com/riverqueue/river v0.10.1
@@ -44,7 +46,6 @@ require (
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-viper/mapstructure/v2 v2.0.0-alpha.1 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
-	github.com/golang-jwt/jwt/v5 v5.0.0 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/holiman/uint256 v1.2.4 // indirect
 	github.com/huandu/xstrings v1.4.0 // indirect
@@ -53,7 +54,6 @@ require (
 	github.com/jackc/pgservicefile v0.0.0-20231201235250-de7065d80cb9 // indirect
 	github.com/jackc/puddle/v2 v2.2.1 // indirect
 	github.com/knadh/koanf/maps v0.1.1 // indirect
-	github.com/labstack/echo-jwt/v4 v4.2.0 // indirect
 	github.com/labstack/gommon v0.4.2 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/lmittmann/tint v1.0.4 // indirect

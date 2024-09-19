@@ -1,0 +1,8 @@
+/**
+!/cmd
+!/migrations
+!/internal
+!/pkg
+!/LICENSE
+!/config.toml
+!/go.*

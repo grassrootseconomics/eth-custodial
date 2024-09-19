@@ -18,6 +18,7 @@ import (
 	"github.com/grassrootseconomics/eth-custodial/internal/gas"
 	"github.com/grassrootseconomics/eth-custodial/internal/queue"
 	"github.com/grassrootseconomics/eth-custodial/internal/store"
+	"github.com/grassrootseconomics/eth-custodial/internal/util"
 	"github.com/grassrootseconomics/eth-custodial/internal/worker"
 	"github.com/knadh/koanf/v2"
 )
@@ -41,8 +42,8 @@ func init() {
 	flag.StringVar(&queriesFlag, "queries", "queries.sql", "Queries file location")
 	flag.Parse()
 
-	lo = initLogger()
-	ko = initConfig()
+	lo = util.InitLogger()
+	ko = util.InitConfig(lo, confFlag)
 
 	lo.Info("starting eth custodial", "build", build)
 }

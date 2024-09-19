@@ -1,0 +1,4 @@
+.vscode
+.idx
+**/*.env
+eth-custodial
