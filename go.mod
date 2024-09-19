@@ -21,7 +21,7 @@ require (
 	github.com/labstack/echo/v4 v4.12.0
 	github.com/lmittmann/w3 v0.16.7
 	github.com/riverqueue/river v0.10.1
-	github.com/riverqueue/river/riverdriver/riverpgxv5 v0.10.1
+	github.com/riverqueue/river/riverdriver/riverpgxv5 v0.11.4
 )
 
 require (
@@ -64,9 +64,9 @@ require (
 	github.com/mmcloughlin/addchain v0.4.0 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/riverqueue/river/riverdriver v0.10.1 // indirect
-	github.com/riverqueue/river/rivershared v0.10.1 // indirect
-	github.com/riverqueue/river/rivertype v0.10.1 // indirect
+	github.com/riverqueue/river/riverdriver v0.11.4 // indirect
+	github.com/riverqueue/river/rivershared v0.11.4 // indirect
+	github.com/riverqueue/river/rivertype v0.11.4 // indirect
 	github.com/shirou/gopsutil v3.21.4-0.20210419000835-c7a38de76ee5+incompatible // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect
 	github.com/spf13/cast v1.6.0 // indirect
