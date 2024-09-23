@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/grassrootseconomics/eth-custodial/pkg/api"
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -38,8 +39,9 @@ func (a *API) serviceAPIAuthConfig() middleware.KeyAuthConfig {
 			return auth == a.apiKey, nil
 		},
 		ErrorHandler: func(_ error, c echo.Context) error {
-			return c.JSON(http.StatusUnauthorized, errResp{
+			return c.JSON(http.StatusUnauthorized, api.ErrResponse{
 				Ok:          false,
+				ErrCode:     api.ErrCodeInvalidAPIKey,
 				Description: "Invalid API key",
 			})
 		},
@@ -75,7 +77,7 @@ func (a *API) testLogin(c echo.Context) error {
 }
 
 func (a *API) testRestircted(c echo.Context) error {
-	return c.JSON(http.StatusOK, okResp{
+	return c.JSON(http.StatusOK, api.OKResponse{
 		Ok:          true,
 		Description: "You are seeing a restricted page!",
 	})

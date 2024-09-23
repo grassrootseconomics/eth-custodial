@@ -3,6 +3,7 @@ package api
 import (
 	"net/http"
 
+	"github.com/grassrootseconomics/eth-custodial/pkg/api"
 	"github.com/labstack/echo/v4"
 )
 
@@ -24,7 +25,7 @@ func (a *API) customHTTPErrorHandler(err error, c echo.Context) {
 			errorMsg = m
 		}
 
-		c.JSON(hErr.Code, errResp{
+		c.JSON(hErr.Code, api.ErrResponse{
 			Ok:          false,
 			Description: errorMsg,
 		})
@@ -32,8 +33,25 @@ func (a *API) customHTTPErrorHandler(err error, c echo.Context) {
 	}
 
 	a.logg.Error("api: echo error", "path", c.Path(), "err", err)
-	c.JSON(http.StatusInternalServerError, errResp{
+	c.JSON(http.StatusInternalServerError, api.ErrResponse{
 		Ok:          false,
-		Description: "Internal server error.",
+		Description: "Internal server error",
+		ErrCode:     api.ErrCodeInternalServerError,
+	})
+}
+
+func handleBindError(c echo.Context) error {
+	return c.JSON(http.StatusBadRequest, api.ErrResponse{
+		Ok:          false,
+		ErrCode:     api.ErrCodeInvalidJSON,
+		Description: "Invalid or malformed JSON structure",
+	})
+}
+
+func handleValidateError(c echo.Context) error {
+	return c.JSON(http.StatusBadRequest, api.ErrResponse{
+		Ok:          false,
+		ErrCode:     api.ErrCodeValidationFailed,
+		Description: "Validation failed on one or more fields",
 	})
 }

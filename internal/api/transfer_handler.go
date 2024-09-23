@@ -6,23 +6,19 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/grassrootseconomics/eth-custodial/internal/worker"
+	"github.com/grassrootseconomics/eth-custodial/pkg/api"
 	"github.com/labstack/echo/v4"
 )
 
 func (a *API) transferHandler(c echo.Context) error {
-	var req struct {
-		From         string `json:"from" validate:"required,eth_addr_checksum"`
-		To           string `json:"to" validate:"required,eth_addr_checksum"`
-		TokenAddress string `json:"tokenAddress" validate:"required,eth_addr_checksum"`
-		Amount       string `json:"amount" validate:"number,gt=0"`
-	}
+	req := api.TransferRequest{}
 
 	if err := c.Bind(&req); err != nil {
-		return newBadRequestError(errInvalidJSON)
+		return handleBindError(c)
 	}
 
 	if err := c.Validate(req); err != nil {
-		return err
+		return handleValidateError(c)
 	}
 
 	tx, err := a.store.Pool().Begin(c.Request().Context())
@@ -36,16 +32,17 @@ func (a *API) transferHandler(c echo.Context) error {
 		return err
 	}
 	if !exists {
-		return c.JSON(http.StatusNotFound, errResp{
+		return c.JSON(http.StatusNotFound, api.ErrResponse{
 			Ok:          false,
 			Description: fmt.Sprintf("Account %s does not exist or is not yet activated", req.From),
+			ErrCode:     api.ErrCodeAccountNotExists,
 		})
 	}
 
-	trackingId := uuid.NewString()
+	trackingID := uuid.NewString()
 
 	_, err = a.queue.Client().InsertTx(c.Request().Context(), tx, worker.TokenTransferArgs{
-		TrackingId:   trackingId,
+		TrackingId:   trackingID,
 		From:         req.From,
 		To:           req.To,
 		TokenAddress: req.TokenAddress,
@@ -59,11 +56,11 @@ func (a *API) transferHandler(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, okResp{
+	return c.JSON(http.StatusOK, api.OKResponse{
 		Ok:          true,
 		Description: "Transfer request successfully created",
-		Result: H{
-			"trackingId": trackingId,
+		Result: map[string]any{
+			"trackingId": trackingID,
 		},
 	})
 }

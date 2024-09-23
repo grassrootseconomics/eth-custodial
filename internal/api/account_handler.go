@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/grassrootseconomics/eth-custodial/internal/keypair"
 	"github.com/grassrootseconomics/eth-custodial/internal/worker"
+	"github.com/grassrootseconomics/eth-custodial/pkg/api"
 	"github.com/labstack/echo/v4"
 )
 
@@ -15,22 +16,22 @@ func (a *API) accountCreateHandler(c echo.Context) error {
 		return err
 	}
 
-	trackingId := uuid.NewString()
+	trackingID := uuid.NewString()
 
 	_, err = a.queue.Client().Insert(c.Request().Context(), worker.AccountCreateArgs{
-		TrackingId: trackingId,
+		TrackingId: trackingID,
 		KeyPair:    generatedKeyPair,
 	}, nil)
 	if err != nil {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, okResp{
+	return c.JSON(http.StatusOK, api.OKResponse{
 		Ok:          true,
 		Description: "Account creation request successfully created",
-		Result: H{
+		Result: map[string]any{
 			"publicKey":  generatedKeyPair.Public,
-			"trackingId": trackingId,
+			"trackingId": trackingID,
 		},
 	})
 }
