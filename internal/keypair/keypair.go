@@ -8,8 +8,8 @@ import (
 )
 
 type Key struct {
-	Public  string
-	Private string
+	Public  string `db:"public_key"`
+	Private string `db:"private_key"`
 }
 
 func GenerateKeyPair() (Key, error) {

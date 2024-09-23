@@ -2,9 +2,9 @@ package store
 
 import (
 	"context"
-	"crypto/ecdsa"
+	"errors"
 
-	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/georgysavva/scany/v2/pgxscan"
 	"github.com/grassrootseconomics/eth-custodial/internal/keypair"
 	"github.com/jackc/pgx/v5"
 )
@@ -23,23 +23,19 @@ func (pg *Pg) InsertKeyPair(ctx context.Context, tx pgx.Tx, keypair keypair.Key)
 	return nil
 }
 
-func (pg *Pg) LoadPrivateKey(ctx context.Context, tx pgx.Tx, publicKey string) (*ecdsa.PrivateKey, error) {
-	var privateKeyString string
+func (pg *Pg) LoadPrivateKey(ctx context.Context, tx pgx.Tx, publicKey string) (keypair.Key, error) {
+	var keypair keypair.Key
 
-	if err := tx.QueryRow(
-		ctx,
-		pg.queries.LoadKey,
-		publicKey,
-	).Scan(&privateKeyString); err != nil {
-		return nil, err
-	}
-
-	privateKey, err := crypto.HexToECDSA(privateKeyString)
+	row, err := tx.Query(ctx, pg.queries.LoadKey, publicKey)
 	if err != nil {
-		return nil, err
+		return keypair, err
 	}
 
-	return privateKey, nil
+	if err := pgxscan.ScanOne(&keypair, row); err != nil {
+		return keypair, err
+	}
+
+	return keypair, nil
 }
 
 func (pg *Pg) CheckKeypair(ctx context.Context, tx pgx.Tx, publicKey string) (bool, error) {
@@ -59,28 +55,25 @@ func (pg *Pg) CheckKeypair(ctx context.Context, tx pgx.Tx, publicKey string) (bo
 	return active, nil
 }
 
-func (pg *Pg) LoadMasterSignerKey(ctx context.Context, tx pgx.Tx) (*ecdsa.PrivateKey, error) {
-	var privateKeyString string
+func (pg *Pg) LoadMasterSignerKey(ctx context.Context, tx pgx.Tx) (keypair.Key, error) {
+	var masterKeypair keypair.Key
 
-	if err := tx.QueryRow(
-		ctx,
-		pg.queries.LoadMasterKey,
-	).Scan(&privateKeyString); err != nil {
-		return nil, err
-	}
-
-	privateKey, err := crypto.HexToECDSA(privateKeyString)
+	row, err := tx.Query(ctx, pg.queries.LoadMasterKey)
 	if err != nil {
-		return nil, err
+		return masterKeypair, err
 	}
 
-	return privateKey, nil
+	if err := pgxscan.ScanOne(&masterKeypair, row); err != nil {
+		return masterKeypair, err
+	}
+
+	return masterKeypair, nil
 }
 
 func (pg *Pg) bootstrapMasterSigner(ctx context.Context, tx pgx.Tx) error {
 	_, err := pg.LoadMasterSignerKey(ctx, tx)
 	if err != nil {
-		if err == pgx.ErrNoRows {
+		if errors.Is(err, pgx.ErrNoRows) {
 			masterKeyPair, err := keypair.GenerateKeyPair()
 			if err != nil {
 				return err

@@ -7,7 +7,7 @@ INSERT INTO keystore(public_key, private_key) VALUES($1, $2) RETURNING id;
 --name: load-key
 -- Load saved key pair
 -- $1: public_key
-SELECT private_key FROM keystore WHERE public_key=$1;
+SELECT public_key, private_key FROM keystore WHERE public_key=$1;
 
 --name: check-keypair
 -- Check if a key exists in the keystore and is activated
@@ -16,7 +16,7 @@ SELECT active FROM keystore WHERE public_key=$1;
 
 --name: load-master-key
 -- Load saved master key pair
-SELECT private_key FROM keystore
+SELECT public_key, private_key FROM keystore
 INNER JOIN (SELECT id FROM master_key LIMIT 1) master_key ON keystore.id = master_key.id;
 
 --name: bootstrap-master-key

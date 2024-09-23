@@ -5,6 +5,7 @@ import (
 	"log/slog"
 
 	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/grassrootseconomics/eth-custodial/internal/store"
 	"github.com/grassrootseconomics/ethutils"
 	"github.com/riverqueue/river"
@@ -36,7 +37,12 @@ func (w *TokenTransferWorker) Work(ctx context.Context, job *river.Job[TokenTran
 	}
 	defer tx.Rollback(ctx)
 
-	key, err := w.store.LoadPrivateKey(ctx, tx, job.Args.From)
+	keypair, err := w.store.LoadPrivateKey(ctx, tx, job.Args.From)
+	if err != nil {
+		return err
+	}
+
+	privateKey, err := crypto.HexToECDSA(keypair.Private)
 	if err != nil {
 		return err
 	}
@@ -64,7 +70,7 @@ func (w *TokenTransferWorker) Work(ctx context.Context, job *river.Job[TokenTran
 		return err
 	}
 
-	builtTx, err := w.signer.chainProvider.SignContractExecutionTx(key, ethutils.ContractExecutionTxOpts{
+	builtTx, err := w.signer.chainProvider.SignContractExecutionTx(privateKey, ethutils.ContractExecutionTxOpts{
 		ContractAddress: ethutils.HexToAddress(job.Args.TokenAddress),
 		InputData:       input,
 		GasFeeCap:       gasSettings.GasFeeCap,

@@ -2,7 +2,6 @@ package store
 
 import (
 	"context"
-	"crypto/ecdsa"
 
 	"github.com/grassrootseconomics/eth-custodial/internal/keypair"
 	"github.com/jackc/pgx/v5"
@@ -15,8 +14,8 @@ type Store interface {
 	// Keys
 	InsertKeyPair(context.Context, pgx.Tx, keypair.Key) error
 	CheckKeypair(context.Context, pgx.Tx, string) (bool, error)
-	LoadPrivateKey(context.Context, pgx.Tx, string) (*ecdsa.PrivateKey, error)
-	LoadMasterSignerKey(context.Context, pgx.Tx) (*ecdsa.PrivateKey, error)
+	LoadPrivateKey(context.Context, pgx.Tx, string) (keypair.Key, error)
+	LoadMasterSignerKey(context.Context, pgx.Tx) (keypair.Key, error)
 	// Nonce
 	PeekNonce(context.Context, pgx.Tx, string) (uint64, error)
 	AcquireNonce(context.Context, pgx.Tx, string) (uint64, error)
