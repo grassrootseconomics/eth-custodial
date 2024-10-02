@@ -7,19 +7,19 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-type (
-	OTX struct {
-		ID            uint64    `db:"id" json:"id"`
-		TrackingID    string    `db:"tracking_id" json:"trackingId"`
-		OTXType       string    `db:"otx_type" json:"otxType"`
-		SignerAccount string    `db:"public_address" json:"signerAccount"`
-		RawTx         string    `db:"raw_tx" json:"rawTx"`
-		TxHash        string    `db:"tx_hash" json:"txHash"`
-		Nonce         uint64    `db:"nonce" json:"nonce"`
-		Replaced      string    `db:"replaced" json:"replaced"`
-		CreatedAt     time.Time `db:"created_at" json:"createdAt"`
-	}
-)
+type OTX struct {
+	ID             uint64    `db:"id" json:"id"`
+	TrackingID     string    `db:"tracking_id" json:"trackingId"`
+	OTXType        string    `db:"otx_type" json:"otxType"`
+	SignerAccount  string    `db:"public_address" json:"signerAccount"`
+	RawTx          string    `db:"raw_tx" json:"rawTx"`
+	TxHash         string    `db:"tx_hash" json:"txHash"`
+	Nonce          uint64    `db:"nonce" json:"nonce"`
+	Replaced       string    `db:"replaced" json:"replaced"`
+	CreatedAt      time.Time `db:"created_at" json:"createdAt"`
+	UpdatedAt      time.Time `db:"updated_at" json:"updatedAt"`
+	DispatchStatus string    `db:"status" json:"status"`
+}
 
 const (
 	GAS_REFILL       string = "REFILL_GAS"
@@ -32,8 +32,10 @@ const (
 	OTHER_MANUAL     string = "OTHER_MANUAL"
 )
 
-func (pg *Pg) InsertOTX(ctx context.Context, tx pgx.Tx, otx OTX) error {
-	_, err := tx.Exec(
+func (pg *Pg) InsertOTX(ctx context.Context, tx pgx.Tx, otx OTX) (uint64, error) {
+	var id uint64
+
+	if err := tx.QueryRow(
 		ctx,
 		pg.queries.InsertOTX,
 		otx.TrackingID,
@@ -42,12 +44,11 @@ func (pg *Pg) InsertOTX(ctx context.Context, tx pgx.Tx, otx OTX) error {
 		otx.RawTx,
 		otx.TxHash,
 		otx.Nonce,
-	)
-	if err != nil {
-		return err
+	).Scan(&id); err != nil {
+		return id, err
 	}
 
-	return nil
+	return id, nil
 }
 
 func (pg *Pg) GetOTXByTrackingID(ctx context.Context, tx pgx.Tx, trackingID string) (OTX, error) {

@@ -16,7 +16,6 @@ import (
 
 	"github.com/grassrootseconomics/eth-custodial/internal/api"
 	"github.com/grassrootseconomics/eth-custodial/internal/gas"
-	"github.com/grassrootseconomics/eth-custodial/internal/queue"
 	"github.com/grassrootseconomics/eth-custodial/internal/store"
 	"github.com/grassrootseconomics/eth-custodial/internal/util"
 	"github.com/grassrootseconomics/eth-custodial/internal/worker"
@@ -54,7 +53,6 @@ func main() {
 		+ store
 		+ gas
 		+ worker
-		+ queue
 	*/
 	var wg sync.WaitGroup
 	ctx, stop := notifyShutdown()
@@ -82,29 +80,19 @@ func main() {
 		os.Exit(1)
 	}
 
-	workers, err := worker.New(worker.WorkerOpts{
-		ChainID:   ko.MustInt64("chain.id"),
-		GasOracle: gasOracle,
-		Store:     store,
-		Logg:      lo,
-	})
-	if err != nil {
-		lo.Error("could not initialize signer workers", "error", err)
-		os.Exit(1)
-	}
-
-	queueOpts := queue.QueueOpts{
+	workerOpts := worker.WorkerOpts{
 		MaxWorkers: ko.Int("workers.max"),
+		ChainID:    ko.MustInt64("chain.id"),
+		GasOracle:  gasOracle,
+		Store:      store,
 		Logg:       lo,
-		PgxPool:    store.Pool(),
-		Workers:    workers,
 	}
 	if ko.Int("workers.max") <= 0 {
-		queueOpts.MaxWorkers = runtime.NumCPU() * 2
+		workerOpts.MaxWorkers = runtime.NumCPU() * 2
 	}
-	queue, err := queue.New(queueOpts)
+	workerContainer, err := worker.New(workerOpts)
 	if err != nil {
-		lo.Error("could not initialize river queue", "error", err)
+		lo.Error("could not initialize worker container", "error", err)
 		os.Exit(1)
 	}
 
@@ -113,7 +101,7 @@ func main() {
 		EnableMetrics: ko.Bool("metrics.enable"),
 		ListenAddress: ko.MustString("api.address"),
 		Store:         store,
-		Queue:         queue,
+		Worker:        workerContainer,
 		Logg:          lo,
 		Debug:         true,
 	})
@@ -130,7 +118,7 @@ func main() {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		queue.Start(ctx)
+		workerContainer.Start(ctx)
 	}()
 
 	<-ctx.Done()
@@ -143,7 +131,7 @@ func main() {
 		if err := apiServer.Stop(shutdownCtx); err != nil {
 			lo.Error("failed to stop HTTP server", "err", fmt.Sprintf("%T", err))
 		}
-		queue.Stop(shutdownCtx)
+		workerContainer.Stop(shutdownCtx)
 	}()
 
 	go func() {

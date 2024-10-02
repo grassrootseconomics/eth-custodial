@@ -41,8 +41,8 @@ func (a *API) transferHandler(c echo.Context) error {
 
 	trackingID := uuid.NewString()
 
-	_, err = a.queue.Client().InsertTx(c.Request().Context(), tx, worker.TokenTransferArgs{
-		TrackingId:   trackingID,
+	_, err = a.worker.QueueClient.InsertTx(c.Request().Context(), tx, worker.TokenTransferArgs{
+		TrackingID:   trackingID,
 		From:         req.From,
 		To:           req.To,
 		TokenAddress: req.TokenAddress,

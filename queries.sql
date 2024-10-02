@@ -95,16 +95,18 @@ INSERT INTO otx(
 --name: get-otx-by-tracking-id
 -- Get OTX by tracking id
 -- $1: tracking_id
-SELECT otx.id, otx.tracking_id, otx.otx_type, keystore.public_key, otx.raw_tx, otx.tx_hash, otx.nonce, otx.replaced FROM otx
+SELECT otx.id, otx.tracking_id, otx.otx_type, keystore.public_key, otx.raw_tx, otx.tx_hash, otx.nonce, otx.replaced, otx.created_at, otx.updated_at, dispatch.status FROM otx
 INNER JOIN keystore ON otx.signer_account = keystore.id
+INNER JOIN dispatch ON otx.id = dispatch.otx_id
 WHERE otx.tracking_id = $1;
 
 --name: get-otx-by-account
 -- Get OTX by account
 -- $1: public_key
 -- $2: limit
-SELECT otx.id, otx.tracking_id, otx.otx_type, keystore.public_key, otx.raw_tx, otx.tx_hash, otx.nonce, otx.replaced, otx.created_at FROM keystore
+SELECT otx.id, otx.tracking_id, otx.otx_type, keystore.public_key, otx.raw_tx, otx.tx_hash, otx.nonce, otx.replaced, otx.created_at, otx.updated_at, dispatch.status FROM keystore
 INNER JOIN otx ON keystore.id = otx.signer_account
+INNER JOIN dispatch ON otx.id = dispatch.otx_id
 WHERE keystore.public_key = $1
 ORDER BY otx.id ASC LIMIT $2;
 
@@ -113,8 +115,9 @@ ORDER BY otx.id ASC LIMIT $2;
 -- $1: public_key
 -- $2: cursor
 -- $3: limit
-SELECT otx.id, otx.tracking_id, otx.otx_type, keystore.public_key, otx.raw_tx, otx.tx_hash, otx.nonce, otx.replaced, otx.created_at, FROM keystore
+SELECT otx.id, otx.tracking_id, otx.otx_type, keystore.public_key, otx.raw_tx, otx.tx_hash, otx.nonce, otx.replaced, otx.created_at, otx.updated_at, dispatch.status FROM keystore
 INNER JOIN otx ON keystore.id = otx.signer_account
+INNER JOIN dispatch ON otx.id = dispatch.otx_id
 WHERE keystore.public_key = $1
 AND otx.id > $2
 ORDER BY otx.id ASC LIMIT $3;
@@ -125,9 +128,28 @@ ORDER BY otx.id ASC LIMIT $3;
 -- $2: cursor
 -- $3: limit
 SELECT * FROM (
-  SELECT otx.id, otx.tracking_id, otx.otx_type, keystore.public_key, otx.raw_tx, otx.tx_hash, otx.nonce, otx.replaced, otx.created_at FROM keystore
+  SELECT otx.id, otx.tracking_id, otx.otx_type, keystore.public_key, otx.raw_tx, otx.tx_hash, otx.nonce, otx.replaced, otx.created_at, otx.updated_at, dispatch.status FROM keystore
 	INNER JOIN otx ON keystore.id = otx.signer_account
+    INNER JOIN dispatch ON otx.id = dispatch.otx_id
 	WHERE keystore.public_key = $1
   AND otx.id < $2
   ORDER BY otx.id DESC LIMIT $3
 ) AS previous_page ORDER BY id ASC;
+
+
+--name: insert-dispatch-tx
+-- Create a new dispatch request
+-- $1: otx_id
+-- $2: status
+INSERT INTO dispatch(
+    otx_id,
+    "status"
+) VALUES($1, $2) RETURNING id;
+
+--name: update-dispatch-tx-status
+-- Create a new dispatch request
+-- $1: status
+-- $2: otx_id
+UPDATE dispatch
+SET "status" = $1
+WHERE otx_id = $2;

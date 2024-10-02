@@ -2,7 +2,6 @@ package worker
 
 import (
 	"context"
-	"log/slog"
 
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -13,7 +12,7 @@ import (
 
 type (
 	TokenTransferArgs struct {
-		TrackingId   string `json:"trackingId"`
+		TrackingID   string `json:"trackingId"`
 		From         string `json:"from"`
 		To           string `json:"to"`
 		TokenAddress string `json:"tokenAddress"`
@@ -22,22 +21,20 @@ type (
 
 	TokenTransferWorker struct {
 		river.WorkerDefaults[TokenTransferArgs]
-		store  store.Store
-		logg   *slog.Logger
-		signer *signer
+		wc *WorkerContainer
 	}
 )
 
 func (TokenTransferArgs) Kind() string { return store.TOKEN_TRANSFER }
 
 func (w *TokenTransferWorker) Work(ctx context.Context, job *river.Job[TokenTransferArgs]) error {
-	tx, err := w.store.Pool().Begin(ctx)
+	tx, err := w.wc.Store.Pool().Begin(ctx)
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback(ctx)
 
-	keypair, err := w.store.LoadPrivateKey(ctx, tx, job.Args.From)
+	keypair, err := w.wc.Store.LoadPrivateKey(ctx, tx, job.Args.From)
 	if err != nil {
 		return err
 	}
@@ -47,7 +44,7 @@ func (w *TokenTransferWorker) Work(ctx context.Context, job *river.Job[TokenTran
 		return err
 	}
 
-	nonce, err := w.store.AcquireNonce(ctx, tx, job.Args.From)
+	nonce, err := w.wc.Store.AcquireNonce(ctx, tx, job.Args.From)
 	if err != nil {
 		return err
 	}
@@ -65,12 +62,12 @@ func (w *TokenTransferWorker) Work(ctx context.Context, job *river.Job[TokenTran
 		return err
 	}
 
-	gasSettings, err := w.signer.gasOracle.GetSettings()
+	gasSettings, err := w.wc.GasOracle.GetSettings()
 	if err != nil {
 		return err
 	}
 
-	builtTx, err := w.signer.chainProvider.SignContractExecutionTx(privateKey, ethutils.ContractExecutionTxOpts{
+	builtTx, err := w.wc.ChainProvider.SignContractExecutionTx(privateKey, ethutils.ContractExecutionTxOpts{
 		ContractAddress: ethutils.HexToAddress(job.Args.TokenAddress),
 		InputData:       input,
 		GasFeeCap:       gasSettings.GasFeeCap,
@@ -87,14 +84,33 @@ func (w *TokenTransferWorker) Work(ctx context.Context, job *river.Job[TokenTran
 		return err
 	}
 
-	if err := w.store.InsertOTX(ctx, tx, store.OTX{
-		TrackingID:    job.Args.TrackingId,
+	rawTxHex := hexutil.Encode(rawTx)
+
+	otxID, err := w.wc.Store.InsertOTX(ctx, tx, store.OTX{
+		TrackingID:    job.Args.TrackingID,
 		OTXType:       store.TOKEN_TRANSFER,
 		SignerAccount: job.Args.From,
-		RawTx:         hexutil.Encode(rawTx),
+		RawTx:         rawTxHex,
 		TxHash:        builtTx.Hash().Hex(),
 		Nonce:         nonce,
+	})
+	if err != nil {
+		return err
+	}
+
+	if err := w.wc.Store.InsertDispatchTx(ctx, tx, store.DispatchTx{
+		OTXID:  otxID,
+		Status: store.PENDING,
 	}); err != nil {
+		return err
+	}
+
+	_, err = w.wc.QueueClient.InsertTx(ctx, tx, DispatchArgs{
+		TrackingID: job.Args.TrackingID,
+		OTXID:      otxID,
+		RawTx:      rawTxHex,
+	}, nil)
+	if err != nil {
 		return err
 	}
 

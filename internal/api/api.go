@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/grassrootseconomics/eth-custodial/internal/queue"
 	"github.com/grassrootseconomics/eth-custodial/internal/store"
+	"github.com/grassrootseconomics/eth-custodial/internal/worker"
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -21,7 +21,7 @@ type (
 		ListenAddress string
 		Store         store.Store
 		Logg          *slog.Logger
-		Queue         *queue.Queue
+		Worker        *worker.WorkerContainer
 	}
 
 	API struct {
@@ -30,7 +30,7 @@ type (
 		store         store.Store
 		logg          *slog.Logger
 		router        *echo.Echo
-		queue         queue.Queue
+		worker        *worker.WorkerContainer
 	}
 )
 
@@ -47,7 +47,7 @@ func New(o APIOpts) *API {
 		listenAddress: o.ListenAddress,
 		logg:          o.Logg,
 		store:         o.Store,
-		queue:         *o.Queue,
+		worker:        o.Worker,
 	}
 
 	customValidator := validator.New(validator.WithRequiredStructEnabled())
