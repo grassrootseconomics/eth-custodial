@@ -52,23 +52,32 @@ func (w *DisptachWorker) Work(ctx context.Context, job *river.Job[DispatchArgs])
 			if dispatchErr.Err == ErrNetwork {
 				updateTxStatus.Status = store.NETWORK_ERROR
 				w.wc.Logg.Error("network related dispatch error", "original_error", dispatchErr.OriginalErr)
-			} else {
-				w.wc.Logg.Error("chain related dispatch error", "error", dispatchErr.Err, "original_error", dispatchErr.OriginalErr)
-				switch dispatchErr.Err {
-				case ErrGasPriceTooLow:
-					updateTxStatus.Status = store.LOW_GAS_PRICE
-				case ErrInsufficientGas:
-					updateTxStatus.Status = store.NO_GAS
-				case ErrNonceTooLow:
-					updateTxStatus.Status = store.LOW_NONCE
-				case ErrReplacementTxUnderpriced:
-					updateTxStatus.Status = store.REPLACEMENT_UNDERPRICED
+				if err := w.wc.Store.UpdateDispatchTxStatus(ctx, tx, updateTxStatus); err != nil {
+					return err
 				}
+				return dispatchErr
 			}
+
+			w.wc.Logg.Error("chain related dispatch error", "error", dispatchErr.Err, "original_error", dispatchErr.OriginalErr)
+			switch dispatchErr.Err {
+			case ErrGasPriceTooLow:
+				updateTxStatus.Status = store.LOW_GAS_PRICE
+			case ErrInsufficientGas:
+				updateTxStatus.Status = store.NO_GAS
+			case ErrNonceTooLow:
+				updateTxStatus.Status = store.LOW_NONCE
+			case ErrReplacementTxUnderpriced:
+				updateTxStatus.Status = store.REPLACEMENT_UNDERPRICED
+			}
+
+			if err := w.wc.Store.UpdateDispatchTxStatus(ctx, tx, updateTxStatus); err != nil {
+				return err
+			}
+
+			// TODO: Queue retrier job here and permanently cancel further retries on chain related dispatch errors
+			return river.JobCancel(dispatchErr)
 		}
-		if err := w.wc.Store.UpdateDispatchTxStatus(ctx, tx, updateTxStatus); err != nil {
-			return err
-		}
+
 		w.wc.Logg.Error("dispatch error", "error", err)
 		return err
 	}
