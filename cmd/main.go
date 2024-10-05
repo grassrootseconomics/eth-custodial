@@ -17,6 +17,7 @@ import (
 	"github.com/grassrootseconomics/eth-custodial/internal/api"
 	"github.com/grassrootseconomics/eth-custodial/internal/gas"
 	"github.com/grassrootseconomics/eth-custodial/internal/store"
+	"github.com/grassrootseconomics/eth-custodial/internal/sub"
 	"github.com/grassrootseconomics/eth-custodial/internal/util"
 	"github.com/grassrootseconomics/eth-custodial/internal/worker"
 	"github.com/knadh/koanf/v2"
@@ -96,6 +97,18 @@ func main() {
 		os.Exit(1)
 	}
 
+	jetStreamSub, err := sub.NewJetStreamSub(sub.JetStreamOpts{
+		Logg:            lo,
+		Store:           store,
+		WorkerContainer: workerContainer,
+		Endpoint:        ko.MustString("jetstream.endpoint"),
+		JetStreamID:     ko.MustString("jetstream.id"),
+	})
+	if err != nil {
+		lo.Error("could not initialize jetstream sub", "error", err)
+		os.Exit(1)
+	}
+
 	apiServer := api.New(api.APIOpts{
 		APIKey:        ko.MustString("api.key"),
 		EnableMetrics: ko.Bool("metrics.enable"),
@@ -121,6 +134,12 @@ func main() {
 		workerContainer.Start(ctx)
 	}()
 
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		jetStreamSub.Process()
+	}()
+
 	<-ctx.Done()
 	lo.Info("shutdown signal received")
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), defaultGracefulShutdownPeriod)
@@ -128,6 +147,7 @@ func main() {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
+		jetStreamSub.Close()
 		if err := apiServer.Stop(shutdownCtx); err != nil {
 			lo.Error("failed to stop HTTP server", "err", fmt.Sprintf("%T", err))
 		}

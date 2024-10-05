@@ -16,3 +16,7 @@ oracle_type = "static"
 
 [chain]
 id = 1337
+
+[jetstream]
+endpoint = "nats://127.0.0.1:4222"
+id = "eth-custodial-1"

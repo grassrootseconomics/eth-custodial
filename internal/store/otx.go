@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/georgysavva/scany/v2/pgxscan"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -49,6 +50,21 @@ func (pg *Pg) InsertOTX(ctx context.Context, tx pgx.Tx, otx OTX) (uint64, error)
 	}
 
 	return id, nil
+}
+
+func (pg *Pg) GetOTXByTxHash(ctx context.Context, tx pgx.Tx, txHash string) (OTX, error) {
+	var otx OTX
+
+	row, err := tx.Query(ctx, pg.queries.GetOTXByTxHash, txHash)
+	if err != nil {
+		return otx, err
+	}
+
+	if err := pgxscan.ScanOne(&otx, row); err != nil {
+		return otx, err
+	}
+
+	return otx, nil
 }
 
 func (pg *Pg) GetOTXByTrackingID(ctx context.Context, tx pgx.Tx, trackingID string) (OTX, error) {

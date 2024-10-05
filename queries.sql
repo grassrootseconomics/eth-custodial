@@ -4,6 +4,13 @@
 -- $2: private_key
 INSERT INTO keystore(public_key, private_key) VALUES($1, $2) RETURNING id;
 
+--name: activate-keypair
+-- Save hex encoded private key
+-- $1: public_key
+UPDATE keystore
+SET active = true
+WHERE public_key = $1;
+
 --name: load-key
 -- Load saved key pair
 -- $1: public_key
@@ -91,6 +98,13 @@ INSERT INTO otx(
     tx_hash,
     nonce
 ) VALUES($1, $2, (SELECT id FROM keystore WHERE public_key = $3), $4, $5, $6) RETURNING id;
+
+--name: get-otx-by-tx-hash
+-- Get OTX by tracking id
+-- $1: tx_hash
+SELECT otx.id, otx.tracking_id, otx.otx_type, keystore.public_key, otx.raw_tx, otx.tx_hash, otx.nonce, otx.replaced, otx.created_at, otx.updated_at, dispatch.status FROM otx
+INNER JOIN dispatch ON otx.id = dispatch.otx_id
+WHERE otx.tx_hash = $1;
 
 --name: get-otx-by-tracking-id
 -- Get OTX by tracking id

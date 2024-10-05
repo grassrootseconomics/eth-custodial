@@ -23,6 +23,19 @@ func (pg *Pg) InsertKeyPair(ctx context.Context, tx pgx.Tx, keypair keypair.Key)
 	return nil
 }
 
+func (pg *Pg) ActivateKeyPair(ctx context.Context, tx pgx.Tx, publicKey string) error {
+	_, err := tx.Exec(
+		ctx,
+		pg.queries.ActivateKeyPair,
+		publicKey,
+	)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (pg *Pg) LoadPrivateKey(ctx context.Context, tx pgx.Tx, publicKey string) (keypair.Key, error) {
 	var keypair keypair.Key
 

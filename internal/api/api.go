@@ -3,10 +3,10 @@ package api
 import (
 	"context"
 	"log/slog"
-	"time"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/grassrootseconomics/eth-custodial/internal/store"
+	"github.com/grassrootseconomics/eth-custodial/internal/util"
 	"github.com/grassrootseconomics/eth-custodial/internal/worker"
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
@@ -38,7 +38,6 @@ const (
 	apiVersion         = "/api/v2"
 	maxBodySize        = "1M"
 	allowedContentType = "application/json"
-	slaTimeout         = 15 * time.Second
 )
 
 func New(o APIOpts) *API {
@@ -61,7 +60,7 @@ func New(o APIOpts) *API {
 
 	router.Use(middleware.Recover())
 	router.Use(middleware.BodyLimit(maxBodySize))
-	router.Use(middleware.ContextTimeout(slaTimeout))
+	router.Use(middleware.ContextTimeout(util.SLATimeout))
 	if o.Debug {
 		router.Use(middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
 			LogStatus:   true,

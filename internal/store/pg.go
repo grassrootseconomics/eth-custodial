@@ -15,6 +15,7 @@ import (
 type (
 	Queries struct {
 		InsertKeyPair           string `query:"insert-keypair"`
+		ActivateKeyPair         string `query:"activate-keypair"`
 		LoadKey                 string `query:"load-key"`
 		CheckKeypair            string `query:"check-keypair"`
 		LoadMasterKey           string `query:"load-master-key"`
@@ -23,6 +24,7 @@ type (
 		AcquireNonce            string `query:"acquire-nonce"`
 		SetAcccountNonce        string `query:"set-account-nonce"`
 		InsertOTX               string `query:"insert-otx"`
+		GetOTXByTxHash          string `query:"get-otx-by-tx-hash"`
 		GetOTXByTrackingID      string `query:"get-otx-by-tracking-id"`
 		GetOTXByAccount         string `query:"get-otx-by-account"`
 		GetOTXByAccountNext     string `query:"get-otx-by-account-next"`

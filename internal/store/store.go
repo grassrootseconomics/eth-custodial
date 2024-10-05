@@ -13,6 +13,7 @@ type Store interface {
 	Bootstrap() error
 	// Keys
 	InsertKeyPair(context.Context, pgx.Tx, keypair.Key) error
+	ActivateKeyPair(context.Context, pgx.Tx, string) error
 	CheckKeypair(context.Context, pgx.Tx, string) (bool, error)
 	LoadPrivateKey(context.Context, pgx.Tx, string) (keypair.Key, error)
 	LoadMasterSignerKey(context.Context, pgx.Tx) (keypair.Key, error)
@@ -22,6 +23,7 @@ type Store interface {
 	SetAccountNonce(context.Context, pgx.Tx, string, uint64) error
 	// OTX
 	InsertOTX(context.Context, pgx.Tx, OTX) (uint64, error)
+	GetOTXByTxHash(context.Context, pgx.Tx, string) (OTX, error)
 	GetOTXByTrackingID(context.Context, pgx.Tx, string) (OTX, error)
 	GetOTXByAccount(context.Context, pgx.Tx, string, int) ([]OTX, error)
 	GetOTXByAccountNext(context.Context, pgx.Tx, string, int, int) ([]OTX, error)
