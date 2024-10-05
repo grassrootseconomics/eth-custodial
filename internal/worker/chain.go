@@ -12,7 +12,7 @@ const (
 	Transfer     = "transfer"
 	TransferFrom = "transferFrom"
 
-	custodialRegistrationProxyAddress = "0x000000000000000000000000000000000000dEaD"
+	custodialRegistrationProxyAddress = "0xf282a3C68A2505a79Fc99f94CE43D9c83230CaE5"
 )
 
 var abi = map[string]*w3.Func{

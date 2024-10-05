@@ -21,9 +21,12 @@ type Store interface {
 	AcquireNonce(context.Context, pgx.Tx, string) (uint64, error)
 	SetAccountNonce(context.Context, pgx.Tx, string, uint64) error
 	// OTX
-	InsertOTX(context.Context, pgx.Tx, OTX) error
+	InsertOTX(context.Context, pgx.Tx, OTX) (uint64, error)
 	GetOTXByTrackingID(context.Context, pgx.Tx, string) (OTX, error)
 	GetOTXByAccount(context.Context, pgx.Tx, string, int) ([]OTX, error)
 	GetOTXByAccountNext(context.Context, pgx.Tx, string, int, int) ([]OTX, error)
 	GetOTXByAccountPrevious(context.Context, pgx.Tx, string, int, int) ([]OTX, error)
+	// Dispatch
+	InsertDispatchTx(context.Context, pgx.Tx, DispatchTx) error
+	UpdateDispatchTxStatus(context.Context, pgx.Tx, DispatchTx) error
 }

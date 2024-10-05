@@ -2,7 +2,6 @@ package worker
 
 import (
 	"context"
-	"log/slog"
 
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -14,15 +13,13 @@ import (
 
 type (
 	AccountCreateArgs struct {
-		TrackingId string      `json:"trackingId"`
+		TrackingID string      `json:"trackingId"`
 		KeyPair    keypair.Key `json:"keypair"`
 	}
 
 	AccountCreateWorker struct {
 		river.WorkerDefaults[AccountCreateArgs]
-		store  store.Store
-		logg   *slog.Logger
-		signer *signer
+		wc *WorkerContainer
 	}
 )
 
@@ -31,17 +28,17 @@ const AccountCreateID = "ACCOUNT_CREATE"
 func (AccountCreateArgs) Kind() string { return AccountCreateID }
 
 func (w *AccountCreateWorker) Work(ctx context.Context, job *river.Job[AccountCreateArgs]) error {
-	tx, err := w.store.Pool().Begin(ctx)
+	tx, err := w.wc.Store.Pool().Begin(ctx)
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback(ctx)
 
-	if err := w.store.InsertKeyPair(ctx, tx, job.Args.KeyPair); err != nil {
+	if err := w.wc.Store.InsertKeyPair(ctx, tx, job.Args.KeyPair); err != nil {
 		return err
 	}
 
-	systemKeypair, err := w.store.LoadMasterSignerKey(ctx, tx)
+	systemKeypair, err := w.wc.Store.LoadMasterSignerKey(ctx, tx)
 	if err != nil {
 		return err
 	}
@@ -51,7 +48,7 @@ func (w *AccountCreateWorker) Work(ctx context.Context, job *river.Job[AccountCr
 		return err
 	}
 
-	nonce, err := w.store.AcquireNonce(ctx, tx, systemKeypair.Public)
+	nonce, err := w.wc.Store.AcquireNonce(ctx, tx, systemKeypair.Public)
 	if err != nil {
 		return err
 	}
@@ -61,12 +58,12 @@ func (w *AccountCreateWorker) Work(ctx context.Context, job *river.Job[AccountCr
 		return err
 	}
 
-	gasSettings, err := w.signer.gasOracle.GetSettings()
+	gasSettings, err := w.wc.GasOracle.GetSettings()
 	if err != nil {
 		return err
 	}
 
-	builtTx, err := w.signer.chainProvider.SignContractExecutionTx(privateKey, ethutils.ContractExecutionTxOpts{
+	builtTx, err := w.wc.ChainProvider.SignContractExecutionTx(privateKey, ethutils.ContractExecutionTxOpts{
 		ContractAddress: ethutils.HexToAddress(custodialRegistrationProxyAddress),
 		InputData:       input,
 		GasFeeCap:       gasSettings.GasFeeCap,
@@ -83,14 +80,33 @@ func (w *AccountCreateWorker) Work(ctx context.Context, job *river.Job[AccountCr
 		return err
 	}
 
-	if err := w.store.InsertOTX(ctx, tx, store.OTX{
-		TrackingID:    job.Args.TrackingId,
+	rawTxHex := hexutil.Encode(rawTx)
+
+	otxID, err := w.wc.Store.InsertOTX(ctx, tx, store.OTX{
+		TrackingID:    job.Args.TrackingID,
 		OTXType:       store.ACCOUNT_REGISTER,
 		SignerAccount: systemKeypair.Public,
-		RawTx:         hexutil.Encode(rawTx),
+		RawTx:         rawTxHex,
 		TxHash:        builtTx.Hash().Hex(),
 		Nonce:         nonce,
+	})
+	if err != nil {
+		return err
+	}
+
+	if err := w.wc.Store.InsertDispatchTx(ctx, tx, store.DispatchTx{
+		OTXID:  otxID,
+		Status: store.PENDING,
 	}); err != nil {
+		return err
+	}
+
+	_, err = w.wc.QueueClient.InsertTx(ctx, tx, DispatchArgs{
+		TrackingID: job.Args.TrackingID,
+		OTXID:      otxID,
+		RawTx:      rawTxHex,
+	}, nil)
+	if err != nil {
 		return err
 	}
 

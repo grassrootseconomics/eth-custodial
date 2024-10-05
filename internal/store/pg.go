@@ -27,6 +27,8 @@ type (
 		GetOTXByAccount         string `query:"get-otx-by-account"`
 		GetOTXByAccountNext     string `query:"get-otx-by-account-next"`
 		GetOTXByAccountPrevious string `query:"get-otx-by-account-previous"`
+		InsertDispatchTx        string `query:"insert-dispatch-tx"`
+		UpdateDispatchTxStatus  string `query:"update-dispatch-tx-status"`
 	}
 
 	PgOpts struct {

@@ -18,8 +18,8 @@ func (a *API) accountCreateHandler(c echo.Context) error {
 
 	trackingID := uuid.NewString()
 
-	_, err = a.queue.Client().Insert(c.Request().Context(), worker.AccountCreateArgs{
-		TrackingId: trackingID,
+	_, err = a.worker.QueueClient.Insert(c.Request().Context(), worker.AccountCreateArgs{
+		TrackingID: trackingID,
 		KeyPair:    generatedKeyPair,
 	}, nil)
 	if err != nil {
