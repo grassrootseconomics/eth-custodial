@@ -51,24 +51,15 @@ func New(o WorkerOpts) (*WorkerContainer, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), migrationTimeout)
 	defer cancel()
 
-	tx, err := o.Store.Pool().Begin(ctx)
+	riverPgxDriver := riverpgxv5.New(o.Store.Pool())
+	riverMigrator, err := rivermigrate.New(riverPgxDriver, &rivermigrate.Config{
+		Logger: o.Logg,
+	})
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		if err != nil {
-			tx.Rollback(ctx)
-		} else {
-			tx.Commit(ctx)
-		}
-	}()
 
-	riverPgxDriver := riverpgxv5.New(o.Store.Pool())
-	riverMigrator := rivermigrate.New(riverPgxDriver, &rivermigrate.Config{
-		Logger: o.Logg,
-	})
-
-	_, err = riverMigrator.MigrateTx(ctx, tx, rivermigrate.DirectionUp, nil)
+	_, err = riverMigrator.Migrate(ctx, rivermigrate.DirectionUp, nil)
 	if err != nil {
 		return nil, err
 	}
