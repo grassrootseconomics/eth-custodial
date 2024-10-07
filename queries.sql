@@ -102,7 +102,7 @@ INSERT INTO otx(
 --name: get-otx-by-tx-hash
 -- Get OTX by tracking id
 -- $1: tx_hash
-SELECT otx.id, otx.tracking_id, otx.otx_type, keystore.public_key, otx.raw_tx, otx.tx_hash, otx.nonce, otx.replaced, otx.created_at, otx.updated_at, dispatch.status FROM otx
+SELECT otx.id, otx.tracking_id, otx.otx_type, otx.signer_account AS public_key, otx.raw_tx, otx.tx_hash, otx.nonce, otx.replaced, otx.created_at, otx.updated_at, dispatch.status FROM otx
 INNER JOIN dispatch ON otx.id = dispatch.otx_id
 WHERE otx.tx_hash = $1;
 

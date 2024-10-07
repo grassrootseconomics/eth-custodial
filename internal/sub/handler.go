@@ -3,6 +3,7 @@ package sub
 import (
 	"context"
 	"encoding/json"
+	"errors"
 
 	"github.com/grassrootseconomics/eth-custodial/internal/store"
 	"github.com/grassrootseconomics/eth-tracker/pkg/event"
@@ -29,7 +30,7 @@ func (s *JetStreamSub) processEvent(ctx context.Context, msgSubject string, msg 
 		chainEvent.TxHash,
 	)
 	if err != nil {
-		if err == pgx.ErrNoRows {
+		if errors.Is(err, pgx.ErrNoRows) {
 			return nil
 		}
 		return err
@@ -40,13 +41,13 @@ func (s *JetStreamSub) processEvent(ctx context.Context, msgSubject string, msg 
 	}
 
 	if chainEvent.Success {
-		// TODO: gas topups and master key alerts
-		updateDispatchStatus.Status = store.SUCCESS
-		if otx.OTXType == store.ACCOUNT_REGISTER {
+		switch msgSubject {
+		case "TRACKER.CUSTODIAL_REGISTRATION":
 			if err := s.store.ActivateKeyPair(ctx, tx, chainEvent.Payload["account"].(string)); err != nil {
 				return err
 			}
 		}
+		updateDispatchStatus.Status = store.SUCCESS
 	} else {
 		updateDispatchStatus.Status = store.REVERTED
 	}
@@ -55,5 +56,5 @@ func (s *JetStreamSub) processEvent(ctx context.Context, msgSubject string, msg 
 		return err
 	}
 
-	return nil
+	return tx.Commit(ctx)
 }
