@@ -41,9 +41,9 @@ func InitConfig(lo *slog.Logger, confFilePath string) *koanf.Koanf {
 		os.Exit(1)
 	}
 
-	if err := ko.Load(env.Provider("CUSTODIAL", ".", func(s string) string {
+	if err := ko.Load(env.Provider("CUSTODIAL_", ".", func(s string) string {
 		return strings.ReplaceAll(strings.ToLower(
-			strings.TrimPrefix(s, "CUSTODIAL")), "__", ".")
+			strings.TrimPrefix(s, "CUSTODIAL_")), "__", ".")
 	}), nil); err != nil {
 		lo.Error("could not override config from env vars", "error", err)
 		os.Exit(1)
