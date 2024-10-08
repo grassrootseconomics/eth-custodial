@@ -5,4 +5,5 @@
 !/pkg
 !/LICENSE
 !/config.toml
+!/queries.sql
 !/go.*
