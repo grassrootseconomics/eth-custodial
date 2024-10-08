@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/grassrootseconomics/eth-custodial/internal/gas"
 	"github.com/grassrootseconomics/eth-custodial/internal/store"
 	"github.com/grassrootseconomics/ethutils"
@@ -16,11 +17,13 @@ import (
 
 type (
 	WorkerOpts struct {
-		MaxWorkers int
-		ChainID    int64
-		GasOracle  gas.GasOracle
-		Store      store.Store
-		Logg       *slog.Logger
+		MaxWorkers                 int
+		ChainID                    int64
+		RPCEndpoint                string
+		CustodialRegistrationProxy string
+		GasOracle                  gas.GasOracle
+		Store                      store.Store
+		Logg                       *slog.Logger
 	}
 
 	signer struct {
@@ -29,11 +32,12 @@ type (
 	}
 
 	WorkerContainer struct {
-		GasOracle     gas.GasOracle
-		Store         store.Store
-		Logg          *slog.Logger
-		ChainProvider *ethutils.Provider
-		QueueClient   *river.Client[pgx.Tx]
+		GasOracle                  gas.GasOracle
+		Store                      store.Store
+		Logg                       *slog.Logger
+		ChainProvider              *ethutils.Provider
+		QueueClient                *river.Client[pgx.Tx]
+		CustodialRegistrationProxy common.Address
 	}
 )
 
@@ -41,11 +45,12 @@ const migrationTimeout = 15 * time.Second
 
 func New(o WorkerOpts) (*WorkerContainer, error) {
 	workerContainer := &WorkerContainer{
-		GasOracle:     o.GasOracle,
-		Store:         o.Store,
-		Logg:          o.Logg,
-		ChainProvider: ethutils.NewProvider("http://localhost:8545", o.ChainID),
-		QueueClient:   nil,
+		GasOracle:                  o.GasOracle,
+		Store:                      o.Store,
+		Logg:                       o.Logg,
+		ChainProvider:              ethutils.NewProvider(o.RPCEndpoint, o.ChainID),
+		QueueClient:                nil,
+		CustodialRegistrationProxy: ethutils.HexToAddress(o.CustodialRegistrationProxy),
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), migrationTimeout)
@@ -98,7 +103,7 @@ func setupWorkers(wc *WorkerContainer) (*river.Workers, error) {
 		return nil, err
 	}
 
-	if err := river.AddWorkerSafely(workers, &AccountCreateWorker{wc: wc}); err != nil {
+	if err := river.AddWorkerSafely(workers, &AccountCreateWorker{wc: wc, custodialRegistrationProxy: wc.CustodialRegistrationProxy}); err != nil {
 		return nil, err
 	}
 

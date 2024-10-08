@@ -82,11 +82,13 @@ func main() {
 	}
 
 	workerOpts := worker.WorkerOpts{
-		MaxWorkers: ko.Int("workers.max"),
-		ChainID:    ko.MustInt64("chain.id"),
-		GasOracle:  gasOracle,
-		Store:      store,
-		Logg:       lo,
+		MaxWorkers:                 ko.Int("workers.max"),
+		ChainID:                    ko.MustInt64("chain.id"),
+		RPCEndpoint:                ko.MustString("chain.rpc_endpoint"),
+		CustodialRegistrationProxy: ko.MustString("chain.custodial_registration_proxy"),
+		GasOracle:                  gasOracle,
+		Store:                      store,
+		Logg:                       lo,
 	}
 	if ko.Int("workers.max") <= 0 {
 		workerOpts.MaxWorkers = runtime.NumCPU() * 2

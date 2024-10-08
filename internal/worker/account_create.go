@@ -3,6 +3,7 @@ package worker
 import (
 	"context"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/grassrootseconomics/eth-custodial/internal/keypair"
@@ -19,7 +20,8 @@ type (
 
 	AccountCreateWorker struct {
 		river.WorkerDefaults[AccountCreateArgs]
-		wc *WorkerContainer
+		wc                         *WorkerContainer
+		custodialRegistrationProxy common.Address
 	}
 )
 
@@ -64,7 +66,7 @@ func (w *AccountCreateWorker) Work(ctx context.Context, job *river.Job[AccountCr
 	}
 
 	builtTx, err := w.wc.ChainProvider.SignContractExecutionTx(privateKey, ethutils.ContractExecutionTxOpts{
-		ContractAddress: ethutils.HexToAddress(custodialRegistrationProxyAddress),
+		ContractAddress: w.custodialRegistrationProxy,
 		InputData:       input,
 		GasFeeCap:       gasSettings.GasFeeCap,
 		GasTipCap:       gasSettings.GasTipCap,
