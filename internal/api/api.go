@@ -93,6 +93,8 @@ func New(o APIOpts) *API {
 	serviceGroup := apiGroup.Group("/service")
 	serviceGroup.Use(middleware.KeyAuthWithConfig(api.serviceAPIAuthConfig()))
 
+	serviceGroup.GET("/system", api.systemInfoHandler)
+
 	serviceGroup.POST("/account/create", api.accountCreateHandler)
 	serviceGroup.POST("/transfer", api.transferHandler)
 

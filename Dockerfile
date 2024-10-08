@@ -22,6 +22,6 @@ WORKDIR /service
 COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=build /build/* .
 
-EXPOSE 5000
+EXPOSE 5003
 
 CMD ["./eth-custodial"]
