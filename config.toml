@@ -3,6 +3,7 @@ enable = true
 
 [api]
 address = ":5003"
+docs = true
 key = "xd"
 
 [postgres]

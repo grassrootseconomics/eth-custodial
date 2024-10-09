@@ -1,0 +1,112 @@
+basePath: /api/v2
+definitions:
+  api.ErrResponse:
+    properties:
+      description:
+        type: string
+      errorCode:
+        type: string
+      ok:
+        type: boolean
+    type: object
+  api.OKResponse:
+    properties:
+      description:
+        type: string
+      ok:
+        type: boolean
+      result:
+        additionalProperties: {}
+        type: object
+    type: object
+info:
+  contact:
+    email: devops@grassecon.org
+    name: API Support
+    url: https://grassecon.org/pages/contact-us
+  description: Interact with the Grassroots Economics Custodial API
+  license:
+    name: AGPL-3.0
+    url: https://www.gnu.org/licenses/agpl-3.0.en.html
+  termsOfService: https://grassecon.org/pages/terms-and-conditions.html
+  title: ETH Custodial API
+  version: "2.0"
+paths:
+  /account/create:
+    post:
+      consumes:
+      - '*/*'
+      description: Create a new custodial account
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.OKResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrResponse'
+      summary: Create a new custodial account
+      tags:
+      - Account
+  /system:
+    get:
+      consumes:
+      - '*/*'
+      description: Get the current system information
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.OKResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrResponse'
+      summary: Get the current system information
+      tags:
+      - System
+  /transfer:
+    post:
+      consumes:
+      - application/json
+      description: Sign a token transfer request
+      parameters:
+      - description: Sign Transfer Request
+        in: body
+        name: signTransferRequest
+        required: true
+        schema:
+          properties:
+            amount:
+              type: string
+            from:
+              type: string
+            to:
+              type: string
+            voucherAddress:
+              type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.OKResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrResponse'
+      summary: Sign a token transfer request
+      tags:
+      - Sign
+swagger: "2.0"

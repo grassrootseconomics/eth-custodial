@@ -6,10 +6,20 @@ import (
 	"github.com/google/uuid"
 	"github.com/grassrootseconomics/eth-custodial/internal/keypair"
 	"github.com/grassrootseconomics/eth-custodial/internal/worker"
-	"github.com/grassrootseconomics/eth-custodial/pkg/api"
+	apiresp "github.com/grassrootseconomics/eth-custodial/pkg/api"
 	"github.com/labstack/echo/v4"
 )
 
+// accountCreateHandler godoc
+//
+//	@Summary		Create a new custodial account
+//	@Description	Create a new custodial account
+//	@Tags			Account
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	apiresp.OKResponse
+//	@Failure		500	{object}	apiresp.ErrResponse
+//	@Router			/account/create [post]
 func (a *API) accountCreateHandler(c echo.Context) error {
 	generatedKeyPair, err := keypair.GenerateKeyPair()
 	if err != nil {
@@ -26,7 +36,7 @@ func (a *API) accountCreateHandler(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, api.OKResponse{
+	return c.JSON(http.StatusOK, apiresp.OKResponse{
 		Ok:          true,
 		Description: "Account creation request successfully created",
 		Result: map[string]any{
@@ -36,6 +46,16 @@ func (a *API) accountCreateHandler(c echo.Context) error {
 	})
 }
 
+// systemInfoHandler godoc
+//
+//	@Summary		Get the current system information
+//	@Description	Get the current system information
+//	@Tags			System
+//	@Accept			*/*
+//	@Produce		json
+//	@Success		200	{object}	apiresp.OKResponse
+//	@Failure		500	{object}	apiresp.ErrResponse
+//	@Router			/system [get]
 func (a *API) systemInfoHandler(c echo.Context) error {
 	tx, err := a.store.Pool().Begin(c.Request().Context())
 	if err != nil {
@@ -52,7 +72,7 @@ func (a *API) systemInfoHandler(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, api.OKResponse{
+	return c.JSON(http.StatusOK, apiresp.OKResponse{
 		Ok:          true,
 		Description: "Current system information",
 		Result: map[string]any{

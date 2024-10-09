@@ -114,6 +114,7 @@ func main() {
 	apiServer := api.New(api.APIOpts{
 		APIKey:        ko.MustString("api.key"),
 		EnableMetrics: ko.Bool("metrics.enable"),
+		EnableDocs:    ko.Bool("api.docs"),
 		ListenAddress: ko.MustString("api.address"),
 		Store:         store,
 		Worker:        workerContainer,

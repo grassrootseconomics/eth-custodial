@@ -6,12 +6,24 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/grassrootseconomics/eth-custodial/internal/worker"
-	"github.com/grassrootseconomics/eth-custodial/pkg/api"
+	apiresp "github.com/grassrootseconomics/eth-custodial/pkg/api"
 	"github.com/labstack/echo/v4"
 )
 
+// transferHandler godoc
+//
+//	@Summary		Sign a token transfer request
+//	@Description	Sign a token transfer request
+//	@Tags			Sign
+//	@Accept			json
+//	@Produce		json
+//	@Param			signTransferRequest	body		object{from=string,to=string,voucherAddress=string,amount=string}	true	"Sign Transfer Request"
+//	@Success		200					{object}	apiresp.OKResponse
+//	@Failure		400					{object}	apiresp.ErrResponse
+//	@Failure		500					{object}	apiresp.ErrResponse
+//	@Router			/transfer [post]
 func (a *API) transferHandler(c echo.Context) error {
-	req := api.TransferRequest{}
+	req := apiresp.TransferRequest{}
 
 	if err := c.Bind(&req); err != nil {
 		return handleBindError(c)
@@ -32,10 +44,10 @@ func (a *API) transferHandler(c echo.Context) error {
 		return err
 	}
 	if !exists {
-		return c.JSON(http.StatusNotFound, api.ErrResponse{
+		return c.JSON(http.StatusNotFound, apiresp.ErrResponse{
 			Ok:          false,
 			Description: fmt.Sprintf("Account %s does not exist or is not yet activated", req.From),
-			ErrCode:     api.ErrCodeAccountNotExists,
+			ErrCode:     apiresp.ErrCodeAccountNotExists,
 		})
 	}
 
@@ -56,7 +68,7 @@ func (a *API) transferHandler(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, api.OKResponse{
+	return c.JSON(http.StatusOK, apiresp.OKResponse{
 		Ok:          true,
 		Description: "Transfer request successfully created",
 		Result: map[string]any{

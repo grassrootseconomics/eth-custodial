@@ -18,6 +18,7 @@ type (
 		APIKey        string
 		Debug         bool
 		EnableMetrics bool
+		EnableDocs    bool
 		ListenAddress string
 		Store         store.Store
 		Logg          *slog.Logger
@@ -88,15 +89,18 @@ func New(o APIOpts) *API {
 		router.GET("/metrics", api.metricsHandler)
 	}
 
+	if o.EnableDocs {
+		router.GET("/docs", api.docsHandler)
+	}
+
 	apiGroup := router.Group(apiVersion)
 
-	serviceGroup := apiGroup.Group("/service")
-	serviceGroup.Use(middleware.KeyAuthWithConfig(api.serviceAPIAuthConfig()))
+	// serviceGroup := apiGroup.Group("/service")
+	apiGroup.Use(middleware.KeyAuthWithConfig(api.serviceAPIAuthConfig()))
 
-	serviceGroup.GET("/system", api.systemInfoHandler)
-
-	serviceGroup.POST("/account/create", api.accountCreateHandler)
-	serviceGroup.POST("/transfer", api.transferHandler)
+	apiGroup.GET("/system", api.systemInfoHandler)
+	apiGroup.POST("/account/create", api.accountCreateHandler)
+	apiGroup.POST("/transfer", api.transferHandler)
 
 	userGroup := apiGroup.Group("/user")
 	userGroup.Use(echojwt.WithConfig(api.userAPIJWTAuthConfig()))
