@@ -18,8 +18,7 @@ import (
 type (
 	WorkerOpts struct {
 		MaxWorkers                 int
-		ChainID                    int64
-		RPCEndpoint                string
+		ChainProvider              *ethutils.Provider
 		CustodialRegistrationProxy string
 		GasOracle                  gas.GasOracle
 		Store                      store.Store
@@ -48,7 +47,7 @@ func New(o WorkerOpts) (*WorkerContainer, error) {
 		GasOracle:                  o.GasOracle,
 		Store:                      o.Store,
 		Logg:                       o.Logg,
-		ChainProvider:              ethutils.NewProvider(o.RPCEndpoint, o.ChainID),
+		ChainProvider:              o.ChainProvider,
 		QueueClient:                nil,
 		CustodialRegistrationProxy: ethutils.HexToAddress(o.CustodialRegistrationProxy),
 	}

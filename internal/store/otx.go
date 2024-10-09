@@ -67,8 +67,15 @@ func (pg *Pg) GetOTXByTxHash(ctx context.Context, tx pgx.Tx, txHash string) (OTX
 	return otx, nil
 }
 
-func (pg *Pg) GetOTXByTrackingID(ctx context.Context, tx pgx.Tx, trackingID string) (OTX, error) {
-	return OTX{}, nil
+// TODO: Sort by nonce
+func (pg *Pg) GetOTXByTrackingID(ctx context.Context, tx pgx.Tx, trackingID string) ([]*OTX, error) {
+	var otx []*OTX
+
+	if err := pgxscan.Select(ctx, tx, &otx, pg.queries.GetOTXByTrackingID, trackingID); err != nil {
+		return nil, err
+	}
+
+	return otx, nil
 }
 
 func (pg *Pg) GetOTXByAccount(ctx context.Context, tx pgx.Tx, trackingID string, limit int) ([]OTX, error) {

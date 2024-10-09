@@ -20,6 +20,7 @@ import (
 	"github.com/grassrootseconomics/eth-custodial/internal/sub"
 	"github.com/grassrootseconomics/eth-custodial/internal/util"
 	"github.com/grassrootseconomics/eth-custodial/internal/worker"
+	"github.com/grassrootseconomics/ethutils"
 	"github.com/knadh/koanf/v2"
 )
 
@@ -49,14 +50,10 @@ func init() {
 }
 
 func main() {
-	/*
-
-		+ store
-		+ gas
-		+ worker
-	*/
 	var wg sync.WaitGroup
 	ctx, stop := notifyShutdown()
+
+	chainProvider := ethutils.NewProvider(ko.MustString("chain.rpc_endpoint"), ko.MustInt64("chain.id"))
 
 	store, err := store.NewPgStore(store.PgOpts{
 		Logg:                 lo,
@@ -83,8 +80,7 @@ func main() {
 
 	workerOpts := worker.WorkerOpts{
 		MaxWorkers:                 ko.Int("workers.max"),
-		ChainID:                    ko.MustInt64("chain.id"),
-		RPCEndpoint:                ko.MustString("chain.rpc_endpoint"),
+		ChainProvider:              chainProvider,
 		CustodialRegistrationProxy: ko.MustString("chain.custodial_registration_proxy"),
 		GasOracle:                  gasOracle,
 		Store:                      store,
@@ -117,6 +113,7 @@ func main() {
 		EnableDocs:    ko.Bool("api.docs"),
 		ListenAddress: ko.MustString("api.address"),
 		Store:         store,
+		ChainProvider: chainProvider,
 		Worker:        workerContainer,
 		Logg:          lo,
 		Debug:         true,

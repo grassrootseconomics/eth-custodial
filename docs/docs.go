@@ -58,6 +58,92 @@ const docTemplate = `{
                 }
             }
         },
+        "/account/status/{address}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Check a custodial account's status",
+                "consumes": [
+                    "*/*"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Account"
+                ],
+                "summary": "Check a custodial account's status",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Account address",
+                        "name": "address",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.OKResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/otx/track/{trackingId}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Track an OTX's (Origin transaction) chain status",
+                "consumes": [
+                    "*/*"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "OTX"
+                ],
+                "summary": "Track an OTX's (Origin transaction) chain status",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Tracking ID",
+                        "name": "trackingId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.OKResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/system": {
             "get": {
                 "security": [
@@ -112,26 +198,12 @@ const docTemplate = `{
                 "summary": "Sign a token transfer request",
                 "parameters": [
                     {
-                        "description": "Sign Transfer Request",
-                        "name": "signTransferRequest",
+                        "description": "Transfer request",
+                        "name": "transferRequest",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
-                            "properties": {
-                                "amount": {
-                                    "type": "string"
-                                },
-                                "from": {
-                                    "type": "string"
-                                },
-                                "to": {
-                                    "type": "string"
-                                },
-                                "voucherAddress": {
-                                    "type": "string"
-                                }
-                            }
+                            "$ref": "#/definitions/api.TransferRequest"
                         }
                     }
                 ],
@@ -185,6 +257,29 @@ const docTemplate = `{
                 "result": {
                     "type": "object",
                     "additionalProperties": {}
+                }
+            }
+        },
+        "api.TransferRequest": {
+            "type": "object",
+            "required": [
+                "amount",
+                "from",
+                "to",
+                "tokenAddress"
+            ],
+            "properties": {
+                "amount": {
+                    "type": "string"
+                },
+                "from": {
+                    "type": "string"
+                },
+                "to": {
+                    "type": "string"
+                },
+                "tokenAddress": {
+                    "type": "string"
                 }
             }
         }

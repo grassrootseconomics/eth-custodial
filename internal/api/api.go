@@ -8,6 +8,7 @@ import (
 	"github.com/grassrootseconomics/eth-custodial/internal/store"
 	"github.com/grassrootseconomics/eth-custodial/internal/util"
 	"github.com/grassrootseconomics/eth-custodial/internal/worker"
+	"github.com/grassrootseconomics/ethutils"
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -22,6 +23,7 @@ type (
 		ListenAddress string
 		Store         store.Store
 		Logg          *slog.Logger
+		ChainProvider *ethutils.Provider
 		Worker        *worker.WorkerContainer
 	}
 
@@ -30,6 +32,7 @@ type (
 		listenAddress string
 		store         store.Store
 		logg          *slog.Logger
+		chainProvider *ethutils.Provider
 		router        *echo.Echo
 		worker        *worker.WorkerContainer
 	}
@@ -47,6 +50,7 @@ func New(o APIOpts) *API {
 		listenAddress: o.ListenAddress,
 		logg:          o.Logg,
 		store:         o.Store,
+		chainProvider: o.ChainProvider,
 		worker:        o.Worker,
 	}
 
@@ -100,6 +104,8 @@ func New(o APIOpts) *API {
 
 	apiGroup.GET("/system", api.systemInfoHandler)
 	apiGroup.POST("/account/create", api.accountCreateHandler)
+	apiGroup.GET("/account/status/:address", api.accountStatusHandler)
+	apiGroup.GET("/otx/track/:trackingId", api.trackOTXHandler)
 	apiGroup.POST("/transfer", api.transferHandler)
 
 	userGroup := apiGroup.Group("/user")

@@ -1,13 +1,17 @@
 package api
 
 import (
+	"math/big"
 	"net/http"
 
 	"github.com/google/uuid"
 	"github.com/grassrootseconomics/eth-custodial/internal/keypair"
 	"github.com/grassrootseconomics/eth-custodial/internal/worker"
 	apiresp "github.com/grassrootseconomics/eth-custodial/pkg/api"
+	"github.com/grassrootseconomics/ethutils"
+	"github.com/jackc/pgx/v5"
 	"github.com/labstack/echo/v4"
+	"github.com/lmittmann/w3/module/eth"
 )
 
 // accountCreateHandler godoc
@@ -47,26 +51,57 @@ func (a *API) accountCreateHandler(c echo.Context) error {
 	})
 }
 
-// systemInfoHandler godoc
+// accountStatusHandler godoc
 //
-//	@Summary		Get the current system information
-//	@Description	Get the current system information
-//	@Tags			System
+//	@Summary		Check a custodial account's status
+//	@Description	Check a custodial account's status
+//	@Tags			Account
 //	@Accept			*/*
 //	@Produce		json
-//	@Success		200	{object}	apiresp.OKResponse
-//	@Failure		500	{object}	apiresp.ErrResponse
+//	@Param			address	path		string	true	"Account address"
+//	@Success		200		{object}	apiresp.OKResponse
+//	@Failure		500		{object}	apiresp.ErrResponse
 //	@Security		ApiKeyAuth
-//	@Router			/system [get]
-func (a *API) systemInfoHandler(c echo.Context) error {
+//	@Router			/account/status/{address} [get]
+func (a *API) accountStatusHandler(c echo.Context) error {
+	req := apiresp.AccountAddressParam{}
+
+	if err := c.Bind(&req); err != nil {
+		return handleBindError(c)
+	}
+
+	if err := c.Validate(req); err != nil {
+		return handleValidateError(c)
+	}
+
+	var (
+		gasBalance   *big.Int
+		networkNonce uint64
+	)
+
+	accountAddress := ethutils.HexToAddress(req.Address)
+
+	if err := a.chainProvider.Client.CallCtx(
+		c.Request().Context(),
+		eth.Nonce(accountAddress, nil).Returns(&networkNonce),
+		eth.Balance(accountAddress, nil).Returns(&gasBalance),
+	); err != nil {
+		return err
+	}
+
 	tx, err := a.store.Pool().Begin(c.Request().Context())
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback(c.Request().Context())
 
-	systemKey, err := a.store.LoadMasterSignerKey(c.Request().Context(), tx)
-	if err != nil {
+	internalNonce, err := a.store.PeekNonce(c.Request().Context(), tx, req.Address)
+	if err != nil && err != pgx.ErrNoRows {
+		return err
+	}
+
+	active, err := a.store.CheckKeypair(c.Request().Context(), tx, req.Address)
+	if err != nil && err != pgx.ErrNoRows {
 		return err
 	}
 
@@ -76,9 +111,12 @@ func (a *API) systemInfoHandler(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, apiresp.OKResponse{
 		Ok:          true,
-		Description: "Current system information",
+		Description: "Custodial account status",
 		Result: map[string]any{
-			"systemSigner": systemKey.Public,
+			"gasBalance":    gasBalance.String(),
+			"networkNonce":  networkNonce,
+			"internalNonce": internalNonce,
+			"active":        active,
 		},
 	})
 }

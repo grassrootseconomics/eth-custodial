@@ -17,10 +17,10 @@ import (
 //	@Tags			Sign
 //	@Accept			json
 //	@Produce		json
-//	@Param			signTransferRequest	body		object{from=string,to=string,voucherAddress=string,amount=string}	true	"Sign Transfer Request"
-//	@Success		200					{object}	apiresp.OKResponse
-//	@Failure		400					{object}	apiresp.ErrResponse
-//	@Failure		500					{object}	apiresp.ErrResponse
+//	@Param			transferRequest	body		apiresp.TransferRequest	true	"Transfer request"
+//	@Success		200				{object}	apiresp.OKResponse
+//	@Failure		400				{object}	apiresp.ErrResponse
+//	@Failure		500				{object}	apiresp.ErrResponse
 //	@Security		ApiKeyAuth
 //	@Router			/transfer [post]
 func (a *API) transferHandler(c echo.Context) error {

@@ -1,5 +1,12 @@
 package api
 
+import (
+	"net/http"
+
+	"github.com/MarceloPetrucio/go-scalar-api-reference"
+	"github.com/labstack/echo/v4"
+)
+
 //	@title			ETH Custodial API
 //	@version		2.0
 //	@description	Interact with the Grassroots Economics Custodial API
@@ -19,3 +26,20 @@ package api
 
 //	@host		localhost:5003
 //	@BasePath	/api/v2
+
+func (a *API) docsHandler(c echo.Context) error {
+	htmlContent, err := scalar.ApiReferenceHTML(&scalar.Options{
+		Layout:  scalar.LayoutModern,
+		Theme:   scalar.ThemeSaturn,
+		SpecURL: "./docs/swagger.json",
+		CustomOptions: scalar.CustomOptions{
+			PageTitle: "ETH Custodial API",
+		},
+		DarkMode: false,
+	})
+	if err != nil {
+		return err
+	}
+
+	return c.HTML(http.StatusOK, htmlContent)
+}

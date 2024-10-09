@@ -19,6 +19,22 @@ definitions:
         additionalProperties: {}
         type: object
     type: object
+  api.TransferRequest:
+    properties:
+      amount:
+        type: string
+      from:
+        type: string
+      to:
+        type: string
+      tokenAddress:
+        type: string
+    required:
+    - amount
+    - from
+    - to
+    - tokenAddress
+    type: object
 host: localhost:5003
 info:
   contact:
@@ -54,6 +70,60 @@ paths:
       summary: Create a new custodial account
       tags:
       - Account
+  /account/status/{address}:
+    get:
+      consumes:
+      - '*/*'
+      description: Check a custodial account's status
+      parameters:
+      - description: Account address
+        in: path
+        name: address
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.OKResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Check a custodial account's status
+      tags:
+      - Account
+  /otx/track/{trackingId}:
+    get:
+      consumes:
+      - '*/*'
+      description: Track an OTX's (Origin transaction) chain status
+      parameters:
+      - description: Tracking ID
+        in: path
+        name: trackingId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.OKResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Track an OTX's (Origin transaction) chain status
+      tags:
+      - OTX
   /system:
     get:
       consumes:
@@ -81,21 +151,12 @@ paths:
       - application/json
       description: Sign a token transfer request
       parameters:
-      - description: Sign Transfer Request
+      - description: Transfer request
         in: body
-        name: signTransferRequest
+        name: transferRequest
         required: true
         schema:
-          properties:
-            amount:
-              type: string
-            from:
-              type: string
-            to:
-              type: string
-            voucherAddress:
-              type: string
-          type: object
+          $ref: '#/definitions/api.TransferRequest'
       produces:
       - application/json
       responses:

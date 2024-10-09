@@ -17,7 +17,15 @@ type (
 		From         string `json:"from" validate:"required,eth_addr_checksum"`
 		To           string `json:"to" validate:"required,eth_addr_checksum"`
 		TokenAddress string `json:"tokenAddress" validate:"required,eth_addr_checksum"`
-		Amount       string `json:"amount" validate:"number,gt=0"`
+		Amount       string `json:"amount" validate:"required,number,gt=0"`
+	}
+
+	AccountAddressParam struct {
+		Address string `param:"address"  validate:"required,eth_addr_checksum"`
+	}
+
+	TrackingIDParam struct {
+		TrackingID string `param:"trackingId"  validate:"required,uuid"`
 	}
 )
 
