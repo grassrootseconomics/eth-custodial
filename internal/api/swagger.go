@@ -12,4 +12,10 @@ package api
 //	@license.name	AGPL-3.0
 //	@license.url	https://www.gnu.org/licenses/agpl-3.0.en.html
 
+//	@securityDefinitions.apikey	ApiKeyAuth
+//	@in							header
+//	@name						X-GE-KEY
+//	@description				Service API Key
+
+//	@host		localhost:5003
 //	@BasePath	/api/v2

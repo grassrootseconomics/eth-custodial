@@ -19,6 +19,7 @@ import (
 //	@Produce		json
 //	@Success		200	{object}	apiresp.OKResponse
 //	@Failure		500	{object}	apiresp.ErrResponse
+//	@Security		ApiKeyAuth
 //	@Router			/account/create [post]
 func (a *API) accountCreateHandler(c echo.Context) error {
 	generatedKeyPair, err := keypair.GenerateKeyPair()
@@ -55,6 +56,7 @@ func (a *API) accountCreateHandler(c echo.Context) error {
 //	@Produce		json
 //	@Success		200	{object}	apiresp.OKResponse
 //	@Failure		500	{object}	apiresp.ErrResponse
+//	@Security		ApiKeyAuth
 //	@Router			/system [get]
 func (a *API) systemInfoHandler(c echo.Context) error {
 	tx, err := a.store.Pool().Begin(c.Request().Context())

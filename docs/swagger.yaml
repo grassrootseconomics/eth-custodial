@@ -19,6 +19,7 @@ definitions:
         additionalProperties: {}
         type: object
     type: object
+host: localhost:5003
 info:
   contact:
     email: devops@grassecon.org
@@ -48,6 +49,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/api.ErrResponse'
+      security:
+      - ApiKeyAuth: []
       summary: Create a new custodial account
       tags:
       - Account
@@ -67,6 +70,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/api.ErrResponse'
+      security:
+      - ApiKeyAuth: []
       summary: Get the current system information
       tags:
       - System
@@ -106,7 +111,15 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/api.ErrResponse'
+      security:
+      - ApiKeyAuth: []
       summary: Sign a token transfer request
       tags:
       - Sign
+securityDefinitions:
+  ApiKeyAuth:
+    description: Service API Key
+    in: header
+    name: X-GE-KEY
+    type: apiKey
 swagger: "2.0"

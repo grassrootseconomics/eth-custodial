@@ -26,6 +26,11 @@ const docTemplate = `{
     "paths": {
         "/account/create": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Create a new custodial account",
                 "consumes": [
                     "*/*"
@@ -55,6 +60,11 @@ const docTemplate = `{
         },
         "/system": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get the current system information",
                 "consumes": [
                     "*/*"
@@ -84,6 +94,11 @@ const docTemplate = `{
         },
         "/transfer": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Sign a token transfer request",
                 "consumes": [
                     "application/json"
@@ -173,13 +188,21 @@ const docTemplate = `{
                 }
             }
         }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "description": "Service API Key",
+            "type": "apiKey",
+            "name": "X-GE-KEY",
+            "in": "header"
+        }
     }
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "2.0",
-	Host:             "",
+	Host:             "localhost:5003",
 	BasePath:         "/api/v2",
 	Schemes:          []string{},
 	Title:            "ETH Custodial API",

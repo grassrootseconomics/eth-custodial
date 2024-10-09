@@ -15,10 +15,16 @@
         },
         "version": "2.0"
     },
+    "host": "localhost:5003",
     "basePath": "/api/v2",
     "paths": {
         "/account/create": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Create a new custodial account",
                 "consumes": [
                     "*/*"
@@ -48,6 +54,11 @@
         },
         "/system": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get the current system information",
                 "consumes": [
                     "*/*"
@@ -77,6 +88,11 @@
         },
         "/transfer": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Sign a token transfer request",
                 "consumes": [
                     "application/json"
@@ -165,6 +181,14 @@
                     "additionalProperties": {}
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "description": "Service API Key",
+            "type": "apiKey",
+            "name": "X-GE-KEY",
+            "in": "header"
         }
     }
 }

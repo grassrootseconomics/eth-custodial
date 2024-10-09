@@ -21,6 +21,7 @@ import (
 //	@Success		200					{object}	apiresp.OKResponse
 //	@Failure		400					{object}	apiresp.ErrResponse
 //	@Failure		500					{object}	apiresp.ErrResponse
+//	@Security		ApiKeyAuth
 //	@Router			/transfer [post]
 func (a *API) transferHandler(c echo.Context) error {
 	req := apiresp.TransferRequest{}
