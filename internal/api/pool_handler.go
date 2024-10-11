@@ -10,21 +10,21 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// transferHandler godoc
+// poolSwapHandler godoc
 //
-//	@Summary		Sign a token transfer request
-//	@Description	Sign a token transfer request
+//	@Summary		Pool a swap request
+//	@Description	Pool a swap request
 //	@Tags			Sign
 //	@Accept			json
 //	@Produce		json
-//	@Param			transferRequest	body		apiresp.TransferRequest	true	"Transfer request"
+//	@Param			transferRequest	body		apiresp.PoolSwapRequest	true	"Pool swap request"
 //	@Success		200				{object}	apiresp.OKResponse
 //	@Failure		400				{object}	apiresp.ErrResponse
 //	@Failure		500				{object}	apiresp.ErrResponse
 //	@Security		ApiKeyAuth
-//	@Router			/token/transfer [post]
-func (a *API) transferHandler(c echo.Context) error {
-	req := apiresp.TransferRequest{}
+//	@Router			/pool/swap [post]
+func (a *API) poolSwapHandler(c echo.Context) error {
+	req := apiresp.PoolSwapRequest{}
 
 	if err := c.Bind(&req); err != nil {
 		return handleBindError(c)
@@ -54,12 +54,13 @@ func (a *API) transferHandler(c echo.Context) error {
 
 	trackingID := uuid.NewString()
 
-	_, err = a.worker.QueueClient.InsertTx(c.Request().Context(), tx, worker.TokenTransferArgs{
-		TrackingID:   trackingID,
-		From:         req.From,
-		To:           req.To,
-		TokenAddress: req.TokenAddress,
-		Amount:       req.Amount,
+	_, err = a.worker.QueueClient.InsertTx(c.Request().Context(), tx, worker.PoolSwapArgs{
+		TrackingID:       trackingID,
+		From:             req.From,
+		FromTokenAddress: req.FromTokenAddress,
+		ToTokenAddress:   req.ToTokenAddress,
+		PoolAddress:      req.PoolAddress,
+		Amount:           req.Amount,
 	}, nil)
 	if err != nil {
 		return err
@@ -71,7 +72,7 @@ func (a *API) transferHandler(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, apiresp.OKResponse{
 		Ok:          true,
-		Description: "Transfer request successfully created",
+		Description: "Pool swap request successfully created",
 		Result: map[string]any{
 			"trackingId": trackingID,
 		},

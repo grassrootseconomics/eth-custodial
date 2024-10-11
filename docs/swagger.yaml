@@ -19,6 +19,25 @@ definitions:
         additionalProperties: {}
         type: object
     type: object
+  api.PoolSwapRequest:
+    properties:
+      amount:
+        type: string
+      from:
+        type: string
+      fromTokenAddress:
+        type: string
+      poolAddress:
+        type: string
+      toTokenAddress:
+        type: string
+    required:
+    - amount
+    - from
+    - fromTokenAddress
+    - poolAddress
+    - toTokenAddress
+    type: object
   api.TransferRequest:
     properties:
       amount:
@@ -124,6 +143,38 @@ paths:
       summary: Track an OTX's (Origin transaction) chain status
       tags:
       - OTX
+  /pool/swap:
+    post:
+      consumes:
+      - application/json
+      description: Pool swap request
+      parameters:
+      - description: Pool swap request
+        in: body
+        name: transferRequest
+        required: true
+        schema:
+          $ref: '#/definitions/api.PoolSwapRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.OKResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Pool swap request
+      tags:
+      - Sign
   /system:
     get:
       consumes:
@@ -145,7 +196,7 @@ paths:
       summary: Get the current system information
       tags:
       - System
-  /transfer:
+  /token/transfer:
     post:
       consumes:
       - application/json

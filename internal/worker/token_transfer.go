@@ -49,7 +49,7 @@ func (w *TokenTransferWorker) Work(ctx context.Context, job *river.Job[TokenTran
 		return err
 	}
 
-	amount, err := StringToBigInt(job.Args.Amount)
+	amount, err := StringToBigInt(job.Args.Amount, false)
 	if err != nil {
 		return err
 	}
