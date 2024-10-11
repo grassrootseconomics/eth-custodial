@@ -240,7 +240,7 @@ func (w *PoolSwapWorker) Work(ctx context.Context, job *river.Job[PoolSwapArgs])
 			TrackingID: job.Args.TrackingID,
 			OTXID:      otxID,
 			RawTx:      rawTxHex,
-		}, InsertOpts: &river.InsertOpts{Priority: 1}},
+		}, InsertOpts: &river.InsertOpts{Priority: 3}},
 	})
 	if err != nil {
 		return err
