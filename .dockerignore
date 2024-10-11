@@ -1,6 +1,7 @@
 /**
 !/cmd
 !/migrations
+!/docs
 !/internal
 !/pkg
 !/LICENSE
