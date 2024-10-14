@@ -28,6 +28,13 @@ type (
 		Amount           string `json:"amount" validate:"required,number,gt=0"`
 	}
 
+	PoolDepositRequest struct {
+		From         string `json:"from" validate:"required,eth_addr_checksum"`
+		TokenAddress string `json:"tokenAddress" validate:"required,eth_addr_checksum"`
+		PoolAddress  string `json:"poolAddress" validate:"required,eth_addr_checksum"`
+		Amount       string `json:"amount" validate:"required,number,gt=0"`
+	}
+
 	AccountAddressParam struct {
 		Address string `param:"address"  validate:"required,eth_addr_checksum"`
 	}

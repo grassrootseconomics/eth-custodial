@@ -12,8 +12,8 @@ import (
 
 // poolSwapHandler godoc
 //
-//	@Summary		Pool a swap request
-//	@Description	Pool a swap request
+//	@Summary		Pool swap request
+//	@Description	Pool swap request
 //	@Tags			Sign
 //	@Accept			json
 //	@Produce		json
@@ -73,6 +73,74 @@ func (a *API) poolSwapHandler(c echo.Context) error {
 	return c.JSON(http.StatusOK, apiresp.OKResponse{
 		Ok:          true,
 		Description: "Pool swap request successfully created",
+		Result: map[string]any{
+			"trackingId": trackingID,
+		},
+	})
+}
+
+// poolDepositHandler godoc
+//
+//	@Summary		Pool deposit request
+//	@Description	Pool deposit request
+//	@Tags			Sign
+//	@Accept			json
+//	@Produce		json
+//	@Param			transferRequest	body		apiresp.PoolDepositRequest	true	"Pool deposit request"
+//	@Success		200				{object}	apiresp.OKResponse
+//	@Failure		400				{object}	apiresp.ErrResponse
+//	@Failure		500				{object}	apiresp.ErrResponse
+//	@Security		ApiKeyAuth
+//	@Router			/pool/deposit [post]
+func (a *API) poolDepositHandler(c echo.Context) error {
+	req := apiresp.PoolDepositRequest{}
+
+	if err := c.Bind(&req); err != nil {
+		return handleBindError(c)
+	}
+
+	if err := c.Validate(req); err != nil {
+		return handleValidateError(c)
+	}
+
+	tx, err := a.store.Pool().Begin(c.Request().Context())
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(c.Request().Context())
+
+	exists, err := a.store.CheckKeypair(c.Request().Context(), tx, req.From)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		return c.JSON(http.StatusNotFound, apiresp.ErrResponse{
+			Ok:          false,
+			Description: fmt.Sprintf("Account %s does not exist or is not yet activated", req.From),
+			ErrCode:     apiresp.ErrCodeAccountNotExists,
+		})
+	}
+
+	trackingID := uuid.NewString()
+
+	_, err = a.worker.QueueClient.InsertTx(c.Request().Context(), tx, worker.PoolDepositArgs{
+		TrackingID:   trackingID,
+		From:         req.From,
+		TokenAddress: req.TokenAddress,
+		PoolAddress:  req.PoolAddress,
+		Amount:       req.Amount,
+	}, nil)
+	if err != nil {
+		return err
+	}
+
+	if err := tx.Commit(c.Request().Context()); err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, apiresp.OKResponse{
+		Ok:          true,
+		Description: "Pool deposit request successfully created",
 		Result: map[string]any{
 			"trackingId": trackingID,
 		},

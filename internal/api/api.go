@@ -108,6 +108,7 @@ func New(o APIOpts) *API {
 	apiGroup.GET("/otx/track/:trackingId", api.trackOTXHandler)
 	apiGroup.POST("/token/transfer", api.transferHandler)
 	apiGroup.POST("/pool/swap", api.poolSwapHandler)
+	apiGroup.POST("/pool/deposit", api.poolDepositHandler)
 
 	userGroup := apiGroup.Group("/user")
 	userGroup.Use(echojwt.WithConfig(api.userAPIJWTAuthConfig()))

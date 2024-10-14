@@ -144,6 +144,57 @@ const docTemplate = `{
                 }
             }
         },
+        "/pool/deposit": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Pool deposit request",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Sign"
+                ],
+                "summary": "Pool deposit request",
+                "parameters": [
+                    {
+                        "description": "Pool deposit request",
+                        "name": "transferRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.PoolDepositRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.OKResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/pool/swap": {
             "post": {
                 "security": [
@@ -308,6 +359,29 @@ const docTemplate = `{
                 "result": {
                     "type": "object",
                     "additionalProperties": {}
+                }
+            }
+        },
+        "api.PoolDepositRequest": {
+            "type": "object",
+            "required": [
+                "amount",
+                "from",
+                "poolAddress",
+                "tokenAddress"
+            ],
+            "properties": {
+                "amount": {
+                    "type": "string"
+                },
+                "from": {
+                    "type": "string"
+                },
+                "poolAddress": {
+                    "type": "string"
+                },
+                "tokenAddress": {
+                    "type": "string"
                 }
             }
         },

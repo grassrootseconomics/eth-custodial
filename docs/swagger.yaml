@@ -19,6 +19,22 @@ definitions:
         additionalProperties: {}
         type: object
     type: object
+  api.PoolDepositRequest:
+    properties:
+      amount:
+        type: string
+      from:
+        type: string
+      poolAddress:
+        type: string
+      tokenAddress:
+        type: string
+    required:
+    - amount
+    - from
+    - poolAddress
+    - tokenAddress
+    type: object
   api.PoolSwapRequest:
     properties:
       amount:
@@ -143,6 +159,38 @@ paths:
       summary: Track an OTX's (Origin transaction) chain status
       tags:
       - OTX
+  /pool/deposit:
+    post:
+      consumes:
+      - application/json
+      description: Pool deposit request
+      parameters:
+      - description: Pool deposit request
+        in: body
+        name: transferRequest
+        required: true
+        schema:
+          $ref: '#/definitions/api.PoolDepositRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.OKResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Pool deposit request
+      tags:
+      - Sign
   /pool/swap:
     post:
       consumes:
