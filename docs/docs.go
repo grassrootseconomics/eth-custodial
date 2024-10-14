@@ -144,6 +144,159 @@ const docTemplate = `{
                 }
             }
         },
+        "/pool/deposit": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Pool deposit request",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Sign"
+                ],
+                "summary": "Pool deposit request",
+                "parameters": [
+                    {
+                        "description": "Pool deposit request",
+                        "name": "transferRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.PoolDepositRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.OKResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/pool/quote": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get a pool swap quote",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Sign"
+                ],
+                "summary": "Get a pool swap quote",
+                "parameters": [
+                    {
+                        "description": "Get a pool swap quote",
+                        "name": "transferRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.PoolSwapRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.OKResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/pool/swap": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Pool swap request",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Sign"
+                ],
+                "summary": "Pool swap request",
+                "parameters": [
+                    {
+                        "description": "Pool swap request",
+                        "name": "transferRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.PoolSwapRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.OKResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/system": {
             "get": {
                 "security": [
@@ -178,7 +331,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/transfer": {
+        "/token/transfer": {
             "post": {
                 "security": [
                     {
@@ -257,6 +410,56 @@ const docTemplate = `{
                 "result": {
                     "type": "object",
                     "additionalProperties": {}
+                }
+            }
+        },
+        "api.PoolDepositRequest": {
+            "type": "object",
+            "required": [
+                "amount",
+                "from",
+                "poolAddress",
+                "tokenAddress"
+            ],
+            "properties": {
+                "amount": {
+                    "type": "string"
+                },
+                "from": {
+                    "type": "string"
+                },
+                "poolAddress": {
+                    "type": "string"
+                },
+                "tokenAddress": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.PoolSwapRequest": {
+            "type": "object",
+            "required": [
+                "amount",
+                "from",
+                "fromTokenAddress",
+                "poolAddress",
+                "toTokenAddress"
+            ],
+            "properties": {
+                "amount": {
+                    "type": "string"
+                },
+                "from": {
+                    "type": "string"
+                },
+                "fromTokenAddress": {
+                    "type": "string"
+                },
+                "poolAddress": {
+                    "type": "string"
+                },
+                "toTokenAddress": {
+                    "type": "string"
                 }
             }
         },

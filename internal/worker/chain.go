@@ -11,6 +11,8 @@ const (
 	Register     = "register"
 	Transfer     = "transfer"
 	TransferFrom = "transferFrom"
+	Withdraw     = "withdraw"
+	Deposit      = "deposit"
 )
 
 var abi = map[string]*w3.Func{
@@ -24,4 +26,7 @@ var abi = map[string]*w3.Func{
 	NextTime: w3.MustNewFunc("nextTime(address)", "uint256"),
 	// CustodialRegistrationProxy
 	Register: w3.MustNewFunc("register(address)", ""),
+	// Pool
+	Withdraw: w3.MustNewFunc("withdraw(address,address,uint256)", ""),
+	Deposit:  w3.MustNewFunc("deposit(address,uint256)", ""),
 }
