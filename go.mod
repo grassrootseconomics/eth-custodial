@@ -10,7 +10,7 @@ require (
 	github.com/go-playground/validator/v10 v10.22.1
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/google/uuid v1.6.0
-	github.com/grassrootseconomics/eth-tracker v1.1.0-rc
+	github.com/grassrootseconomics/eth-tracker v1.3.0-rc
 	github.com/grassrootseconomics/ethutils v1.3.0
 	github.com/jackc/pgx/v5 v5.7.1
 	github.com/jackc/tern/v2 v2.2.3
@@ -22,7 +22,7 @@ require (
 	github.com/knadh/koanf/v2 v2.1.1
 	github.com/labstack/echo-jwt/v4 v4.2.0
 	github.com/labstack/echo/v4 v4.12.0
-	github.com/lmittmann/w3 v0.17.0
+	github.com/lmittmann/w3 v0.17.1
 	github.com/nats-io/nats.go v1.37.0
 	github.com/riverqueue/river v0.12.1
 	github.com/riverqueue/river/riverdriver/riverpgxv5 v0.12.1
@@ -108,7 +108,7 @@ require (
 	golang.org/x/sync v0.8.0 // indirect
 	golang.org/x/sys v0.25.0 // indirect
 	golang.org/x/text v0.18.0 // indirect
-	golang.org/x/time v0.6.0 // indirect
+	golang.org/x/time v0.7.0 // indirect
 	golang.org/x/tools v0.23.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
