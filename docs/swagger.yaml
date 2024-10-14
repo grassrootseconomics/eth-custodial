@@ -191,6 +191,38 @@ paths:
       summary: Pool deposit request
       tags:
       - Sign
+  /pool/quote:
+    post:
+      consumes:
+      - application/json
+      description: Get a pool swap quote
+      parameters:
+      - description: Get a pool swap quote
+        in: body
+        name: transferRequest
+        required: true
+        schema:
+          $ref: '#/definitions/api.PoolSwapRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.OKResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get a pool swap quote
+      tags:
+      - Sign
   /pool/swap:
     post:
       consumes:

@@ -2,13 +2,19 @@ package api
 
 import (
 	"fmt"
+	"math/big"
 	"net/http"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/google/uuid"
 	"github.com/grassrootseconomics/eth-custodial/internal/worker"
 	apiresp "github.com/grassrootseconomics/eth-custodial/pkg/api"
 	"github.com/labstack/echo/v4"
+	"github.com/lmittmann/w3"
+	"github.com/lmittmann/w3/module/eth"
 )
+
+var getQuoteFunc = w3.MustNewFunc("getQuote(address,address,uint256)", "uint256")
 
 // poolSwapHandler godoc
 //
@@ -143,6 +149,62 @@ func (a *API) poolDepositHandler(c echo.Context) error {
 		Description: "Pool deposit request successfully created",
 		Result: map[string]any{
 			"trackingId": trackingID,
+		},
+	})
+}
+
+// TODO: Add fees multiplier to return true final quote value
+
+// poolQuoteHandler godoc
+//
+//	@Summary		Get a pool swap quote
+//	@Description	Get a pool swap quote
+//	@Tags			Sign
+//	@Accept			json
+//	@Produce		json
+//	@Param			transferRequest	body		apiresp.PoolSwapRequest	true	"Get a pool swap quote"
+//	@Success		200				{object}	apiresp.OKResponse
+//	@Failure		400				{object}	apiresp.ErrResponse
+//	@Failure		500				{object}	apiresp.ErrResponse
+//	@Security		ApiKeyAuth
+//	@Router			/pool/quote [post]
+func (a *API) poolQuoteHandler(c echo.Context) error {
+	req := apiresp.PoolSwapRequest{}
+
+	if err := c.Bind(&req); err != nil {
+		return handleBindError(c)
+	}
+
+	if err := c.Validate(req); err != nil {
+		return handleValidateError(c)
+	}
+
+	amount, err := worker.StringToBigInt(req.Amount, false)
+	if err != nil {
+		return err
+	}
+
+	var outValue *big.Int
+
+	if err := a.chainProvider.Client.CallCtx(
+		c.Request().Context(),
+		eth.CallFunc(
+			common.HexToAddress(req.PoolAddress),
+			getQuoteFunc,
+			common.HexToAddress(req.ToTokenAddress),
+			common.HexToAddress(req.FromTokenAddress),
+			amount,
+		).Returns(&outValue),
+	); err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, apiresp.OKResponse{
+		Ok:          true,
+		Description: "Pool swap quote successfully obtained",
+		Result: map[string]any{
+			"outValue":              outValue.String(),
+			"includesFeesDeduction": false,
 		},
 	})
 }

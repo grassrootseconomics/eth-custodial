@@ -107,6 +107,7 @@ func New(o APIOpts) *API {
 	apiGroup.GET("/account/status/:address", api.accountStatusHandler)
 	apiGroup.GET("/otx/track/:trackingId", api.trackOTXHandler)
 	apiGroup.POST("/token/transfer", api.transferHandler)
+	apiGroup.POST("/pool/quote", api.poolQuoteHandler)
 	apiGroup.POST("/pool/swap", api.poolSwapHandler)
 	apiGroup.POST("/pool/deposit", api.poolDepositHandler)
 
