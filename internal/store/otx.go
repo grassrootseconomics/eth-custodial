@@ -67,7 +67,6 @@ func (pg *Pg) GetOTXByTxHash(ctx context.Context, tx pgx.Tx, txHash string) (OTX
 	return otx, nil
 }
 
-// TODO: Sort by nonce
 func (pg *Pg) GetOTXByTrackingID(ctx context.Context, tx pgx.Tx, trackingID string) ([]*OTX, error) {
 	var otx []*OTX
 
@@ -78,14 +77,32 @@ func (pg *Pg) GetOTXByTrackingID(ctx context.Context, tx pgx.Tx, trackingID stri
 	return otx, nil
 }
 
-func (pg *Pg) GetOTXByAccount(ctx context.Context, tx pgx.Tx, trackingID string, limit int) ([]OTX, error) {
-	return nil, nil
+func (pg *Pg) GetOTXByAccount(ctx context.Context, tx pgx.Tx, publicKey string, limit int) ([]*OTX, error) {
+	var otx []*OTX
+
+	if err := pgxscan.Select(ctx, tx, &otx, pg.queries.GetOTXByAccount, publicKey, limit); err != nil {
+		return nil, err
+	}
+
+	return otx, nil
 }
 
-func (pg *Pg) GetOTXByAccountNext(ctx context.Context, tx pgx.Tx, trackingID string, cursor int, limit int) ([]OTX, error) {
-	return nil, nil
+func (pg *Pg) GetOTXByAccountNext(ctx context.Context, tx pgx.Tx, publicKey string, cursor int, limit int) ([]*OTX, error) {
+	var otx []*OTX
+
+	if err := pgxscan.Select(ctx, tx, &otx, pg.queries.GetOTXByAccountNext, publicKey, cursor, limit); err != nil {
+		return nil, err
+	}
+
+	return otx, nil
 }
 
-func (pg *Pg) GetOTXByAccountPrevious(ctx context.Context, tx pgx.Tx, trackingID string, cursor int, limit int) ([]OTX, error) {
-	return nil, nil
+func (pg *Pg) GetOTXByAccountPrevious(ctx context.Context, tx pgx.Tx, publicKey string, cursor int, limit int) ([]*OTX, error) {
+	var otx []*OTX
+
+	if err := pgxscan.Select(ctx, tx, &otx, pg.queries.GetOTXByAccountPrevious, publicKey, cursor, limit); err != nil {
+		return nil, err
+	}
+
+	return otx, nil
 }

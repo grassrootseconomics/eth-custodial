@@ -112,7 +112,7 @@ WHERE otx.tx_hash = $1;
 SELECT otx.id, otx.tracking_id, otx.otx_type, keystore.public_key, otx.raw_tx, otx.tx_hash, otx.nonce, otx.replaced, otx.created_at, otx.updated_at, dispatch.status FROM otx
 INNER JOIN keystore ON otx.signer_account = keystore.id
 INNER JOIN dispatch ON otx.id = dispatch.otx_id
-WHERE otx.tracking_id = $1;
+WHERE otx.tracking_id = $1 ORDER BY otx.nonce ASC;
 
 --name: get-otx-by-account
 -- Get OTX by account

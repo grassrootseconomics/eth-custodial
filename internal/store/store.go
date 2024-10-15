@@ -25,9 +25,9 @@ type Store interface {
 	InsertOTX(context.Context, pgx.Tx, OTX) (uint64, error)
 	GetOTXByTxHash(context.Context, pgx.Tx, string) (OTX, error)
 	GetOTXByTrackingID(context.Context, pgx.Tx, string) ([]*OTX, error)
-	GetOTXByAccount(context.Context, pgx.Tx, string, int) ([]OTX, error)
-	GetOTXByAccountNext(context.Context, pgx.Tx, string, int, int) ([]OTX, error)
-	GetOTXByAccountPrevious(context.Context, pgx.Tx, string, int, int) ([]OTX, error)
+	GetOTXByAccount(context.Context, pgx.Tx, string, int) ([]*OTX, error)
+	GetOTXByAccountNext(context.Context, pgx.Tx, string, int, int) ([]*OTX, error)
+	GetOTXByAccountPrevious(context.Context, pgx.Tx, string, int, int) ([]*OTX, error)
 	// Dispatch
 	InsertDispatchTx(context.Context, pgx.Tx, DispatchTx) error
 	UpdateDispatchTxStatus(context.Context, pgx.Tx, DispatchTx) error

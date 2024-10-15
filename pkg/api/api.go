@@ -42,6 +42,13 @@ type (
 	TrackingIDParam struct {
 		TrackingID string `param:"trackingId"  validate:"required,uuid"`
 	}
+
+	OTXByAccountRequest struct {
+		Address string `param:"address" validate:"required,eth_addr_checksum"`
+		PerPage int    `query:"perPage" validate:"required,number,gt=0"`
+		Cursor  int    `query:"cursor" validate:"number"`
+		Next    bool   `query:"next"`
+	}
 )
 
 const (

@@ -44,7 +44,7 @@ func handleBindError(c echo.Context) error {
 	return c.JSON(http.StatusBadRequest, api.ErrResponse{
 		Ok:          false,
 		ErrCode:     api.ErrCodeInvalidJSON,
-		Description: "Invalid or malformed JSON structure",
+		Description: "Invalid or malformed request",
 	})
 }
 

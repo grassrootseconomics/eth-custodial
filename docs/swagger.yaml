@@ -105,6 +105,46 @@ paths:
       summary: Create a new custodial account
       tags:
       - Account
+  /account/otx/{address}:
+    get:
+      consumes:
+      - '*/*'
+      description: Get an accounts OTX's (Origin transaction)
+      parameters:
+      - description: Account
+        in: path
+        name: address
+        required: true
+        type: string
+      - description: Next
+        in: query
+        name: next
+        type: boolean
+      - description: Cursor
+        in: query
+        name: cursor
+        type: integer
+      - description: Per page
+        in: query
+        name: perPage
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.OKResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get an accounts OTX's (Origin transaction)
+      tags:
+      - Account
   /account/status/{address}:
     get:
       consumes:
