@@ -8,6 +8,7 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/rpc"
 	"github.com/grassrootseconomics/eth-custodial/internal/store"
+	"github.com/grassrootseconomics/eth-custodial/pkg/event"
 	"github.com/lmittmann/w3"
 	"github.com/lmittmann/w3/module/eth"
 	"github.com/riverqueue/river"
@@ -55,6 +56,11 @@ func (w *DisptachWorker) Work(ctx context.Context, job *river.Job[DispatchArgs])
 				if err := w.wc.Store.UpdateDispatchTxStatus(ctx, tx, updateTxStatus); err != nil {
 					return err
 				}
+				w.wc.Pub.Send(ctx, event.Event{
+					TrackingID: job.Args.TrackingID,
+					Status:     updateTxStatus.Status,
+				})
+
 				return dispatchErr
 			}
 
@@ -73,6 +79,10 @@ func (w *DisptachWorker) Work(ctx context.Context, job *river.Job[DispatchArgs])
 			if err := w.wc.Store.UpdateDispatchTxStatus(ctx, tx, updateTxStatus); err != nil {
 				return err
 			}
+			w.wc.Pub.Send(ctx, event.Event{
+				TrackingID: job.Args.TrackingID,
+				Status:     updateTxStatus.Status,
+			})
 
 			// TODO: Queue retrier job here and permanently cancel further retries on chain related dispatch errors
 			return river.JobCancel(dispatchErr)
@@ -86,6 +96,10 @@ func (w *DisptachWorker) Work(ctx context.Context, job *river.Job[DispatchArgs])
 	if err := w.wc.Store.UpdateDispatchTxStatus(ctx, tx, updateTxStatus); err != nil {
 		return err
 	}
+	w.wc.Pub.Send(ctx, event.Event{
+		TrackingID: job.Args.TrackingID,
+		Status:     updateTxStatus.Status,
+	})
 
 	return tx.Commit(ctx)
 }

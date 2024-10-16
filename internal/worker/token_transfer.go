@@ -6,6 +6,7 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/grassrootseconomics/eth-custodial/internal/store"
+	"github.com/grassrootseconomics/eth-custodial/pkg/event"
 	"github.com/grassrootseconomics/ethutils"
 	"github.com/riverqueue/river"
 )
@@ -104,6 +105,10 @@ func (w *TokenTransferWorker) Work(ctx context.Context, job *river.Job[TokenTran
 	}); err != nil {
 		return err
 	}
+	w.wc.Pub.Send(ctx, event.Event{
+		TrackingID: job.Args.TrackingID,
+		Status:     store.PENDING,
+	})
 
 	_, err = w.wc.QueueClient.InsertTx(ctx, tx, DispatchArgs{
 		TrackingID: job.Args.TrackingID,

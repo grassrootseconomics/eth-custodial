@@ -6,11 +6,12 @@ import (
 	"errors"
 
 	"github.com/grassrootseconomics/eth-custodial/internal/store"
+	custodialEvent "github.com/grassrootseconomics/eth-custodial/pkg/event"
 	"github.com/grassrootseconomics/eth-tracker/pkg/event"
 	"github.com/jackc/pgx/v5"
 )
 
-func (s *JetStreamSub) processEvent(ctx context.Context, msgSubject string, msg []byte) error {
+func (s *Sub) processEvent(ctx context.Context, msgSubject string, msg []byte) error {
 	s.logg.Debug("sub processing event", "subject", msgSubject, "data", string(msg))
 	var chainEvent event.Event
 
@@ -55,6 +56,10 @@ func (s *JetStreamSub) processEvent(ctx context.Context, msgSubject string, msg 
 	if err := s.store.UpdateDispatchTxStatus(ctx, tx, updateDispatchStatus); err != nil {
 		return err
 	}
+	s.pub.Send(ctx, custodialEvent.Event{
+		TrackingID: otx.TrackingID,
+		Status:     updateDispatchStatus.Status,
+	})
 
 	return tx.Commit(ctx)
 }

@@ -7,6 +7,7 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/grassrootseconomics/eth-custodial/internal/store"
+	"github.com/grassrootseconomics/eth-custodial/pkg/event"
 	"github.com/grassrootseconomics/ethutils"
 	"github.com/riverqueue/river"
 )
@@ -108,6 +109,10 @@ func (w *PoolSwapWorker) Work(ctx context.Context, job *river.Job[PoolSwapArgs])
 	}); err != nil {
 		return err
 	}
+	w.wc.Pub.Send(ctx, event.Event{
+		TrackingID: job.Args.TrackingID,
+		Status:     store.PENDING,
+	})
 
 	// Set approval -> amount + 5%
 
@@ -166,6 +171,10 @@ func (w *PoolSwapWorker) Work(ctx context.Context, job *river.Job[PoolSwapArgs])
 	}); err != nil {
 		return err
 	}
+	w.wc.Pub.Send(ctx, event.Event{
+		TrackingID: job.Args.TrackingID,
+		Status:     store.PENDING,
+	})
 
 	// Initiate swap
 
@@ -225,6 +234,10 @@ func (w *PoolSwapWorker) Work(ctx context.Context, job *river.Job[PoolSwapArgs])
 	}); err != nil {
 		return err
 	}
+	w.wc.Pub.Send(ctx, event.Event{
+		TrackingID: job.Args.TrackingID,
+		Status:     store.PENDING,
+	})
 	_, err = w.wc.QueueClient.InsertManyTx(ctx, tx, []river.InsertManyParams{
 		{Args: DispatchArgs{
 			TrackingID: job.Args.TrackingID,

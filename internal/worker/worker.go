@@ -7,6 +7,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/grassrootseconomics/eth-custodial/internal/gas"
+	"github.com/grassrootseconomics/eth-custodial/internal/pub"
 	"github.com/grassrootseconomics/eth-custodial/internal/store"
 	"github.com/grassrootseconomics/ethutils"
 	"github.com/jackc/pgx/v5"
@@ -18,11 +19,12 @@ import (
 type (
 	WorkerOpts struct {
 		MaxWorkers                 int
-		ChainProvider              *ethutils.Provider
 		CustodialRegistrationProxy string
 		GasOracle                  gas.GasOracle
 		Store                      store.Store
 		Logg                       *slog.Logger
+		ChainProvider              *ethutils.Provider
+		Pub                        *pub.Pub
 	}
 
 	signer struct {
@@ -31,12 +33,13 @@ type (
 	}
 
 	WorkerContainer struct {
+		CustodialRegistrationProxy common.Address
 		GasOracle                  gas.GasOracle
 		Store                      store.Store
 		Logg                       *slog.Logger
+		Pub                        *pub.Pub
 		ChainProvider              *ethutils.Provider
 		QueueClient                *river.Client[pgx.Tx]
-		CustodialRegistrationProxy common.Address
 	}
 )
 
@@ -44,12 +47,13 @@ const migrationTimeout = 15 * time.Second
 
 func New(o WorkerOpts) (*WorkerContainer, error) {
 	workerContainer := &WorkerContainer{
+		CustodialRegistrationProxy: ethutils.HexToAddress(o.CustodialRegistrationProxy),
 		GasOracle:                  o.GasOracle,
 		Store:                      o.Store,
 		Logg:                       o.Logg,
+		Pub:                        o.Pub,
 		ChainProvider:              o.ChainProvider,
 		QueueClient:                nil,
-		CustodialRegistrationProxy: ethutils.HexToAddress(o.CustodialRegistrationProxy),
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), migrationTimeout)

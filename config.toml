@@ -23,3 +23,4 @@ custodial_registration_proxy = "0xf282a3C68A2505a79Fc99f94CE43D9c83230CaE5"
 [jetstream]
 endpoint = "nats://127.0.0.1:4222"
 id = "eth-custodial-1"
+persist_duration_hrs = 48

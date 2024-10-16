@@ -16,6 +16,8 @@ import (
 
 	"github.com/grassrootseconomics/eth-custodial/internal/api"
 	"github.com/grassrootseconomics/eth-custodial/internal/gas"
+	"github.com/grassrootseconomics/eth-custodial/internal/jetstream"
+	"github.com/grassrootseconomics/eth-custodial/internal/pub"
 	"github.com/grassrootseconomics/eth-custodial/internal/store"
 	"github.com/grassrootseconomics/eth-custodial/internal/sub"
 	"github.com/grassrootseconomics/eth-custodial/internal/util"
@@ -78,13 +80,28 @@ func main() {
 		os.Exit(1)
 	}
 
+	js, err := jetstream.NewJetStream(jetstream.JetStreamOpts{
+		Logg:            lo,
+		Endpoint:        ko.MustString("jetstream.endpoint"),
+		JetStreamID:     ko.MustString("jetstream.id"),
+		PersistDuration: time.Duration(ko.MustInt("jetstream.persist_duration_hrs")) * time.Hour,
+	})
+	if err != nil {
+		lo.Error("could not initialize jetstream sub", "error", err)
+		os.Exit(1)
+	}
+	pub := pub.NewPub(pub.PubOpts{
+		JSCtx: js.JSCtx,
+	})
+
 	workerOpts := worker.WorkerOpts{
-		MaxWorkers:                 ko.Int("workers.max"),
-		ChainProvider:              chainProvider,
 		CustodialRegistrationProxy: ko.MustString("chain.custodial_registration_proxy"),
+		MaxWorkers:                 ko.Int("workers.max"),
 		GasOracle:                  gasOracle,
 		Store:                      store,
 		Logg:                       lo,
+		Pub:                        pub,
+		ChainProvider:              chainProvider,
 	}
 	if ko.Int("workers.max") <= 0 {
 		workerOpts.MaxWorkers = runtime.NumCPU() * 2
@@ -95,17 +112,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	jetStreamSub, err := sub.NewJetStreamSub(sub.JetStreamOpts{
-		Logg:            lo,
+	sub := sub.NewSub(sub.SubObts{
 		Store:           store,
+		Pub:             pub,
+		JSSub:           js.JSSub,
+		Logg:            lo,
 		WorkerContainer: workerContainer,
-		Endpoint:        ko.MustString("jetstream.endpoint"),
-		JetStreamID:     ko.MustString("jetstream.id"),
 	})
-	if err != nil {
-		lo.Error("could not initialize jetstream sub", "error", err)
-		os.Exit(1)
-	}
 
 	apiServer := api.New(api.APIOpts{
 		APIKey:        ko.MustString("api.key"),
@@ -137,7 +150,7 @@ func main() {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		jetStreamSub.Process()
+		sub.Process(ctx)
 	}()
 
 	<-ctx.Done()
@@ -147,7 +160,7 @@ func main() {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		jetStreamSub.Close()
+		js.Close()
 		if err := apiServer.Stop(shutdownCtx); err != nil {
 			lo.Error("failed to stop HTTP server", "err", fmt.Sprintf("%T", err))
 		}
