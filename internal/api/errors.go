@@ -55,3 +55,11 @@ func handleValidateError(c echo.Context) error {
 		Description: "Validation failed on one or more fields",
 	})
 }
+
+func handleJWTAuthError(c echo.Context, errorReason string) error {
+	return c.JSON(http.StatusUnauthorized, api.ErrResponse{
+		Ok:          false,
+		ErrCode:     api.ErrJWTAuth,
+		Description: "JWT authentication failed " + errorReason,
+	})
+}

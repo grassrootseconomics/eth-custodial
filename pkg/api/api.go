@@ -13,6 +13,11 @@ type (
 		ErrCode     string `json:"errorCode"`
 	}
 
+	LoginRequest struct {
+		Email    string `json:"email" validate:"required,email"`
+		Password string `json:"password" validate:"required"`
+	}
+
 	TransferRequest struct {
 		From         string `json:"from" validate:"required,eth_addr_checksum"`
 		To           string `json:"to" validate:"required,eth_addr_checksum"`
@@ -57,4 +62,5 @@ const (
 	ErrCodeInvalidAPIKey       = "E03"
 	ErrCodeValidationFailed    = "E04"
 	ErrCodeAccountNotExists    = "E05"
+	ErrJWTAuth                 = "E06"
 )

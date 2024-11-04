@@ -9,10 +9,11 @@ clean:
 	rm ${BIN} ${BOOTSTRAP_BIN}
 
 build:
-	${BUILD_CONF} go build -ldflags="-X main.build=${BUILD_COMMIT} -s -w" -o ${BIN} cmd/*.go
+	${BUILD_CONF} go build -ldflags="-X main.build=${BUILD_COMMIT} -s -w" -o build/${BIN} cmd/service/main.go
+	${BUILD_CONF} go build -ldflags="-X main.build=${BUILD_COMMIT} -s -w" -o build/gen-service-token cmd/gen-service-token/main.go
 
 run:
-	${BUILD_CONF} ${DEBUG} go run cmd/*.go
+	${BUILD_CONF} ${DEBUG} go run cmd/service/main.go
 
 docs:
 	swag fmt --dir internal/api/

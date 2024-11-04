@@ -19,10 +19,10 @@ import (
 //	@license.name	AGPL-3.0
 //	@license.url	https://www.gnu.org/licenses/agpl-3.0.en.html
 
-//	@securityDefinitions.apikey	ApiKeyAuth
+//	@securityDefinitions.apikey	TokenAuth
 //	@in							header
-//	@name						X-GE-KEY
-//	@description				Service API Key
+//	@name						Authorization
+//	@description				Service API Token
 
 //	@host		localhost:5003
 //	@BasePath	/api/v2

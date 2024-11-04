@@ -96,12 +96,13 @@ func main() {
 
 	workerOpts := worker.WorkerOpts{
 		CustodialRegistrationProxy: ko.MustString("chain.custodial_registration_proxy"),
-		MaxWorkers:                 ko.Int("workers.max"),
-		GasOracle:                  gasOracle,
-		Store:                      store,
-		Logg:                       lo,
-		Pub:                        pub,
-		ChainProvider:              chainProvider,
+		// TODO: Tune max workers based on load type
+		MaxWorkers:    ko.Int("workers.max"),
+		GasOracle:     gasOracle,
+		Store:         store,
+		Logg:          lo,
+		Pub:           pub,
+		ChainProvider: chainProvider,
 	}
 	if ko.Int("workers.max") <= 0 {
 		workerOpts.MaxWorkers = runtime.NumCPU() * 2
@@ -120,11 +121,18 @@ func main() {
 		WorkerContainer: workerContainer,
 	})
 
+	privateKey, publicKey, err := util.LoadSigningKey(ko.MustString("api.private_key"))
+	if err != nil {
+		lo.Error("could not load private key", "error", err)
+		os.Exit(1)
+	}
+	lo.Info("loaded private key", "key", privateKey)
+
 	apiServer := api.New(api.APIOpts{
-		APIKey:        ko.MustString("api.key"),
 		EnableMetrics: ko.Bool("metrics.enable"),
 		EnableDocs:    ko.Bool("api.docs"),
 		ListenAddress: ko.MustString("api.address"),
+		SigningKey:    publicKey,
 		Store:         store,
 		ChainProvider: chainProvider,
 		Worker:        workerContainer,

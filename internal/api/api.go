@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"crypto"
 	"log/slog"
 
 	"github.com/go-playground/validator/v10"
@@ -16,11 +17,13 @@ import (
 
 type (
 	APIOpts struct {
-		APIKey        string
 		Debug         bool
 		EnableMetrics bool
 		EnableDocs    bool
 		ListenAddress string
+		Build         string
+		VerifyingKey  crypto.PublicKey
+		SigningKey    crypto.PrivateKey
 		Store         store.Store
 		Logg          *slog.Logger
 		ChainProvider *ethutils.Provider
@@ -28,8 +31,10 @@ type (
 	}
 
 	API struct {
-		apiKey        string
 		listenAddress string
+		build         string
+		signingKey    crypto.PrivateKey
+		verifyingKey  crypto.PublicKey
 		store         store.Store
 		logg          *slog.Logger
 		chainProvider *ethutils.Provider
@@ -46,7 +51,9 @@ const (
 
 func New(o APIOpts) *API {
 	api := &API{
-		apiKey:        o.APIKey,
+		build:         o.Build,
+		signingKey:    o.SigningKey,
+		verifyingKey:  o.VerifyingKey,
 		listenAddress: o.ListenAddress,
 		logg:          o.Logg,
 		store:         o.Store,
@@ -97,11 +104,11 @@ func New(o APIOpts) *API {
 		router.GET("/docs", api.docsHandler)
 	}
 
+	authGroup := router.Group("/auth")
+	authGroup.POST("/login", api.loginHandler)
+
 	apiGroup := router.Group(apiVersion)
-
-	// serviceGroup := apiGroup.Group("/service")
-	apiGroup.Use(middleware.KeyAuthWithConfig(api.serviceAPIAuthConfig()))
-
+	apiGroup.Use(echojwt.WithConfig(api.apiJWTAuthConfig()))
 	apiGroup.GET("/system", api.systemInfoHandler)
 	apiGroup.POST("/account/create", api.accountCreateHandler)
 	apiGroup.GET("/account/status/:address", api.accountStatusHandler)
@@ -111,10 +118,6 @@ func New(o APIOpts) *API {
 	apiGroup.POST("/pool/quote", api.poolQuoteHandler)
 	apiGroup.POST("/pool/swap", api.poolSwapHandler)
 	apiGroup.POST("/pool/deposit", api.poolDepositHandler)
-
-	userGroup := apiGroup.Group("/user")
-	userGroup.Use(echojwt.WithConfig(api.userAPIJWTAuthConfig()))
-	userGroup.GET("/test", api.testRestircted)
 
 	api.router = router
 	return api

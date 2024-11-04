@@ -1,4 +1,4 @@
 .vscode
 .idx
 **/*.env
-eth-custodial
+build

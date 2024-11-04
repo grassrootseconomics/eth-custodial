@@ -39,6 +39,7 @@ func (a *API) systemInfoHandler(c echo.Context) error {
 		Description: "Current system information",
 		Result: map[string]any{
 			"systemSigner": systemKey.Public,
+			"build":        a.build,
 		},
 	})
 }

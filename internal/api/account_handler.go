@@ -114,7 +114,7 @@ func (a *API) accountStatusHandler(c echo.Context) error {
 		Description: "Custodial account status",
 		Result: map[string]any{
 			"gasBalance":    gasBalance.String(),
-			"networkNonce":  networkNonce,
+			"networkNonce":  networkNonce - 1,
 			"internalNonce": internalNonce,
 			"active":        active,
 		},

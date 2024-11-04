@@ -4,7 +4,17 @@ enable = true
 [api]
 address = ":5003"
 docs = true
-key = "xd"
+# These are sample keys, replace them with your own in production.
+# openssl genpkey -algorithm ED25519 -out private.pem
+# openssl pkey -in private.pem -pubout -out public.pem
+public_key = """
+-----BEGIN PUBLIC KEY-----
+MCowBQYDK2VwAyEAHGCyaM2KW5/S31wd+jHuki2QrQw1pyAFUcz888ekiVA=
+-----END PUBLIC KEY-----"""
+private_key = """
+-----BEGIN PRIVATE KEY-----
+MC4CAQAwBQYDK2VwBCIEIMJ3D6UBk/inMyoPWNPYybNIA0TEinMrWiMEMvoCodXE
+-----END PRIVATE KEY-----"""
 
 [postgres]
 dsn = "postgres://postgres:postgres@127.0.0.1:5432/ge_celo_custodial"

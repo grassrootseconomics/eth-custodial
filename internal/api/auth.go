@@ -1,84 +1,102 @@
 package api
 
 import (
+	"errors"
+	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/grassrootseconomics/eth-custodial/pkg/api"
+	apiresp "github.com/grassrootseconomics/eth-custodial/pkg/api"
+	"github.com/grassrootseconomics/ethutils"
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 )
 
-type jwtCustomClaims struct {
+type JWTCustomClaims struct {
 	PublicKey string `json:"publicKey"`
-	Admin     bool   `json:"admin"`
+	Service   bool   `json:"service"`
 	jwt.RegisteredClaims
 }
 
-// TODO: Choose edDSA Signing algo
 const (
-	authorizationHeader = "X-GE-KEY"
+	cookieName   = "__ge_cust_auth"
+	cookieDomain = "sarafu.network"
 
-	testPublicKey = `-----BEGIN PUBLIC KEY-----
-MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEpl+G3km4UIHLgSe54RIl0EW/Z2ON
-3VudoQCszl+yoTkTYp1GD5LK+0ZkqHFB2FuDTjaSiFsDo36FuVXvX5Hnug==
------END PUBLIC KEY-----`
-	testPrivateKey = `-----BEGIN EC PRIVATE KEY-----
-MHcCAQEEIJ+GMQ6MFC0KHL7izvCz0sR0CR2dAr6GgJCVTvPzNYaToAoGCCqGSM49
-AwEHoUQDQgAEpl+G3km4UIHLgSe54RIl0EW/Z2ON3VudoQCszl+yoTkTYp1GD5LK
-+0ZkqHFB2FuDTjaSiFsDo36FuVXvX5Hnug==
------END EC PRIVATE KEY-----`
+	defaultExpiryPeriod = 1 * 24 * time.Hour
 )
 
-func (a *API) serviceAPIAuthConfig() middleware.KeyAuthConfig {
-	return middleware.KeyAuthConfig{
-		KeyLookup: "header:" + authorizationHeader,
-		Validator: func(auth string, c echo.Context) (bool, error) {
-			return auth == a.apiKey, nil
-		},
-		ErrorHandler: func(_ error, c echo.Context) error {
-			return c.JSON(http.StatusUnauthorized, api.ErrResponse{
-				Ok:          false,
-				ErrCode:     api.ErrCodeInvalidAPIKey,
-				Description: "Invalid API key",
-			})
-		},
-	}
-}
-
-func (a *API) userAPIJWTAuthConfig() echojwt.Config {
+func (a *API) apiJWTAuthConfig() echojwt.Config {
 	return echojwt.Config{
-		TokenLookup:   "header:Authorization:Bearer,cookie:__ge_auth",
-		SigningMethod: "ES256",
-		SigningKey:    testPublicKey,
+		ErrorHandler: func(c echo.Context, err error) error {
+			var reason = "An unknown JWT error occurred"
+
+			if errors.Is(err, echojwt.ErrJWTMissing) {
+				reason = "token missing from Authorization header or cookie"
+			} else if errors.Is(err, echojwt.ErrJWTInvalid) {
+				reason = "token is invalid or expired"
+			} else {
+				a.logg.Error("unknown jwt error caught", "error", err)
+			}
+			return handleJWTAuthError(c, reason)
+		},
+		BeforeFunc: func(c echo.Context) {
+			a.logg.Info("header", "authorization", c.Request().Header.Get("Authorization"))
+		},
+		// Note that there is a space after Bearer to correctlty extract the token.
+		TokenLookup:   "header:Authorization:Bearer ,cookie:__ge_cust_auth",
+		SigningMethod: jwt.SigningMethodEdDSA.Alg(),
+		SigningKey:    a.verifyingKey,
 	}
 }
 
-func (a *API) testLogin(c echo.Context) error {
-	claims := &jwtCustomClaims{
-		"0x0000000000000000000000000000000000000000",
-		true,
-		jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 72)),
+func (a *API) loginHandler(c echo.Context) error {
+	req := apiresp.LoginRequest{}
+
+	if err := c.Bind(&req); err != nil {
+		return handleBindError(c)
+	}
+
+	if err := c.Validate(req); err != nil {
+		return handleValidateError(c)
+	}
+
+	issueDate := time.Now()
+	expiryDate := issueDate.Add(defaultExpiryPeriod)
+
+	claims := JWTCustomClaims{
+		Service: false,
+		// FetchPublicKey from auth db
+		PublicKey: ethutils.ZeroAddress.Hex(),
+		RegisteredClaims: jwt.RegisteredClaims{
+			Issuer: fmt.Sprintf("eth-custodial-%s", a.build),
+			// Use PublicKey here as well
+			Subject:   ethutils.ZeroAddress.Hex(),
+			IssuedAt:  jwt.NewNumericDate(issueDate),
+			ExpiresAt: jwt.NewNumericDate(expiryDate),
 		},
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodES256, claims)
-	t, err := token.SignedString([]byte(testPrivateKey))
+	token := jwt.NewWithClaims(jwt.SigningMethodEdDSA, claims)
+	t, err := token.SignedString(a.signingKey)
 	if err != nil {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, echo.Map{
-		"token": t,
-	})
-}
+	cookie := &http.Cookie{
+		Name:     cookieName,
+		Value:    t,
+		Secure:   true,
+		Expires:  expiryDate,
+		HttpOnly: true,
+		SameSite: http.SameSiteStrictMode,
+		Domain:   cookieDomain,
+	}
+	c.SetCookie(cookie)
 
-func (a *API) testRestircted(c echo.Context) error {
-	return c.JSON(http.StatusOK, api.OKResponse{
+	return c.JSON(http.StatusOK, apiresp.OKResponse{
 		Ok:          true,
-		Description: "You are seeing a restricted page!",
+		Description: "Login successful",
+		Result:      nil,
 	})
 }

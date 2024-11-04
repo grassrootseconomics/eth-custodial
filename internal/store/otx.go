@@ -71,7 +71,7 @@ func (pg *Pg) GetOTXByTrackingID(ctx context.Context, tx pgx.Tx, trackingID stri
 	var otx []*OTX
 
 	if err := pgxscan.Select(ctx, tx, &otx, pg.queries.GetOTXByTrackingID, trackingID); err != nil {
-		return nil, err
+		return otx, err
 	}
 
 	return otx, nil
