@@ -97,6 +97,6 @@ func (a *API) loginHandler(c echo.Context) error {
 	return c.JSON(http.StatusOK, apiresp.OKResponse{
 		Ok:          true,
 		Description: "Login successful",
-		Result:      nil,
+		Result:      map[string]any{"token": t},
 	})
 }
