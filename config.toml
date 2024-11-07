@@ -28,7 +28,9 @@ oracle_type = "static"
 [chain]
 id = 1337
 rpc_endpoint = "http://localhost:8545"
-custodial_registration_proxy = "0xf282a3C68A2505a79Fc99f94CE43D9c83230CaE5"
+ge_registry = "0xE979a64D375F5D363d7cecF3c93B9aFD40Ba9f55"
+# Certain chains implement the gas token as an ERC20 token as well. We block any transfer related to it at the API level.
+gas_token = "0x471EcE3750Da237f93B8E339c536989b8978a438"
 
 [jetstream]
 endpoint = "nats://127.0.0.1:4222"

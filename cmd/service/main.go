@@ -94,8 +94,14 @@ func main() {
 		JSCtx: js.JSCtx,
 	})
 
+	registry, err := chainProvider.RegistryMap(ctx, ethutils.HexToAddress(ko.MustString("chain.ge_registry")))
+	if err != nil {
+		lo.Error("could not fetch on chain registry", "error", err)
+		os.Exit(1)
+	}
+
 	workerOpts := worker.WorkerOpts{
-		CustodialRegistrationProxy: ko.MustString("chain.custodial_registration_proxy"),
+		CustodialRegistrationProxy: registry[ethutils.CustodialProxy].Hex(),
 		// TODO: Tune max workers based on load type
 		MaxWorkers:    ko.Int("workers.max"),
 		GasOracle:     gasOracle,
