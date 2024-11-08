@@ -27,7 +27,7 @@ require (
 	github.com/nats-io/nats.go v1.37.0
 	github.com/riverqueue/river v0.14.1
 	github.com/riverqueue/river/riverdriver/riverpgxv5 v0.14.1
-	github.com/swaggo/swag v1.16.3
+	github.com/swaggo/swag v1.16.4
 )
 
 require (
