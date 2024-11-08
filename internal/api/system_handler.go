@@ -21,17 +21,17 @@ import (
 func (a *API) systemInfoHandler(c echo.Context) error {
 	tx, err := a.store.Pool().Begin(c.Request().Context())
 	if err != nil {
-		return err
+		return handlePostgresError(c, err)
 	}
 	defer tx.Rollback(c.Request().Context())
 
 	systemKey, err := a.store.LoadMasterSignerKey(c.Request().Context(), tx)
 	if err != nil {
-		return err
+		return handlePostgresError(c, err)
 	}
 
 	if err := tx.Commit(c.Request().Context()); err != nil {
-		return err
+		return handlePostgresError(c, err)
 	}
 
 	return c.JSON(http.StatusOK, apiresp.OKResponse{

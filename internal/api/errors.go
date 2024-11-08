@@ -1,9 +1,11 @@
 package api
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/grassrootseconomics/eth-custodial/pkg/api"
+	"github.com/jackc/pgx/v5"
 	"github.com/labstack/echo/v4"
 )
 
@@ -62,4 +64,17 @@ func handleJWTAuthError(c echo.Context, errorReason string) error {
 		ErrCode:     api.ErrJWTAuth,
 		Description: "JWT authentication failed " + errorReason,
 	})
+}
+
+func handlePostgresError(c echo.Context, err error) error {
+	// TODO: Use a switch case to handle moree pg errors if needed
+	if errors.Is(err, pgx.ErrNoRows) {
+		return c.JSON(http.StatusNotFound, api.ErrResponse{
+			Ok:          false,
+			ErrCode:     api.ErrNoRecordFound,
+			Description: "Record(s) not found",
+		})
+	}
+
+	return err
 }

@@ -59,7 +59,7 @@ func (pg *Pg) CheckKeypair(ctx context.Context, tx pgx.Tx, publicKey string) (bo
 		pg.queries.CheckKeypair,
 		publicKey,
 	).Scan(&active); err != nil {
-		if err == pgx.ErrNoRows {
+		if errors.Is(err, pgx.ErrNoRows) {
 			return false, nil
 		}
 		return false, err

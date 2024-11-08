@@ -63,4 +63,5 @@ const (
 	ErrCodeValidationFailed    = "E04"
 	ErrCodeAccountNotExists    = "E05"
 	ErrJWTAuth                 = "E06"
+	ErrNoRecordFound           = "E07"
 )

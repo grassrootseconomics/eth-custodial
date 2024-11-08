@@ -34,17 +34,17 @@ func (a *API) trackOTXHandler(c echo.Context) error {
 
 	tx, err := a.store.Pool().Begin(c.Request().Context())
 	if err != nil {
-		return err
+		return handlePostgresError(c, err)
 	}
 	defer tx.Rollback(c.Request().Context())
 
 	otx, err := a.store.GetOTXByTrackingID(c.Request().Context(), tx, req.TrackingID)
 	if err != nil {
-		return err
+		return handlePostgresError(c, err)
 	}
 
 	if err := tx.Commit(c.Request().Context()); err != nil {
-		return err
+		return handlePostgresError(c, err)
 	}
 
 	return c.JSON(http.StatusOK, apiresp.OKResponse{
@@ -87,7 +87,7 @@ func (a *API) getOTXByAddressHandler(c echo.Context) error {
 
 	tx, err := a.store.Pool().Begin(c.Request().Context())
 	if err != nil {
-		return err
+		return handlePostgresError(c, err)
 	}
 	defer tx.Rollback(c.Request().Context())
 
@@ -96,22 +96,22 @@ func (a *API) getOTXByAddressHandler(c echo.Context) error {
 	if pagination.FirstPage {
 		otx, err = a.store.GetOTXByAccount(c.Request().Context(), tx, req.Address, pagination.PerPage)
 		if err != nil {
-			return err
+			return handlePostgresError(c, err)
 		}
 	} else if pagination.Next {
 		otx, err = a.store.GetOTXByAccountNext(c.Request().Context(), tx, req.Address, pagination.Cursor, pagination.PerPage)
 		if err != nil {
-			return err
+			return handlePostgresError(c, err)
 		}
 	} else {
 		otx, err = a.store.GetOTXByAccountPrevious(c.Request().Context(), tx, req.Address, pagination.Cursor, pagination.PerPage)
 		if err != nil {
-			return err
+			return handlePostgresError(c, err)
 		}
 	}
 
 	if err := tx.Commit(c.Request().Context()); err != nil {
-		return err
+		return handlePostgresError(c, err)
 	}
 
 	var first, last uint64

@@ -9,7 +9,6 @@ import (
 	"github.com/grassrootseconomics/eth-custodial/internal/worker"
 	apiresp "github.com/grassrootseconomics/eth-custodial/pkg/api"
 	"github.com/grassrootseconomics/ethutils"
-	"github.com/jackc/pgx/v5"
 	"github.com/labstack/echo/v4"
 	"github.com/lmittmann/w3/module/eth"
 )
@@ -96,17 +95,17 @@ func (a *API) accountStatusHandler(c echo.Context) error {
 	defer tx.Rollback(c.Request().Context())
 
 	internalNonce, err := a.store.PeekNonce(c.Request().Context(), tx, req.Address)
-	if err != nil && err != pgx.ErrNoRows {
-		return err
+	if err != nil {
+		return handlePostgresError(c, err)
 	}
 
 	active, err := a.store.CheckKeypair(c.Request().Context(), tx, req.Address)
-	if err != nil && err != pgx.ErrNoRows {
-		return err
+	if err != nil {
+		return handlePostgresError(c, err)
 	}
 
 	if err := tx.Commit(c.Request().Context()); err != nil {
-		return err
+		return handlePostgresError(c, err)
 	}
 
 	return c.JSON(http.StatusOK, apiresp.OKResponse{

@@ -36,13 +36,13 @@ func (a *API) transferHandler(c echo.Context) error {
 
 	tx, err := a.store.Pool().Begin(c.Request().Context())
 	if err != nil {
-		return err
+		return handlePostgresError(c, err)
 	}
 	defer tx.Rollback(c.Request().Context())
 
 	exists, err := a.store.CheckKeypair(c.Request().Context(), tx, req.From)
 	if err != nil {
-		return err
+		return handlePostgresError(c, err)
 	}
 	if !exists {
 		return c.JSON(http.StatusNotFound, apiresp.ErrResponse{
@@ -62,11 +62,11 @@ func (a *API) transferHandler(c echo.Context) error {
 		Amount:       req.Amount,
 	}, nil)
 	if err != nil {
-		return err
+		return handlePostgresError(c, err)
 	}
 
 	if err := tx.Commit(c.Request().Context()); err != nil {
-		return err
+		return handlePostgresError(c, err)
 	}
 
 	return c.JSON(http.StatusOK, apiresp.OKResponse{
