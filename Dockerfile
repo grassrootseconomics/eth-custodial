@@ -11,7 +11,7 @@ WORKDIR /build
 
 COPY . .
 RUN go mod download
-RUN go build -o eth-custodial -ldflags="-X main.build=${BUILD} -s -w" cmd/*.go
+RUN go build -o eth-custodial -ldflags="-X main.build=${BUILD} -s -w" cmd/service/*.go
 
 FROM debian:bookworm-slim
 

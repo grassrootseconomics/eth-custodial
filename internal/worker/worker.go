@@ -46,7 +46,7 @@ type (
 
 const (
 	migrationTimeout    = 15 * time.Second
-	healthCheckInterval = 5 * time.Second
+	healthCheckInterval = 2 * time.Minute
 )
 
 func New(o WorkerOpts) (*WorkerContainer, error) {

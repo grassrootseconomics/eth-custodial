@@ -2,7 +2,9 @@ package worker
 
 import (
 	"context"
+	"time"
 
+	"github.com/grassrootseconomics/eth-custodial/internal/store"
 	"github.com/riverqueue/river"
 )
 
@@ -37,6 +39,11 @@ func (w *DispatchHealthCheckWorker) Work(ctx context.Context, _ *river.Job[Dispa
 	}
 
 	for _, v := range otx {
+		if v.DispatchStatus == store.IN_NETWORK {
+			if v.UpdatedAt.Sub(time.Now()) < time.Minute*1 {
+				break
+			}
+		}
 		w.wc.Logg.Warn("dispatch health check: found failed otx", "otx_id", v.ID, "tracking_id", v.TrackingID, "account", v.SignerAccount, "status", v.DispatchStatus)
 	}
 
