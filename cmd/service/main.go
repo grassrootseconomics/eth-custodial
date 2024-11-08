@@ -110,7 +110,7 @@ func main() {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			subComponent.Process(ctx)
+			subComponent.Process()
 		}()
 	}
 
@@ -121,8 +121,11 @@ func main() {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		if js != nil {
-			js.Close()
+		if subComponent != nil {
+			subComponent.Close()
+		} else {
+			// No need to call this is if the sub iterator is already closed
+			jsPub.Close()
 		}
 		if apiComponent != nil {
 			if err := apiComponent.Stop(shutdownCtx); err != nil {
@@ -132,6 +135,7 @@ func main() {
 		if workerComponent != nil {
 			workerComponent.Stop(shutdownCtx)
 		}
+
 	}()
 
 	go func() {

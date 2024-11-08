@@ -9,13 +9,15 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/grassrootseconomics/eth-custodial/internal/api"
 	"github.com/grassrootseconomics/eth-custodial/internal/gas"
-	"github.com/grassrootseconomics/eth-custodial/internal/jetstream"
+	internaljs "github.com/grassrootseconomics/eth-custodial/internal/jetstream"
 	"github.com/grassrootseconomics/eth-custodial/internal/pub"
 	"github.com/grassrootseconomics/eth-custodial/internal/store"
 	"github.com/grassrootseconomics/eth-custodial/internal/sub"
 	"github.com/grassrootseconomics/eth-custodial/internal/util"
 	"github.com/grassrootseconomics/eth-custodial/internal/worker"
 	"github.com/grassrootseconomics/ethutils"
+	"github.com/nats-io/nats.go"
+	"github.com/nats-io/nats.go/jetstream"
 )
 
 var (
@@ -28,8 +30,26 @@ var (
 	workerContainer *worker.WorkerContainer
 	apiServer       *api.API
 
-	js *jetstream.JetStream
+	js       jetstream.JetStream
+	natsConn *nats.Conn
 )
+
+func loadJetStream() jetstream.JetStream {
+	if js != nil {
+		return js
+	}
+	var err error
+
+	natsConn, js, err = internaljs.NewJetStream(internaljs.JetStreamOpts{
+		Endpoint: ko.MustString("jetstream.endpoint"),
+	})
+	if err != nil {
+		lo.Error("could not initialize jetstream", "error", err)
+		os.Exit(1)
+	}
+
+	return js
+}
 
 func loadStore() store.Store {
 	if pgStore != nil {
@@ -99,36 +119,15 @@ func loadRegistry() map[string]common.Address {
 	return registry
 }
 
-func loadJetStream() *jetstream.JetStream {
-	if js != nil {
-		return js
-	}
-	var err error
-
-	js, err = jetstream.NewJetStream(jetstream.JetStreamOpts{
-		Logg:            lo,
-		Endpoint:        ko.MustString("jetstream.endpoint"),
-		JetStreamID:     ko.MustString("jetstream.id"),
-		PersistDuration: time.Duration(ko.MustInt("jetstream.persist_duration_hrs")) * time.Hour,
-	})
-	if err != nil {
-		lo.Error("could not initialize jetstream sub", "error", err)
-		os.Exit(1)
-	}
-
-	return js
-}
-
 func loadPub() *pub.Pub {
 	if jsPub != nil {
 		return jsPub
 	}
-	if js == nil {
-		loadJetStream()
-	}
 
 	jsPub = pub.NewPub(pub.PubOpts{
-		JSCtx: js.JSCtx,
+		PersistDuration: time.Duration(ko.MustInt("jetstream.persist_duration_hrs")) * time.Hour,
+		JS:              loadJetStream(),
+		NatsConn:        natsConn,
 	})
 
 	return jsPub
@@ -138,16 +137,20 @@ func initSub() *sub.Sub {
 	if jsSub != nil {
 		return jsSub
 	}
-	if js == nil {
-		loadJetStream()
-	}
+	var err error
 
-	jsSub = sub.NewSub(sub.SubObts{
-		Store: loadStore(),
-		Pub:   loadPub(),
-		JSSub: js.JSSub,
-		Logg:  lo,
+	jsSub, err = sub.NewSub(sub.SubObts{
+		Store:      loadStore(),
+		JS:         loadJetStream(),
+		ConsumerID: ko.MustString("jetstream.id"),
+		Pub:        loadPub(),
+		Logg:       lo,
 	})
+	if err != nil {
+		lo.Error("could not load jetstream sub", "error", err)
+		os.Exit(1)
+	}
+	lo.Debug("init: successfuly loaded js sub", "consumer_id", ko.String("jetstream.id"))
 
 	return jsSub
 }
