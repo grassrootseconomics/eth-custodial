@@ -18,3 +18,8 @@ func (v *Validator) Validate(i interface{}) error {
 	// return nil
 	return v.ValidatorProvider.Struct(i)
 }
+
+func (a *API) isBannedToken(tokenAddress string) bool {
+	_, exists := a.BannedTokens[tokenAddress]
+	return exists
+}

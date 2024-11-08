@@ -144,6 +144,7 @@ func main() {
 		Worker:        workerContainer,
 		Logg:          lo,
 		Debug:         true,
+		BannedTokens:  ko.Strings("chain.banned_tokens"),
 	})
 
 	wg.Add(1)

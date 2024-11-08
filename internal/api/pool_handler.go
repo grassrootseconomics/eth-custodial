@@ -40,6 +40,14 @@ func (a *API) poolSwapHandler(c echo.Context) error {
 		return handleValidateError(c)
 	}
 
+	if a.isBannedToken(req.FromTokenAddress) || a.isBannedToken(req.ToTokenAddress) {
+		return c.JSON(http.StatusForbidden, apiresp.ErrResponse{
+			Ok:          false,
+			Description: fmt.Sprintf("Not allowed to interact with token"),
+			ErrCode:     apiresp.ErrBannedToken,
+		})
+	}
+
 	tx, err := a.store.Pool().Begin(c.Request().Context())
 	if err != nil {
 		return handlePostgresError(c, err)
@@ -107,6 +115,14 @@ func (a *API) poolDepositHandler(c echo.Context) error {
 
 	if err := c.Validate(req); err != nil {
 		return handleValidateError(c)
+	}
+
+	if a.isBannedToken(req.TokenAddress) {
+		return c.JSON(http.StatusForbidden, apiresp.ErrResponse{
+			Ok:          false,
+			Description: fmt.Sprintf("Not allowed to interact with token"),
+			ErrCode:     apiresp.ErrBannedToken,
+		})
 	}
 
 	tx, err := a.store.Pool().Begin(c.Request().Context())

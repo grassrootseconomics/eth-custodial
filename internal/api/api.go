@@ -28,6 +28,7 @@ type (
 		Logg          *slog.Logger
 		ChainProvider *ethutils.Provider
 		Worker        *worker.WorkerContainer
+		BannedTokens  []string
 	}
 
 	API struct {
@@ -40,6 +41,7 @@ type (
 		chainProvider *ethutils.Provider
 		router        *echo.Echo
 		worker        *worker.WorkerContainer
+		BannedTokens  map[string]struct{}
 	}
 )
 
@@ -59,6 +61,11 @@ func New(o APIOpts) *API {
 		store:         o.Store,
 		chainProvider: o.ChainProvider,
 		worker:        o.Worker,
+		BannedTokens:  make(map[string]struct{}, len(o.BannedTokens)),
+	}
+
+	for _, addr := range o.BannedTokens {
+		api.BannedTokens[addr] = struct{}{}
 	}
 
 	customValidator := validator.New(validator.WithRequiredStructEnabled())
