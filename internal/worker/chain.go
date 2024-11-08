@@ -13,6 +13,7 @@ const (
 	TransferFrom = "transferFrom"
 	Withdraw     = "withdraw"
 	Deposit      = "deposit"
+	Sweep        = "sweep"
 )
 
 var abi = map[string]*w3.Func{
@@ -20,6 +21,7 @@ var abi = map[string]*w3.Func{
 	Approve:  w3.MustNewFunc("approve(address, uint256)", "bool"),
 	MintTo:   w3.MustNewFunc("mintTo(address, uint256)", "bool"),
 	Transfer: w3.MustNewFunc("transfer(address,uint256)", "bool"),
+	Sweep:    w3.MustNewFunc("sweep(address)", "uint256"),
 	// GasFaucet
 	Check:    w3.MustNewFunc("check(address)", "bool"),
 	GiveTo:   w3.MustNewFunc("giveTo(address)", "uint256"),

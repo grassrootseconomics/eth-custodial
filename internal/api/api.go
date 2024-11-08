@@ -122,6 +122,7 @@ func New(o APIOpts) *API {
 	apiGroup.GET("/account/otx/:address", api.getOTXByAddressHandler)
 	apiGroup.GET("/otx/track/:trackingId", api.trackOTXHandler)
 	apiGroup.POST("/token/transfer", api.transferHandler)
+	apiGroup.POST("/token/sweep", api.sweepHandler)
 	apiGroup.POST("/pool/quote", api.poolQuoteHandler)
 	apiGroup.POST("/pool/swap", api.poolSwapHandler)
 	apiGroup.POST("/pool/deposit", api.poolDepositHandler)

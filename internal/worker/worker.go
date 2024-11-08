@@ -106,6 +106,10 @@ func setupWorkers(wc *WorkerContainer) (*river.Workers, error) {
 		return nil, err
 	}
 
+	if err := river.AddWorkerSafely(workers, &TokenSweepWorker{wc: wc}); err != nil {
+		return nil, err
+	}
+
 	if err := river.AddWorkerSafely(workers, &AccountCreateWorker{wc: wc, custodialRegistrationProxy: wc.CustodialRegistrationProxy}); err != nil {
 		return nil, err
 	}

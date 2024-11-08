@@ -28,6 +28,7 @@ const (
 	GAS_TRANSFER     string = "GAS_TRANSFER"
 	TOKEN_TRANSFER   string = "TOKEN_TRANSFER"
 	TOKEN_APPROVE    string = "TOKEN_APPROVE"
+	TOKEN_SWEEP      string = "TOKEN_SWEEP"
 	POOL_SWAP        string = "POOL_SWAP"
 	POOL_DEPSOIT     string = "POOL_DEPOSIT"
 	OTHER_MANUAL     string = "OTHER_MANUAL"

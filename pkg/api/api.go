@@ -25,6 +25,12 @@ type (
 		Amount       string `json:"amount" validate:"required,number,gt=0"`
 	}
 
+	SweepRequest struct {
+		From         string `json:"from" validate:"required,eth_addr_checksum"`
+		To           string `json:"to" validate:"required,eth_addr_checksum"`
+		TokenAddress string `json:"tokenAddress" validate:"required,eth_addr_checksum"`
+	}
+
 	PoolSwapRequest struct {
 		From             string `json:"from" validate:"required,eth_addr_checksum"`
 		FromTokenAddress string `json:"fromTokenAddress" validate:"required,eth_addr_checksum"`

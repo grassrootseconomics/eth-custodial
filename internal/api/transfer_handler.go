@@ -85,3 +85,78 @@ func (a *API) transferHandler(c echo.Context) error {
 		},
 	})
 }
+
+// sweepHandler godoc
+//
+//	@Summary		Sign a token sweep request
+//	@Description	Sign a token sweep request
+//	@Tags			Sign
+//	@Accept			json
+//	@Produce		json
+//	@Param			sweepRequest	body		apiresp.SweepRequest	true	"Sweep request"
+//	@Success		200				{object}	apiresp.OKResponse
+//	@Failure		400				{object}	apiresp.ErrResponse
+//	@Failure		500				{object}	apiresp.ErrResponse
+//	@Security		ApiKeyAuth
+//	@Router			/token/sweep [post]
+func (a *API) sweepHandler(c echo.Context) error {
+	req := apiresp.SweepRequest{}
+
+	if err := c.Bind(&req); err != nil {
+		return handleBindError(c)
+	}
+
+	if err := c.Validate(req); err != nil {
+		return handleValidateError(c)
+	}
+
+	if a.isBannedToken(req.TokenAddress) {
+		return c.JSON(http.StatusForbidden, apiresp.ErrResponse{
+			Ok:          false,
+			Description: fmt.Sprintf("Not allowed to interact with token"),
+			ErrCode:     apiresp.ErrBannedToken,
+		})
+	}
+
+	tx, err := a.store.Pool().Begin(c.Request().Context())
+	if err != nil {
+		return handlePostgresError(c, err)
+	}
+	defer tx.Rollback(c.Request().Context())
+
+	exists, err := a.store.CheckKeypair(c.Request().Context(), tx, req.From)
+	if err != nil {
+		return handlePostgresError(c, err)
+	}
+	if !exists {
+		return c.JSON(http.StatusNotFound, apiresp.ErrResponse{
+			Ok:          false,
+			Description: fmt.Sprintf("Account %s does not exist or is not yet activated", req.From),
+			ErrCode:     apiresp.ErrCodeAccountNotExists,
+		})
+	}
+
+	trackingID := uuid.NewString()
+
+	_, err = a.worker.QueueClient.InsertTx(c.Request().Context(), tx, worker.TokenSweepArgs{
+		TrackingID:   trackingID,
+		From:         req.From,
+		To:           req.To,
+		TokenAddress: req.TokenAddress,
+	}, nil)
+	if err != nil {
+		return handlePostgresError(c, err)
+	}
+
+	if err := tx.Commit(c.Request().Context()); err != nil {
+		return handlePostgresError(c, err)
+	}
+
+	return c.JSON(http.StatusOK, apiresp.OKResponse{
+		Ok:          true,
+		Description: "Sweep request successfully created",
+		Result: map[string]any{
+			"trackingId": trackingID,
+		},
+	})
+}
