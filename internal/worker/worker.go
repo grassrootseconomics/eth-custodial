@@ -20,6 +20,7 @@ type (
 	WorkerOpts struct {
 		MaxWorkers                 int
 		CustodialRegistrationProxy string
+		HealthCheckInterval        time.Duration
 		GasOracle                  gas.GasOracle
 		Store                      store.Store
 		Logg                       *slog.Logger
@@ -43,7 +44,10 @@ type (
 	}
 )
 
-const migrationTimeout = 15 * time.Second
+const (
+	migrationTimeout    = 15 * time.Second
+	healthCheckInterval = 5 * time.Second
+)
 
 func New(o WorkerOpts) (*WorkerContainer, error) {
 	workerContainer := &WorkerContainer{
@@ -83,8 +87,9 @@ func New(o WorkerOpts) (*WorkerContainer, error) {
 				MaxWorkers: o.MaxWorkers,
 			},
 		},
-		Workers: workers,
-		Logger:  o.Logg,
+		Workers:      workers,
+		PeriodicJobs: setupHealthCheck(),
+		Logger:       o.Logg,
 	})
 
 	return workerContainer, nil
@@ -118,6 +123,14 @@ func setupWorkers(wc *WorkerContainer) (*river.Workers, error) {
 		return nil, err
 	}
 
+	if err := river.AddWorkerSafely(workers, &DispatchHealthCheckWorker{wc: wc}); err != nil {
+		return nil, err
+	}
+
+	if err := river.AddWorkerSafely(workers, &RetrierWorker{wc: wc}); err != nil {
+		return nil, err
+	}
+
 	if err := river.AddWorkerSafely(workers, &PoolSwapWorker{wc: wc}); err != nil {
 		return nil, err
 	}
@@ -127,4 +140,18 @@ func setupWorkers(wc *WorkerContainer) (*river.Workers, error) {
 	}
 
 	return workers, nil
+}
+
+func setupHealthCheck() []*river.PeriodicJob {
+	return []*river.PeriodicJob{
+		river.NewPeriodicJob(
+			river.PeriodicInterval(healthCheckInterval),
+			func() (river.JobArgs, *river.InsertOpts) {
+				return DispatchHealthCheckArgs{}, nil
+			},
+			&river.PeriodicJobOpts{
+				RunOnStart: true,
+			},
+		),
+	}
 }

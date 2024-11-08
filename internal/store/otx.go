@@ -107,3 +107,13 @@ func (pg *Pg) GetOTXByAccountPrevious(ctx context.Context, tx pgx.Tx, publicKey 
 
 	return otx, nil
 }
+
+func (pg *Pg) GetFailedOTX(ctx context.Context, tx pgx.Tx) ([]*OTX, error) {
+	var otx []*OTX
+
+	if err := pgxscan.Select(ctx, tx, &otx, pg.queries.GetFailedOTX); err != nil {
+		return nil, err
+	}
+
+	return otx, nil
+}

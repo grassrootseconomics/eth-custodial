@@ -28,6 +28,7 @@ type Store interface {
 	GetOTXByAccount(context.Context, pgx.Tx, string, int) ([]*OTX, error)
 	GetOTXByAccountNext(context.Context, pgx.Tx, string, int, int) ([]*OTX, error)
 	GetOTXByAccountPrevious(context.Context, pgx.Tx, string, int, int) ([]*OTX, error)
+	GetFailedOTX(context.Context, pgx.Tx) ([]*OTX, error)
 	// Dispatch
 	InsertDispatchTx(context.Context, pgx.Tx, DispatchTx) error
 	UpdateDispatchTxStatus(context.Context, pgx.Tx, DispatchTx) error

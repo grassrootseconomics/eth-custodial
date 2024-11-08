@@ -61,6 +61,7 @@ func (w *DisptachWorker) Work(ctx context.Context, job *river.Job[DispatchArgs])
 					Status:     updateTxStatus.Status,
 				})
 
+				// Network errors are transient, so we can keep retrying up to the limit
 				return dispatchErr
 			}
 
@@ -84,11 +85,21 @@ func (w *DisptachWorker) Work(ctx context.Context, job *river.Job[DispatchArgs])
 				Status:     updateTxStatus.Status,
 			})
 
-			// TODO: Queue retrier job here and permanently cancel further retries on chain related dispatch errors
+			_, err := w.wc.QueueClient.Insert(ctx, RetrierArgs{
+				TrackingID: job.Args.TrackingID,
+			}, &river.InsertOpts{
+				// TODO: Prevent cascading failures
+				MaxAttempts: 1,
+			})
+			if err != nil {
+				return err
+			}
+
+			// Retry attempt has been deffered to retrier, permanantly cancel this job
 			return river.JobCancel(dispatchErr)
 		}
 
-		w.wc.Logg.Error("dispatch error", "error", err)
+		w.wc.Logg.Error("unknown dispatch error", "error", err)
 		return err
 	}
 	updateTxStatus.Status = store.IN_NETWORK
