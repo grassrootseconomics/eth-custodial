@@ -8,36 +8,32 @@ import (
 
 	"github.com/grassrootseconomics/eth-custodial/internal/pub"
 	"github.com/grassrootseconomics/eth-custodial/internal/store"
-	"github.com/grassrootseconomics/eth-custodial/internal/worker"
 	"github.com/nats-io/nats.go"
 )
 
 type (
 	SubObts struct {
-		Store           store.Store
-		Pub             *pub.Pub
-		JSSub           *nats.Subscription
-		Logg            *slog.Logger
-		WorkerContainer *worker.WorkerContainer
+		Store store.Store
+		Pub   *pub.Pub
+		JSSub *nats.Subscription
+		Logg  *slog.Logger
 	}
 
 	Sub struct {
-		store           store.Store
-		pub             *pub.Pub
-		jsSub           *nats.Subscription
-		workerContainer *worker.WorkerContainer
-		natsConn        *nats.Conn
-		logg            *slog.Logger
+		store    store.Store
+		pub      *pub.Pub
+		jsSub    *nats.Subscription
+		natsConn *nats.Conn
+		logg     *slog.Logger
 	}
 )
 
 func NewSub(o SubObts) *Sub {
 	return &Sub{
-		store:           o.Store,
-		pub:             o.Pub,
-		jsSub:           o.JSSub,
-		workerContainer: o.WorkerContainer,
-		logg:            o.Logg,
+		store: o.Store,
+		pub:   o.Pub,
+		jsSub: o.JSSub,
+		logg:  o.Logg,
 	}
 }
 

@@ -113,6 +113,7 @@ func New(o APIOpts) *API {
 
 	authGroup := router.Group("/auth")
 	authGroup.POST("/login", api.loginHandler)
+	authGroup.POST("/logout", api.logoutHandler)
 
 	apiGroup := router.Group(apiVersion)
 	apiGroup.Use(echojwt.WithConfig(api.apiJWTAuthConfig()))

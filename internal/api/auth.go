@@ -100,3 +100,22 @@ func (a *API) loginHandler(c echo.Context) error {
 		Result:      map[string]any{"token": t},
 	})
 }
+
+func (a *API) logoutHandler(c echo.Context) error {
+	cookie := &http.Cookie{
+		Name:     cookieName,
+		Value:    "",
+		Secure:   true,
+		MaxAge:   -1,
+		HttpOnly: true,
+		SameSite: http.SameSiteStrictMode,
+		Domain:   cookieDomain,
+	}
+	c.SetCookie(cookie)
+
+	return c.JSON(http.StatusOK, apiresp.OKResponse{
+		Ok:          true,
+		Description: "Logout successful",
+		Result:      nil,
+	})
+}

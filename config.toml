@@ -1,5 +1,12 @@
-[metrics]
-enable = true
+[service]
+# In "standalone" mode, the service will run all the components in a single process.
+# In "worker" mode, the service will run only the tasker and its dependencies.
+# In "api" mode, the service will run only the API and its dependencies.
+# In "sub" mode, the service will run only the JetStream subscriber and its dependencies.
+
+# If not running in "standalone" mode, all other mods must still be started independently and connect with each other.
+mode = "standalone"
+metrics = true
 
 [api]
 address = ":5003"
