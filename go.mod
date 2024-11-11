@@ -15,7 +15,7 @@ require (
 	github.com/grassrootseconomics/ethutils v1.3.0
 	github.com/jackc/pgx/v5 v5.7.1
 	github.com/jackc/tern/v2 v2.2.3
-	github.com/kamikazechaser/common v0.2.0
+	github.com/kamikazechaser/common v1.0.0
 	github.com/knadh/goyesql/v2 v2.2.0
 	github.com/knadh/koanf/parsers/toml v0.1.0
 	github.com/knadh/koanf/providers/env v1.0.0
