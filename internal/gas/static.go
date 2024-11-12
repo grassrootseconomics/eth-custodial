@@ -1,12 +1,16 @@
 package gas
 
-import "github.com/grassrootseconomics/ethutils"
+import (
+	"math/big"
+
+	"github.com/grassrootseconomics/ethutils"
+)
 
 type StaticGas struct{}
 
 func (sg *StaticGas) GetSettings() (*GasSettings, error) {
 	return &GasSettings{
-		GasFeeCap: ethutils.SafeGasFeeCap,
+		GasFeeCap: big.NewInt(35000000000),
 		GasTipCap: ethutils.SafeGasTipCap,
 		GasLimit:  uint64(ethutils.SafeGasLimit),
 	}, nil
