@@ -102,6 +102,12 @@ func main() {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
+			gasOracle.Start()
+		}()
+
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
 			workerComponent.Start(ctx)
 		}()
 	}
@@ -133,6 +139,7 @@ func main() {
 			}
 		}
 		if workerComponent != nil {
+			gasOracle.Stop()
 			workerComponent.Stop(shutdownCtx)
 		}
 

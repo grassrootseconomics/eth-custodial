@@ -90,11 +90,20 @@ func loadGasOracle() gas.GasOracle {
 	}
 	var err error
 
-	gasOracle, err = gas.New(gas.GasOpts{
-		OracleType: ko.MustString("gas.oracle_type"),
-	})
-	if err != nil {
-		lo.Error("could not initialize gas oracle", "error", err)
+	switch ko.MustString("gas.oracle_type") {
+	case "static":
+		gasOracle = &gas.StaticGas{}
+	case "rpc":
+		gasOracle, err = gas.NewRPCGasOracle(gas.RPCGasOracleOpts{
+			Logg:          lo,
+			ChainProvider: loadChainProvider(),
+		})
+		if err != nil {
+			lo.Error("could not initialize rpc gas oracle", "error", err)
+			os.Exit(1)
+		}
+	default:
+		lo.Error("unknown gas oracle type", "type", ko.MustString("gas.oracle_type"))
 		os.Exit(1)
 	}
 
@@ -170,6 +179,7 @@ func initWorker() *worker.WorkerContainer {
 		Pub:           loadPub(),
 		ChainProvider: loadChainProvider(),
 	}
+	lo.Debug("init: worker loaded custodial registration proxy", "custodial_registration_proxy", workerOpts.CustodialRegistrationProxy, "registry", ko.MustString("chain.ge_registry"))
 	if ko.Int("workers.max") <= 0 {
 		workerOpts.MaxWorkers = runtime.NumCPU() * 2
 	}

@@ -5,10 +5,6 @@ import (
 )
 
 type (
-	GasOpts struct {
-		OracleType string
-	}
-
 	GasSettings struct {
 		GasFeeCap *big.Int
 		GasTipCap *big.Int
@@ -17,18 +13,7 @@ type (
 
 	GasOracle interface {
 		GetSettings() (*GasSettings, error)
+		Start()
+		Stop()
 	}
 )
-
-func New(o GasOpts) (GasOracle, error) {
-	var gasOracle GasOracle
-
-	switch o.OracleType {
-	case "static":
-		gasOracle = &StaticGas{}
-	default:
-		gasOracle = &StaticGas{}
-	}
-
-	return gasOracle, nil
-}

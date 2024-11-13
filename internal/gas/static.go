@@ -15,3 +15,6 @@ func (sg *StaticGas) GetSettings() (*GasSettings, error) {
 		GasLimit:  uint64(ethutils.SafeGasLimit),
 	}, nil
 }
+
+func (sg *StaticGas) Start() {}
+func (sg *StaticGas) Stop()  {}
