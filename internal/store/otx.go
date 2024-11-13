@@ -23,7 +23,7 @@ type OTX struct {
 }
 
 const (
-	GAS_REFILL       string = "REFILL_GAS"
+	GAS_REFILL       string = "GAS_REFILL"
 	ACCOUNT_REGISTER string = "ACCOUNT_REGISTER"
 	GAS_TRANSFER     string = "GAS_TRANSFER"
 	TOKEN_TRANSFER   string = "TOKEN_TRANSFER"

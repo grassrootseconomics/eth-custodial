@@ -98,10 +98,6 @@ func (w *TokenSweepWorker) Work(ctx context.Context, job *river.Job[TokenSweepAr
 	}); err != nil {
 		return err
 	}
-	w.wc.Pub.Send(ctx, event.Event{
-		TrackingID: job.Args.TrackingID,
-		Status:     store.PENDING,
-	})
 
 	_, err = w.wc.QueueClient.InsertTx(ctx, tx, DispatchArgs{
 		TrackingID: job.Args.TrackingID,
@@ -111,6 +107,11 @@ func (w *TokenSweepWorker) Work(ctx context.Context, job *river.Job[TokenSweepAr
 	if err != nil {
 		return err
 	}
+
+	w.wc.Pub.Send(ctx, event.Event{
+		TrackingID: job.Args.TrackingID,
+		Status:     store.PENDING,
+	})
 
 	return tx.Commit(ctx)
 }

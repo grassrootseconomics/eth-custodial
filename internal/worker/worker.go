@@ -18,14 +18,14 @@ import (
 
 type (
 	WorkerOpts struct {
-		MaxWorkers                 int
-		CustodialRegistrationProxy string
-		HealthCheckInterval        time.Duration
-		GasOracle                  gas.GasOracle
-		Store                      store.Store
-		Logg                       *slog.Logger
-		ChainProvider              *ethutils.Provider
-		Pub                        *pub.Pub
+		MaxWorkers          int
+		Registry            map[string]common.Address
+		HealthCheckInterval time.Duration
+		GasOracle           gas.GasOracle
+		Store               store.Store
+		Logg                *slog.Logger
+		ChainProvider       *ethutils.Provider
+		Pub                 *pub.Pub
 	}
 
 	signer struct {
@@ -34,13 +34,13 @@ type (
 	}
 
 	WorkerContainer struct {
-		CustodialRegistrationProxy common.Address
-		GasOracle                  gas.GasOracle
-		Store                      store.Store
-		Logg                       *slog.Logger
-		Pub                        *pub.Pub
-		ChainProvider              *ethutils.Provider
-		QueueClient                *river.Client[pgx.Tx]
+		Registry      map[string]common.Address
+		GasOracle     gas.GasOracle
+		Store         store.Store
+		Logg          *slog.Logger
+		Pub           *pub.Pub
+		ChainProvider *ethutils.Provider
+		QueueClient   *river.Client[pgx.Tx]
 	}
 )
 
@@ -51,13 +51,13 @@ const (
 
 func New(o WorkerOpts) (*WorkerContainer, error) {
 	workerContainer := &WorkerContainer{
-		CustodialRegistrationProxy: ethutils.HexToAddress(o.CustodialRegistrationProxy),
-		GasOracle:                  o.GasOracle,
-		Store:                      o.Store,
-		Logg:                       o.Logg,
-		Pub:                        o.Pub,
-		ChainProvider:              o.ChainProvider,
-		QueueClient:                nil,
+		Registry:      o.Registry,
+		GasOracle:     o.GasOracle,
+		Store:         o.Store,
+		Logg:          o.Logg,
+		Pub:           o.Pub,
+		ChainProvider: o.ChainProvider,
+		QueueClient:   nil,
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), migrationTimeout)
@@ -115,7 +115,7 @@ func setupWorkers(wc *WorkerContainer) (*river.Workers, error) {
 		return nil, err
 	}
 
-	if err := river.AddWorkerSafely(workers, &AccountCreateWorker{wc: wc, custodialRegistrationProxy: wc.CustodialRegistrationProxy}); err != nil {
+	if err := river.AddWorkerSafely(workers, &AccountCreateWorker{wc: wc, custodialRegistrationProxy: wc.Registry[ethutils.CustodialProxy]}); err != nil {
 		return nil, err
 	}
 
@@ -136,6 +136,10 @@ func setupWorkers(wc *WorkerContainer) (*river.Workers, error) {
 	}
 
 	if err := river.AddWorkerSafely(workers, &PoolDepositWorker{wc: wc}); err != nil {
+		return nil, err
+	}
+
+	if err := river.AddWorkerSafely(workers, &GasRefillWorker{wc: wc, gasFaucet: wc.Registry[ethutils.GasFaucet]}); err != nil {
 		return nil, err
 	}
 

@@ -105,19 +105,36 @@ func (w *TokenTransferWorker) Work(ctx context.Context, job *river.Job[TokenTran
 	}); err != nil {
 		return err
 	}
+
+	_, err = w.wc.QueueClient.InsertManyTx(ctx, tx, []river.InsertManyParams{
+		{
+			Args: DispatchArgs{
+				TrackingID: job.Args.TrackingID,
+				OTXID:      otxID,
+				RawTx:      rawTxHex,
+			},
+			InsertOpts: &river.InsertOpts{
+				Priority: 1,
+			},
+		},
+		{
+			Args: GasRefillArgs{
+				TrackingID: job.Args.TrackingID,
+				Address:    job.Args.From,
+			},
+			InsertOpts: &river.InsertOpts{
+				Priority: 2,
+			},
+		},
+	})
+	if err != nil {
+		return err
+	}
+
 	w.wc.Pub.Send(ctx, event.Event{
 		TrackingID: job.Args.TrackingID,
 		Status:     store.PENDING,
 	})
-
-	_, err = w.wc.QueueClient.InsertTx(ctx, tx, DispatchArgs{
-		TrackingID: job.Args.TrackingID,
-		OTXID:      otxID,
-		RawTx:      rawTxHex,
-	}, nil)
-	if err != nil {
-		return err
-	}
 
 	return tx.Commit(ctx)
 }

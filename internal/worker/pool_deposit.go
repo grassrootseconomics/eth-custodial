@@ -232,30 +232,53 @@ func (w *PoolDepositWorker) Work(ctx context.Context, job *river.Job[PoolDeposit
 	}); err != nil {
 		return err
 	}
-	w.wc.Pub.Send(ctx, event.Event{
-		TrackingID: job.Args.TrackingID,
-		Status:     store.PENDING,
-	})
+
 	_, err = w.wc.QueueClient.InsertManyTx(ctx, tx, []river.InsertManyParams{
-		{Args: DispatchArgs{
-			TrackingID: job.Args.TrackingID,
-			OTXID:      resetApprovalOTXID,
-			RawTx:      rawResetApprovalTxHex,
-		}, InsertOpts: &river.InsertOpts{Priority: 1}},
-		{Args: DispatchArgs{
-			TrackingID: job.Args.TrackingID,
-			OTXID:      setApprovalOTXID,
-			RawTx:      rawSetApprovalTxHex,
-		}, InsertOpts: &river.InsertOpts{Priority: 2}},
-		{Args: DispatchArgs{
-			TrackingID: job.Args.TrackingID,
-			OTXID:      otxID,
-			RawTx:      rawTxHex,
-		}, InsertOpts: &river.InsertOpts{Priority: 3}},
+		{
+			Args: DispatchArgs{
+				TrackingID: job.Args.TrackingID,
+				OTXID:      resetApprovalOTXID,
+				RawTx:      rawResetApprovalTxHex,
+			},
+			InsertOpts: &river.InsertOpts{
+				Priority: 1,
+			},
+		},
+		{
+			Args: DispatchArgs{
+				TrackingID: job.Args.TrackingID,
+				OTXID:      setApprovalOTXID,
+				RawTx:      rawSetApprovalTxHex,
+			}, InsertOpts: &river.InsertOpts{
+				Priority: 2,
+			},
+		},
+		{
+			Args: DispatchArgs{
+				TrackingID: job.Args.TrackingID,
+				OTXID:      otxID,
+				RawTx:      rawTxHex,
+			}, InsertOpts: &river.InsertOpts{
+				Priority: 3,
+			},
+		},
+		{
+			Args: GasRefillArgs{
+				TrackingID: job.Args.TrackingID,
+				Address:    job.Args.From,
+			}, InsertOpts: &river.InsertOpts{
+				Priority: 4,
+			},
+		},
 	})
 	if err != nil {
 		return err
 	}
+
+	w.wc.Pub.Send(ctx, event.Event{
+		TrackingID: job.Args.TrackingID,
+		Status:     store.PENDING,
+	})
 
 	return tx.Commit(ctx)
 }

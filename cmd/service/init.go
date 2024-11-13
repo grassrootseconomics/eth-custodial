@@ -170,7 +170,7 @@ func initWorker() *worker.WorkerContainer {
 	}
 
 	workerOpts := worker.WorkerOpts{
-		CustodialRegistrationProxy: loadRegistry()[ethutils.CustodialProxy].Hex(),
+		Registry: loadRegistry(),
 		// TODO: Tune max workers based on load type
 		MaxWorkers:    ko.Int("workers.max"),
 		GasOracle:     loadGasOracle(),
@@ -179,7 +179,7 @@ func initWorker() *worker.WorkerContainer {
 		Pub:           loadPub(),
 		ChainProvider: loadChainProvider(),
 	}
-	lo.Debug("init: worker loaded custodial registration proxy", "custodial_registration_proxy", workerOpts.CustodialRegistrationProxy, "registry", ko.MustString("chain.ge_registry"))
+
 	if ko.Int("workers.max") <= 0 {
 		workerOpts.MaxWorkers = runtime.NumCPU() * 2
 	}
