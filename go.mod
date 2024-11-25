@@ -1,7 +1,6 @@
 module github.com/grassrootseconomics/eth-custodial
 
 go 1.23.0
-
 require (
 	github.com/MarceloPetrucio/go-scalar-api-reference v0.0.0-20240521013641-ce5d2efe0e06
 	github.com/VictoriaMetrics/metrics v1.35.1
@@ -11,7 +10,7 @@ require (
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/google/uuid v1.6.0
-	github.com/grassrootseconomics/eth-tracker v1.4.2-rc
+	github.com/grassrootseconomics/eth-tracker v1.5.2-rc
 	github.com/grassrootseconomics/ethutils v1.3.0
 	github.com/jackc/pgx/v5 v5.7.1
 	github.com/jackc/tern/v2 v2.2.3
