@@ -50,7 +50,7 @@ func (w *GasRefillWorker) Work(ctx context.Context, job *river.Job[GasRefillArgs
 			w.gasFaucet,
 			abi[NextTime],
 			w3.A(job.Args.Address),
-		).Returns(nextTime),
+		).Returns(&nextTime),
 	); err != nil {
 		return err
 	}
