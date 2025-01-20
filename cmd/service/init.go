@@ -106,6 +106,7 @@ func loadGasOracle() gas.GasOracle {
 		lo.Error("unknown gas oracle type", "type", ko.MustString("gas.oracle_type"))
 		os.Exit(1)
 	}
+	lo.Debug("loaded gas oracle", "type", ko.MustString("gas.oracle_type"))
 
 	return gasOracle
 }
@@ -207,6 +208,7 @@ func initAPI() *api.API {
 	return api.New(api.APIOpts{
 		EnableMetrics: ko.Bool("service.metrics"),
 		EnableDocs:    ko.Bool("api.docs"),
+		JRPC:          ko.Bool("api.jrpc"),
 		ListenAddress: ko.MustString("api.address"),
 		SigningKey:    privateKey,
 		VerifyingKey:  publicKey,

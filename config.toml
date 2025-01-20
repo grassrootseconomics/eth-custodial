@@ -11,6 +11,7 @@ metrics = true
 [api]
 address = ":5003"
 docs = true
+jrpc = true
 # These are sample keys, replace them with your own in production.
 # openssl genpkey -algorithm ED25519 -out private.pem
 # openssl pkey -in private.pem -pubout -out public.pem

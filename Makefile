@@ -3,7 +3,7 @@ BUILD_CONF := CGO_ENABLED=1 GOOS=linux GOARCH=amd64
 BUILD_COMMIT := $(shell git rev-parse --short HEAD 2> /dev/null)
 DEBUG := DEV=true
 
-.PHONY: build run clean docs
+.PHONY: build run clean docs gen-service-token
 
 clean:
 	rm ${BIN} ${BOOTSTRAP_BIN}
@@ -18,3 +18,6 @@ run:
 docs:
 	swag fmt --dir internal/api/
 	swag init --parseDependency --dir internal/api/ -g swagger.go
+
+gen-service-token:
+	${BUILD_CONF} ${DEBUG} go run cmd/gen-service-token/main.go -service localdev

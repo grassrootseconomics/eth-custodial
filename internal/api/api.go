@@ -10,6 +10,7 @@ import (
 	"github.com/grassrootseconomics/eth-custodial/internal/util"
 	"github.com/grassrootseconomics/eth-custodial/internal/worker"
 	"github.com/grassrootseconomics/ethutils"
+	"github.com/kamikazechaser/jrpc"
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -20,6 +21,7 @@ type (
 		Debug         bool
 		EnableMetrics bool
 		EnableDocs    bool
+		JRPC          bool
 		ListenAddress string
 		Build         string
 		VerifyingKey  crypto.PublicKey
@@ -47,6 +49,7 @@ type (
 
 const (
 	apiVersion         = "/api/v2"
+	jRPCPath           = "/jrpc"
 	maxBodySize        = "1M"
 	allowedContentType = "application/json"
 )
@@ -117,6 +120,14 @@ func New(o APIOpts) *API {
 
 	apiGroup := router.Group(apiVersion)
 	apiGroup.Use(echojwt.WithConfig(api.apiJWTAuthConfig()))
+
+	if o.JRPC {
+		api.logg.Debug("registering supported eth namespace RPC handlers")
+		j := jrpc.Endpoint(apiGroup, jRPCPath)
+		j.Method("eth_sendTransaction", api.methodEthSendTransaction)
+
+	}
+
 	apiGroup.GET("/system", api.systemInfoHandler)
 	apiGroup.POST("/account/create", api.accountCreateHandler)
 	apiGroup.GET("/account/status/:address", api.accountStatusHandler)
@@ -129,6 +140,7 @@ func New(o APIOpts) *API {
 	apiGroup.POST("/pool/deposit", api.poolDepositHandler)
 
 	api.router = router
+	api.logg.Debug("API initialized", "listen_address", api.router)
 	return api
 }
 
