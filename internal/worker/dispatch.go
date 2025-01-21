@@ -32,7 +32,7 @@ const DispatchID = "DISPATCH"
 func (DispatchArgs) Kind() string { return DispatchID }
 
 func (w *DisptachWorker) Work(ctx context.Context, job *river.Job[DispatchArgs]) error {
-	tx, err := w.wc.Store.Pool().Begin(ctx)
+	tx, err := w.wc.store.Pool().Begin(ctx)
 	if err != nil {
 		return err
 	}
@@ -52,11 +52,11 @@ func (w *DisptachWorker) Work(ctx context.Context, job *river.Job[DispatchArgs])
 		if ok {
 			if dispatchErr.Err == ErrNetwork {
 				updateTxStatus.Status = store.NETWORK_ERROR
-				w.wc.Logg.Error("network related dispatch error", "original_error", dispatchErr.OriginalErr)
-				if err := w.wc.Store.UpdateDispatchTxStatus(ctx, tx, updateTxStatus); err != nil {
+				w.wc.logg.Error("network related dispatch error", "original_error", dispatchErr.OriginalErr)
+				if err := w.wc.store.UpdateDispatchTxStatus(ctx, tx, updateTxStatus); err != nil {
 					return err
 				}
-				w.wc.Pub.Send(ctx, event.Event{
+				w.wc.pub.Send(ctx, event.Event{
 					TrackingID: job.Args.TrackingID,
 					Status:     updateTxStatus.Status,
 				})
@@ -65,7 +65,7 @@ func (w *DisptachWorker) Work(ctx context.Context, job *river.Job[DispatchArgs])
 				return dispatchErr
 			}
 
-			w.wc.Logg.Error("chain related dispatch error", "error", dispatchErr.Err, "original_error", dispatchErr.OriginalErr)
+			w.wc.logg.Error("chain related dispatch error", "error", dispatchErr.Err, "original_error", dispatchErr.OriginalErr)
 			switch dispatchErr.Err {
 			case ErrGasPriceTooLow:
 				updateTxStatus.Status = store.LOW_GAS_PRICE
@@ -77,15 +77,15 @@ func (w *DisptachWorker) Work(ctx context.Context, job *river.Job[DispatchArgs])
 				updateTxStatus.Status = store.REPLACEMENT_UNDERPRICED
 			}
 
-			if err := w.wc.Store.UpdateDispatchTxStatus(ctx, tx, updateTxStatus); err != nil {
+			if err := w.wc.store.UpdateDispatchTxStatus(ctx, tx, updateTxStatus); err != nil {
 				return err
 			}
-			w.wc.Pub.Send(ctx, event.Event{
+			w.wc.pub.Send(ctx, event.Event{
 				TrackingID: job.Args.TrackingID,
 				Status:     updateTxStatus.Status,
 			})
 
-			_, err := w.wc.QueueClient.Insert(ctx, RetrierArgs{
+			_, err := w.wc.queueClient.Insert(ctx, RetrierArgs{
 				TrackingID: job.Args.TrackingID,
 			}, &river.InsertOpts{
 				// TODO: Prevent cascading failures
@@ -99,15 +99,15 @@ func (w *DisptachWorker) Work(ctx context.Context, job *river.Job[DispatchArgs])
 			return river.JobCancel(dispatchErr)
 		}
 
-		w.wc.Logg.Error("unknown dispatch error", "error", err)
+		w.wc.logg.Error("unknown dispatch error", "error", err)
 		return err
 	}
 	updateTxStatus.Status = store.IN_NETWORK
 
-	if err := w.wc.Store.UpdateDispatchTxStatus(ctx, tx, updateTxStatus); err != nil {
+	if err := w.wc.store.UpdateDispatchTxStatus(ctx, tx, updateTxStatus); err != nil {
 		return err
 	}
-	w.wc.Pub.Send(ctx, event.Event{
+	w.wc.pub.Send(ctx, event.Event{
 		TrackingID: job.Args.TrackingID,
 		Status:     updateTxStatus.Status,
 	})
@@ -120,7 +120,7 @@ func (w *DisptachWorker) sendRawTx(ctx context.Context, rawTx []byte) error {
 	sendRawTxCall := eth.SendRawTx(rawTx).Returns(&txHash)
 
 	var errs w3.CallErrors
-	if err := w.wc.ChainProvider.Client.CallCtx(ctx, sendRawTxCall); errors.As(err, &errs) {
+	if err := w.wc.chainProvider.Client.CallCtx(ctx, sendRawTxCall); errors.As(err, &errs) {
 		jsonErr, ok := errs[0].(rpc.Error)
 		if ok {
 			if jsonRPCError := handleJSONRPCError(jsonErr.Error()); jsonRPCError != nil {

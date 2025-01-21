@@ -8,12 +8,13 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/grassrootseconomics/eth-custodial/internal/store"
 	"github.com/grassrootseconomics/eth-custodial/internal/util"
-	"github.com/grassrootseconomics/eth-custodial/internal/worker"
 	"github.com/grassrootseconomics/ethutils"
+	"github.com/jackc/pgx/v5"
 	"github.com/kamikazechaser/jrpc"
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/riverqueue/river"
 )
 
 type (
@@ -29,7 +30,7 @@ type (
 		Store         store.Store
 		Logg          *slog.Logger
 		ChainProvider *ethutils.Provider
-		Worker        *worker.WorkerContainer
+		QueueClient   *river.Client[pgx.Tx]
 		BannedTokens  []string
 	}
 
@@ -42,7 +43,7 @@ type (
 		logg          *slog.Logger
 		chainProvider *ethutils.Provider
 		router        *echo.Echo
-		worker        *worker.WorkerContainer
+		queueClient   *river.Client[pgx.Tx]
 		BannedTokens  map[string]struct{}
 	}
 )
@@ -63,7 +64,7 @@ func New(o APIOpts) *API {
 		logg:          o.Logg,
 		store:         o.Store,
 		chainProvider: o.ChainProvider,
-		worker:        o.Worker,
+		queueClient:   o.QueueClient,
 		BannedTokens:  make(map[string]struct{}, len(o.BannedTokens)),
 	}
 

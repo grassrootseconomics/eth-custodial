@@ -36,13 +36,13 @@ type (
 func (PoolSwapArgs) Kind() string { return store.POOL_SWAP }
 
 func (w *PoolSwapWorker) Work(ctx context.Context, job *river.Job[PoolSwapArgs]) error {
-	tx, err := w.wc.Store.Pool().Begin(ctx)
+	tx, err := w.wc.store.Pool().Begin(ctx)
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback(ctx)
 
-	keypair, err := w.wc.Store.LoadPrivateKey(ctx, tx, job.Args.From)
+	keypair, err := w.wc.store.LoadPrivateKey(ctx, tx, job.Args.From)
 	if err != nil {
 		return err
 	}
@@ -52,14 +52,14 @@ func (w *PoolSwapWorker) Work(ctx context.Context, job *river.Job[PoolSwapArgs])
 		return err
 	}
 
-	gasSettings, err := w.wc.GasOracle.GetSettings()
+	gasSettings, err := w.wc.gasOracle.GetSettings()
 	if err != nil {
 		return err
 	}
 
 	// Reset approval -> 0
 
-	resetApprovalNonce, err := w.wc.Store.AcquireNonce(ctx, tx, job.Args.From)
+	resetApprovalNonce, err := w.wc.store.AcquireNonce(ctx, tx, job.Args.From)
 	if err != nil {
 		return err
 	}
@@ -72,7 +72,7 @@ func (w *PoolSwapWorker) Work(ctx context.Context, job *river.Job[PoolSwapArgs])
 		return err
 	}
 
-	builtResetApprovalTx, err := w.wc.ChainProvider.SignContractExecutionTx(privateKey, ethutils.ContractExecutionTxOpts{
+	builtResetApprovalTx, err := w.wc.chainProvider.SignContractExecutionTx(privateKey, ethutils.ContractExecutionTxOpts{
 		ContractAddress: ethutils.HexToAddress(job.Args.FromTokenAddress),
 		InputData:       resetApprovalInput,
 		GasFeeCap:       gasSettings.GasFeeCap,
@@ -91,7 +91,7 @@ func (w *PoolSwapWorker) Work(ctx context.Context, job *river.Job[PoolSwapArgs])
 
 	rawResetApprovalTxHex := hexutil.Encode(rawResetApprovalTx)
 
-	resetApprovalOTXID, err := w.wc.Store.InsertOTX(ctx, tx, store.OTX{
+	resetApprovalOTXID, err := w.wc.store.InsertOTX(ctx, tx, store.OTX{
 		TrackingID:    job.Args.TrackingID,
 		OTXType:       store.TOKEN_APPROVE,
 		SignerAccount: job.Args.From,
@@ -103,20 +103,20 @@ func (w *PoolSwapWorker) Work(ctx context.Context, job *river.Job[PoolSwapArgs])
 		return err
 	}
 
-	if err := w.wc.Store.InsertDispatchTx(ctx, tx, store.DispatchTx{
+	if err := w.wc.store.InsertDispatchTx(ctx, tx, store.DispatchTx{
 		OTXID:  resetApprovalOTXID,
 		Status: store.PENDING,
 	}); err != nil {
 		return err
 	}
-	w.wc.Pub.Send(ctx, event.Event{
+	w.wc.pub.Send(ctx, event.Event{
 		TrackingID: job.Args.TrackingID,
 		Status:     store.PENDING,
 	})
 
 	// Set approval -> amount + 5%
 
-	setApprovalNonce, err := w.wc.Store.AcquireNonce(ctx, tx, job.Args.From)
+	setApprovalNonce, err := w.wc.store.AcquireNonce(ctx, tx, job.Args.From)
 	if err != nil {
 		return err
 	}
@@ -134,7 +134,7 @@ func (w *PoolSwapWorker) Work(ctx context.Context, job *river.Job[PoolSwapArgs])
 		return err
 	}
 
-	builtSetApprovalTx, err := w.wc.ChainProvider.SignContractExecutionTx(privateKey, ethutils.ContractExecutionTxOpts{
+	builtSetApprovalTx, err := w.wc.chainProvider.SignContractExecutionTx(privateKey, ethutils.ContractExecutionTxOpts{
 		ContractAddress: ethutils.HexToAddress(job.Args.FromTokenAddress),
 		InputData:       setApprovalInput,
 		GasFeeCap:       gasSettings.GasFeeCap,
@@ -153,7 +153,7 @@ func (w *PoolSwapWorker) Work(ctx context.Context, job *river.Job[PoolSwapArgs])
 
 	rawSetApprovalTxHex := hexutil.Encode(rawSetApprovalTx)
 
-	setApprovalOTXID, err := w.wc.Store.InsertOTX(ctx, tx, store.OTX{
+	setApprovalOTXID, err := w.wc.store.InsertOTX(ctx, tx, store.OTX{
 		TrackingID:    job.Args.TrackingID,
 		OTXType:       store.TOKEN_APPROVE,
 		SignerAccount: job.Args.From,
@@ -165,20 +165,20 @@ func (w *PoolSwapWorker) Work(ctx context.Context, job *river.Job[PoolSwapArgs])
 		return err
 	}
 
-	if err := w.wc.Store.InsertDispatchTx(ctx, tx, store.DispatchTx{
+	if err := w.wc.store.InsertDispatchTx(ctx, tx, store.DispatchTx{
 		OTXID:  setApprovalOTXID,
 		Status: store.PENDING,
 	}); err != nil {
 		return err
 	}
-	w.wc.Pub.Send(ctx, event.Event{
+	w.wc.pub.Send(ctx, event.Event{
 		TrackingID: job.Args.TrackingID,
 		Status:     store.PENDING,
 	})
 
 	// Initiate swap
 
-	nonce, err := w.wc.Store.AcquireNonce(ctx, tx, job.Args.From)
+	nonce, err := w.wc.store.AcquireNonce(ctx, tx, job.Args.From)
 	if err != nil {
 		return err
 	}
@@ -197,7 +197,7 @@ func (w *PoolSwapWorker) Work(ctx context.Context, job *river.Job[PoolSwapArgs])
 		return err
 	}
 
-	builtTx, err := w.wc.ChainProvider.SignContractExecutionTx(privateKey, ethutils.ContractExecutionTxOpts{
+	builtTx, err := w.wc.chainProvider.SignContractExecutionTx(privateKey, ethutils.ContractExecutionTxOpts{
 		ContractAddress: ethutils.HexToAddress(job.Args.PoolAddress),
 		InputData:       input,
 		GasFeeCap:       gasSettings.GasFeeCap,
@@ -216,7 +216,7 @@ func (w *PoolSwapWorker) Work(ctx context.Context, job *river.Job[PoolSwapArgs])
 
 	rawTxHex := hexutil.Encode(rawTx)
 
-	otxID, err := w.wc.Store.InsertOTX(ctx, tx, store.OTX{
+	otxID, err := w.wc.store.InsertOTX(ctx, tx, store.OTX{
 		TrackingID:    job.Args.TrackingID,
 		OTXType:       store.POOL_SWAP,
 		SignerAccount: job.Args.From,
@@ -228,14 +228,14 @@ func (w *PoolSwapWorker) Work(ctx context.Context, job *river.Job[PoolSwapArgs])
 		return err
 	}
 
-	if err := w.wc.Store.InsertDispatchTx(ctx, tx, store.DispatchTx{
+	if err := w.wc.store.InsertDispatchTx(ctx, tx, store.DispatchTx{
 		OTXID:  otxID,
 		Status: store.PENDING,
 	}); err != nil {
 		return err
 	}
 
-	_, err = w.wc.QueueClient.InsertManyTx(ctx, tx, []river.InsertManyParams{
+	_, err = w.wc.queueClient.InsertManyTx(ctx, tx, []river.InsertManyParams{
 		{
 			Args: DispatchArgs{
 				TrackingID: job.Args.TrackingID,
@@ -276,7 +276,7 @@ func (w *PoolSwapWorker) Work(ctx context.Context, job *river.Job[PoolSwapArgs])
 		return err
 	}
 
-	w.wc.Pub.Send(ctx, event.Event{
+	w.wc.pub.Send(ctx, event.Event{
 		TrackingID: job.Args.TrackingID,
 		Status:     store.PENDING,
 	})

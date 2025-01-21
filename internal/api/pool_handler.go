@@ -68,7 +68,7 @@ func (a *API) poolSwapHandler(c echo.Context) error {
 
 	trackingID := uuid.NewString()
 
-	_, err = a.worker.QueueClient.InsertTx(c.Request().Context(), tx, worker.PoolSwapArgs{
+	_, err = a.queueClient.InsertTx(c.Request().Context(), tx, worker.PoolSwapArgs{
 		TrackingID:       trackingID,
 		From:             req.From,
 		FromTokenAddress: req.FromTokenAddress,
@@ -145,7 +145,7 @@ func (a *API) poolDepositHandler(c echo.Context) error {
 
 	trackingID := uuid.NewString()
 
-	_, err = a.worker.QueueClient.InsertTx(c.Request().Context(), tx, worker.PoolDepositArgs{
+	_, err = a.queueClient.InsertTx(c.Request().Context(), tx, worker.PoolDepositArgs{
 		TrackingID:   trackingID,
 		From:         req.From,
 		TokenAddress: req.TokenAddress,

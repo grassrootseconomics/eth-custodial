@@ -1,13 +1,13 @@
 services:
-  devnet:
-    image: ghcr.io/paradigmxyz/reth:latest
-    restart: unless-stopped
-    command: "node --datadir /root/devnet-chaindata --dev --dev.block-time 1s --http --http.addr 0.0.0.0 --ws --ws.addr 0.0.0.0"
-    ports:
-      - "127.0.0.1:8545:8545"
-      - "127.0.0.1:8546:8546"
-    volumes:
-      - devnet-chaindata:/root/devnet-chaindata   
+  # devnet:
+  #   image: ghcr.io/paradigmxyz/reth:latest
+  #   restart: unless-stopped
+  #   command: "node --datadir /root/devnet-chaindata --dev --dev.block-time 1s --http --http.addr 0.0.0.0 --ws --ws.addr 0.0.0.0"
+  #   ports:
+  #     - "127.0.0.1:8545:8545"
+  #     - "127.0.0.1:8546:8546"
+  #   volumes:
+  #     - devnet-chaindata:/root/devnet-chaindata   
   custodial-pg-store:
     image: postgres:16-alpine
     restart: unless-stopped

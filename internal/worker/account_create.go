@@ -31,17 +31,17 @@ const AccountCreateID = "ACCOUNT_CREATE"
 func (AccountCreateArgs) Kind() string { return AccountCreateID }
 
 func (w *AccountCreateWorker) Work(ctx context.Context, job *river.Job[AccountCreateArgs]) error {
-	tx, err := w.wc.Store.Pool().Begin(ctx)
+	tx, err := w.wc.store.Pool().Begin(ctx)
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback(ctx)
 
-	if err := w.wc.Store.InsertKeyPair(ctx, tx, job.Args.KeyPair); err != nil {
+	if err := w.wc.store.InsertKeyPair(ctx, tx, job.Args.KeyPair); err != nil {
 		return err
 	}
 
-	systemKeypair, err := w.wc.Store.LoadMasterSignerKey(ctx, tx)
+	systemKeypair, err := w.wc.store.LoadMasterSignerKey(ctx, tx)
 	if err != nil {
 		return err
 	}
@@ -51,7 +51,7 @@ func (w *AccountCreateWorker) Work(ctx context.Context, job *river.Job[AccountCr
 		return err
 	}
 
-	nonce, err := w.wc.Store.AcquireNonce(ctx, tx, systemKeypair.Public)
+	nonce, err := w.wc.store.AcquireNonce(ctx, tx, systemKeypair.Public)
 	if err != nil {
 		return err
 	}
@@ -61,12 +61,12 @@ func (w *AccountCreateWorker) Work(ctx context.Context, job *river.Job[AccountCr
 		return err
 	}
 
-	gasSettings, err := w.wc.GasOracle.GetSettings()
+	gasSettings, err := w.wc.gasOracle.GetSettings()
 	if err != nil {
 		return err
 	}
 
-	builtTx, err := w.wc.ChainProvider.SignContractExecutionTx(privateKey, ethutils.ContractExecutionTxOpts{
+	builtTx, err := w.wc.chainProvider.SignContractExecutionTx(privateKey, ethutils.ContractExecutionTxOpts{
 		ContractAddress: w.custodialRegistrationProxy,
 		InputData:       input,
 		GasFeeCap:       gasSettings.GasFeeCap,
@@ -85,7 +85,7 @@ func (w *AccountCreateWorker) Work(ctx context.Context, job *river.Job[AccountCr
 
 	rawTxHex := hexutil.Encode(rawTx)
 
-	otxID, err := w.wc.Store.InsertOTX(ctx, tx, store.OTX{
+	otxID, err := w.wc.store.InsertOTX(ctx, tx, store.OTX{
 		TrackingID:    job.Args.TrackingID,
 		OTXType:       store.ACCOUNT_REGISTER,
 		SignerAccount: systemKeypair.Public,
@@ -97,14 +97,14 @@ func (w *AccountCreateWorker) Work(ctx context.Context, job *river.Job[AccountCr
 		return err
 	}
 
-	if err := w.wc.Store.InsertDispatchTx(ctx, tx, store.DispatchTx{
+	if err := w.wc.store.InsertDispatchTx(ctx, tx, store.DispatchTx{
 		OTXID:  otxID,
 		Status: store.PENDING,
 	}); err != nil {
 		return err
 	}
 
-	_, err = w.wc.QueueClient.InsertTx(ctx, tx, DispatchArgs{
+	_, err = w.wc.queueClient.InsertTx(ctx, tx, DispatchArgs{
 		TrackingID: job.Args.TrackingID,
 		OTXID:      otxID,
 		RawTx:      rawTxHex,
@@ -113,7 +113,7 @@ func (w *AccountCreateWorker) Work(ctx context.Context, job *river.Job[AccountCr
 		return err
 	}
 
-	w.wc.Pub.Send(ctx, event.Event{
+	w.wc.pub.Send(ctx, event.Event{
 		TrackingID: job.Args.TrackingID,
 		Status:     store.PENDING,
 	})

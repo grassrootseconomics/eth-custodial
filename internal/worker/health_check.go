@@ -22,19 +22,19 @@ const DispatchHealthCheckID = "DISPATCH_HEALTHCHECK"
 func (DispatchHealthCheckArgs) Kind() string { return DispatchHealthCheckID }
 
 func (w *DispatchHealthCheckWorker) Work(ctx context.Context, _ *river.Job[DispatchHealthCheckArgs]) error {
-	tx, err := w.wc.Store.Pool().Begin(ctx)
+	tx, err := w.wc.store.Pool().Begin(ctx)
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback(ctx)
 
-	otx, err := w.wc.Store.GetFailedOTX(ctx, tx)
+	otx, err := w.wc.store.GetFailedOTX(ctx, tx)
 	if err != nil {
 		return err
 	}
 
 	if len(otx) < 1 {
-		w.wc.Logg.Debug("dispatch health check: no failed otx found")
+		w.wc.logg.Debug("dispatch health check: no failed otx found")
 		return nil
 	}
 
@@ -44,7 +44,7 @@ func (w *DispatchHealthCheckWorker) Work(ctx context.Context, _ *river.Job[Dispa
 				break
 			}
 		}
-		w.wc.Logg.Warn("dispatch health check: found failed otx", "otx_id", v.ID, "tracking_id", v.TrackingID, "account", v.SignerAccount, "status", v.DispatchStatus)
+		w.wc.logg.Warn("dispatch health check: found failed otx", "otx_id", v.ID, "tracking_id", v.TrackingID, "account", v.SignerAccount, "status", v.DispatchStatus)
 	}
 
 	return nil

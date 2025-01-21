@@ -29,13 +29,13 @@ type (
 func (TokenTransferArgs) Kind() string { return store.TOKEN_TRANSFER }
 
 func (w *TokenTransferWorker) Work(ctx context.Context, job *river.Job[TokenTransferArgs]) error {
-	tx, err := w.wc.Store.Pool().Begin(ctx)
+	tx, err := w.wc.store.Pool().Begin(ctx)
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback(ctx)
 
-	keypair, err := w.wc.Store.LoadPrivateKey(ctx, tx, job.Args.From)
+	keypair, err := w.wc.store.LoadPrivateKey(ctx, tx, job.Args.From)
 	if err != nil {
 		return err
 	}
@@ -45,7 +45,7 @@ func (w *TokenTransferWorker) Work(ctx context.Context, job *river.Job[TokenTran
 		return err
 	}
 
-	nonce, err := w.wc.Store.AcquireNonce(ctx, tx, job.Args.From)
+	nonce, err := w.wc.store.AcquireNonce(ctx, tx, job.Args.From)
 	if err != nil {
 		return err
 	}
@@ -63,12 +63,12 @@ func (w *TokenTransferWorker) Work(ctx context.Context, job *river.Job[TokenTran
 		return err
 	}
 
-	gasSettings, err := w.wc.GasOracle.GetSettings()
+	gasSettings, err := w.wc.gasOracle.GetSettings()
 	if err != nil {
 		return err
 	}
 
-	builtTx, err := w.wc.ChainProvider.SignContractExecutionTx(privateKey, ethutils.ContractExecutionTxOpts{
+	builtTx, err := w.wc.chainProvider.SignContractExecutionTx(privateKey, ethutils.ContractExecutionTxOpts{
 		ContractAddress: ethutils.HexToAddress(job.Args.TokenAddress),
 		InputData:       input,
 		GasFeeCap:       gasSettings.GasFeeCap,
@@ -87,7 +87,7 @@ func (w *TokenTransferWorker) Work(ctx context.Context, job *river.Job[TokenTran
 
 	rawTxHex := hexutil.Encode(rawTx)
 
-	otxID, err := w.wc.Store.InsertOTX(ctx, tx, store.OTX{
+	otxID, err := w.wc.store.InsertOTX(ctx, tx, store.OTX{
 		TrackingID:    job.Args.TrackingID,
 		OTXType:       store.TOKEN_TRANSFER,
 		SignerAccount: job.Args.From,
@@ -99,14 +99,14 @@ func (w *TokenTransferWorker) Work(ctx context.Context, job *river.Job[TokenTran
 		return err
 	}
 
-	if err := w.wc.Store.InsertDispatchTx(ctx, tx, store.DispatchTx{
+	if err := w.wc.store.InsertDispatchTx(ctx, tx, store.DispatchTx{
 		OTXID:  otxID,
 		Status: store.PENDING,
 	}); err != nil {
 		return err
 	}
 
-	_, err = w.wc.QueueClient.InsertManyTx(ctx, tx, []river.InsertManyParams{
+	_, err = w.wc.queueClient.InsertManyTx(ctx, tx, []river.InsertManyParams{
 		{
 			Args: DispatchArgs{
 				TrackingID: job.Args.TrackingID,
@@ -131,7 +131,7 @@ func (w *TokenTransferWorker) Work(ctx context.Context, job *river.Job[TokenTran
 		return err
 	}
 
-	w.wc.Pub.Send(ctx, event.Event{
+	w.wc.pub.Send(ctx, event.Event{
 		TrackingID: job.Args.TrackingID,
 		Status:     store.PENDING,
 	})

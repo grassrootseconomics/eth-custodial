@@ -205,6 +205,8 @@ func initAPI() *api.API {
 	}
 	lo.Debug("loaded private key", "key", privateKey)
 
+	worker := initWorker()
+
 	return api.New(api.APIOpts{
 		EnableMetrics: ko.Bool("service.metrics"),
 		EnableDocs:    ko.Bool("api.docs"),
@@ -214,7 +216,7 @@ func initAPI() *api.API {
 		VerifyingKey:  publicKey,
 		Store:         loadStore(),
 		ChainProvider: loadChainProvider(),
-		Worker:        initWorker(),
+		QueueClient:   worker.Client(),
 		Logg:          lo,
 		Debug:         true,
 		BannedTokens:  ko.Strings("chain.banned_tokens"),

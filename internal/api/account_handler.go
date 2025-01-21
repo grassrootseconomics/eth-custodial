@@ -32,7 +32,7 @@ func (a *API) accountCreateHandler(c echo.Context) error {
 
 	trackingID := uuid.NewString()
 
-	_, err = a.worker.QueueClient.Insert(c.Request().Context(), worker.AccountCreateArgs{
+	_, err = a.queueClient.Insert(c.Request().Context(), worker.AccountCreateArgs{
 		TrackingID: trackingID,
 		KeyPair:    generatedKeyPair,
 	}, nil)

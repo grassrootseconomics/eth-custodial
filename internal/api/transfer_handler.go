@@ -62,7 +62,7 @@ func (a *API) transferHandler(c echo.Context) error {
 
 	trackingID := uuid.NewString()
 
-	_, err = a.worker.QueueClient.InsertTx(c.Request().Context(), tx, worker.TokenTransferArgs{
+	_, err = a.queueClient.InsertTx(c.Request().Context(), tx, worker.TokenTransferArgs{
 		TrackingID:   trackingID,
 		From:         req.From,
 		To:           req.To,
@@ -138,7 +138,7 @@ func (a *API) sweepHandler(c echo.Context) error {
 
 	trackingID := uuid.NewString()
 
-	_, err = a.worker.QueueClient.InsertTx(c.Request().Context(), tx, worker.TokenSweepArgs{
+	_, err = a.queueClient.InsertTx(c.Request().Context(), tx, worker.TokenSweepArgs{
 		TrackingID:   trackingID,
 		From:         req.From,
 		To:           req.To,

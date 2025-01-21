@@ -34,13 +34,13 @@ type (
 	}
 
 	WorkerContainer struct {
-		Registry      map[string]common.Address
-		GasOracle     gas.GasOracle
-		Store         store.Store
-		Logg          *slog.Logger
-		Pub           *pub.Pub
-		ChainProvider *ethutils.Provider
-		QueueClient   *river.Client[pgx.Tx]
+		queueClient   *river.Client[pgx.Tx]
+		registry      map[string]common.Address
+		gasOracle     gas.GasOracle
+		store         store.Store
+		logg          *slog.Logger
+		pub           *pub.Pub
+		chainProvider *ethutils.Provider
 	}
 )
 
@@ -51,13 +51,13 @@ const (
 
 func New(o WorkerOpts) (*WorkerContainer, error) {
 	workerContainer := &WorkerContainer{
-		Registry:      o.Registry,
-		GasOracle:     o.GasOracle,
-		Store:         o.Store,
-		Logg:          o.Logg,
-		Pub:           o.Pub,
-		ChainProvider: o.ChainProvider,
-		QueueClient:   nil,
+		queueClient:   nil,
+		registry:      o.Registry,
+		gasOracle:     o.GasOracle,
+		store:         o.Store,
+		logg:          o.Logg,
+		pub:           o.Pub,
+		chainProvider: o.ChainProvider,
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), migrationTimeout)
@@ -81,7 +81,7 @@ func New(o WorkerOpts) (*WorkerContainer, error) {
 		return nil, err
 	}
 
-	workerContainer.QueueClient, err = river.NewClient(riverPgxDriver, &river.Config{
+	workerContainer.queueClient, err = river.NewClient(riverPgxDriver, &river.Config{
 		Queues: map[string]river.QueueConfig{
 			river.QueueDefault: {
 				MaxWorkers: o.MaxWorkers,
@@ -91,17 +91,24 @@ func New(o WorkerOpts) (*WorkerContainer, error) {
 		PeriodicJobs: setupHealthCheck(),
 		Logger:       o.Logg,
 	})
+	if err != nil {
+		return nil, err
+	}
 
 	return workerContainer, nil
 }
 
 func (w *WorkerContainer) Start(ctx context.Context) error {
-	return w.QueueClient.Start(ctx)
+	return w.queueClient.Start(ctx)
 }
 
 func (w *WorkerContainer) Stop(ctx context.Context) error {
-	w.Logg.Info("shutting down river queue")
-	return w.QueueClient.Stop(ctx)
+	w.logg.Info("shutting down river queue")
+	return w.queueClient.Stop(ctx)
+}
+
+func (w *WorkerContainer) Client() *river.Client[pgx.Tx] {
+	return w.queueClient
 }
 
 func setupWorkers(wc *WorkerContainer) (*river.Workers, error) {
@@ -115,7 +122,7 @@ func setupWorkers(wc *WorkerContainer) (*river.Workers, error) {
 		return nil, err
 	}
 
-	if err := river.AddWorkerSafely(workers, &AccountCreateWorker{wc: wc, custodialRegistrationProxy: wc.Registry[ethutils.CustodialProxy]}); err != nil {
+	if err := river.AddWorkerSafely(workers, &AccountCreateWorker{wc: wc, custodialRegistrationProxy: wc.registry[ethutils.CustodialProxy]}); err != nil {
 		return nil, err
 	}
 
@@ -139,7 +146,7 @@ func setupWorkers(wc *WorkerContainer) (*river.Workers, error) {
 		return nil, err
 	}
 
-	if err := river.AddWorkerSafely(workers, &GasRefillWorker{wc: wc, gasFaucet: wc.Registry[ethutils.GasFaucet]}); err != nil {
+	if err := river.AddWorkerSafely(workers, &GasRefillWorker{wc: wc, gasFaucet: wc.registry[ethutils.GasFaucet]}); err != nil {
 		return nil, err
 	}
 
