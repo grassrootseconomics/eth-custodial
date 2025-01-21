@@ -25,6 +25,7 @@ type (
 		JRPC          bool
 		ListenAddress string
 		Build         string
+		CORS          []string
 		VerifyingKey  crypto.PublicKey
 		SigningKey    crypto.PrivateKey
 		Store         store.Store
@@ -81,10 +82,20 @@ func New(o APIOpts) *API {
 	}
 	router.HTTPErrorHandler = api.customHTTPErrorHandler
 
+	corsConfig := middleware.CORSConfig{
+		AllowOrigins:     o.CORS,
+		AllowCredentials: true,
+		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization},
+		MaxAge:           86400,
+	}
+
 	router.Use(middleware.Recover())
 	router.Use(middleware.BodyLimit(maxBodySize))
 	router.Use(middleware.ContextTimeout(util.SLATimeout))
 	if o.Debug {
+		// All frontend development must happen on localhost:3000
+		corsConfig.AllowOrigins = append(corsConfig.AllowOrigins, "http://localhost:3000")
+
 		router.Use(middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
 			LogStatus:   true,
 			LogURI:      true,
@@ -107,6 +118,8 @@ func New(o APIOpts) *API {
 			},
 		}))
 	}
+	router.Use(middleware.CORSWithConfig(corsConfig))
+
 	if o.EnableMetrics {
 		router.GET("/metrics", api.metricsHandler)
 	}

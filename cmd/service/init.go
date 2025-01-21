@@ -212,6 +212,7 @@ func initAPI() *api.API {
 		EnableDocs:    ko.Bool("api.docs"),
 		JRPC:          ko.Bool("api.jrpc"),
 		ListenAddress: ko.MustString("api.address"),
+		CORS:          ko.MustStrings("api.cors"),
 		SigningKey:    privateKey,
 		VerifyingKey:  publicKey,
 		Store:         loadStore(),
