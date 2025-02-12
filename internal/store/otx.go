@@ -32,6 +32,7 @@ const (
 	POOL_SWAP        string = "POOL_SWAP"
 	POOL_DEPSOIT     string = "POOL_DEPOSIT"
 	OTHER_MANUAL     string = "OTHER_MANUAL"
+	GENERIC_SIGN     string = "GENERIC_SIGN"
 )
 
 func (pg *Pg) InsertOTX(ctx context.Context, tx pgx.Tx, otx OTX) (uint64, error) {

@@ -150,6 +150,10 @@ func setupWorkers(wc *WorkerContainer) (*river.Workers, error) {
 		return nil, err
 	}
 
+	if err := river.AddWorkerSafely(workers, &GenericSignWorker{wc: wc}); err != nil {
+		return nil, err
+	}
+
 	return workers, nil
 }
 

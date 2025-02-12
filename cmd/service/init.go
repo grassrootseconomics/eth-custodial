@@ -215,6 +215,7 @@ func initAPI() *api.API {
 		CORS:          ko.MustStrings("api.cors"),
 		SigningKey:    privateKey,
 		VerifyingKey:  publicKey,
+		GasOracle:     loadGasOracle(),
 		Store:         loadStore(),
 		ChainProvider: loadChainProvider(),
 		QueueClient:   worker.Client(),

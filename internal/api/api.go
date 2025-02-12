@@ -6,6 +6,7 @@ import (
 	"log/slog"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/grassrootseconomics/eth-custodial/internal/gas"
 	"github.com/grassrootseconomics/eth-custodial/internal/store"
 	"github.com/grassrootseconomics/eth-custodial/internal/util"
 	"github.com/grassrootseconomics/ethutils"
@@ -31,6 +32,7 @@ type (
 		Store         store.Store
 		Logg          *slog.Logger
 		ChainProvider *ethutils.Provider
+		GasOracle     gas.GasOracle
 		QueueClient   *river.Client[pgx.Tx]
 		BannedTokens  []string
 	}
@@ -41,6 +43,7 @@ type (
 		signingKey    crypto.PrivateKey
 		verifyingKey  crypto.PublicKey
 		store         store.Store
+		gasOracle     gas.GasOracle
 		logg          *slog.Logger
 		chainProvider *ethutils.Provider
 		router        *echo.Echo
@@ -64,6 +67,7 @@ func New(o APIOpts) *API {
 		listenAddress: o.ListenAddress,
 		logg:          o.Logg,
 		store:         o.Store,
+		gasOracle:     o.GasOracle,
 		chainProvider: o.ChainProvider,
 		queueClient:   o.QueueClient,
 		BannedTokens:  make(map[string]struct{}, len(o.BannedTokens)),
