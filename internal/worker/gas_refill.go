@@ -66,7 +66,7 @@ func (w *GasRefillWorker) Work(ctx context.Context, job *river.Job[GasRefillArgs
 			w.gasFaucet,
 			abi[Check],
 			w3.A(job.Args.Address),
-		).Returns(checkStatus),
+		).Returns(&checkStatus),
 	); err != nil {
 		return err
 	}

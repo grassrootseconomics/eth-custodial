@@ -1,8 +1,6 @@
 package api
 
 import (
-	"math/big"
-
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -59,8 +57,8 @@ func (a *API) methodEthSendTransaction(c jrpc.Context) error {
 		return err
 	}
 
-	n, ok := new(big.Int).SetString(params[0].Value, 10)
-	if !ok {
+	n, err := hexutil.DecodeBig(params[0].Value)
+	if err != nil {
 		return jrpc.NewErrorInvalidParams("Invalid value")
 	}
 
