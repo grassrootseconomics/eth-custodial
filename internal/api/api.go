@@ -143,7 +143,6 @@ func New(o APIOpts) *API {
 		api.logg.Debug("registering supported eth namespace RPC handlers")
 		j := jrpc.Endpoint(apiGroup, jRPCPath)
 		j.Method("eth_sendTransaction", api.methodEthSendTransaction)
-
 	}
 
 	apiGroup.GET("/system", api.systemInfoHandler)

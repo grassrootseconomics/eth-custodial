@@ -119,3 +119,18 @@ func (a *API) logoutHandler(c echo.Context) error {
 		Result:      nil,
 	})
 }
+
+// TODO: Perhaps we convert this into a middleware and bind the public key to the context
+func (a *API) extractPubKey(c echo.Context) (string, error) {
+	token, ok := c.Get("user").(*jwt.Token)
+	if !ok {
+		return "", errors.New("JWT token missing or invalid")
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return "", errors.New("JWT invalid claims")
+	}
+
+	return claims["publicKey"].(string), nil
+}
