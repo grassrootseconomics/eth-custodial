@@ -138,6 +138,7 @@ func New(o APIOpts) *API {
 
 	apiGroup := router.Group(apiVersion)
 	apiGroup.Use(echojwt.WithConfig(api.apiJWTAuthConfig()))
+	apiGroup.Use(api.authStatusMiddleware())
 
 	if o.JRPC {
 		api.logg.Debug("registering supported eth namespace RPC handlers")

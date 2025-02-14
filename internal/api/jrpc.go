@@ -30,14 +30,8 @@ func (a *API) methodEthSendTransaction(c jrpc.Context) error {
 		return err
 	}
 
-	pubKey, err := a.extractPubKey(c.EchoContext())
-	if err != nil {
-		return jrpc.NewError(-32600, err.Error(), nil)
-	}
-
-	// The system key can  override the From field allowing access to all custodial accounts
-	// Otherwise, only signed in user can access their own accounts
-	if pubKey != ethutils.ZeroAddress.Hex() {
+	if !c.EchoContext().Get("service").(bool) {
+		pubKey := c.EchoContext().Get("publicKey").(string)
 		for i := range params {
 			params[i].From = pubKey
 		}

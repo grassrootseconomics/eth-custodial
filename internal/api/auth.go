@@ -120,17 +120,30 @@ func (a *API) logoutHandler(c echo.Context) error {
 	})
 }
 
-// TODO: Perhaps we convert this into a middleware and bind the public key to the context
-func (a *API) extractPubKey(c echo.Context) (string, error) {
-	token, ok := c.Get("user").(*jwt.Token)
-	if !ok {
-		return "", errors.New("JWT token missing or invalid")
-	}
+func (a *API) authStatusMiddleware() echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			token, ok := c.Get("user").(*jwt.Token)
+			if !ok {
+				return handleJWTAuthError(c, "JWT token missing or invalid")
+			}
+			claims, ok := token.Claims.(jwt.MapClaims)
+			if !ok {
+				return handleJWTAuthError(c, "JWT invalid claims")
+			}
+			pubKey, ok := claims["publicKey"].(string)
+			if !ok {
+				return handleJWTAuthError(c, "Public key missing in JWT claims")
+			}
+			serviceKey, ok := claims["service"].(bool)
+			if !ok {
+				return handleJWTAuthError(c, "Service key missing in JWT claims")
+			}
 
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if !ok {
-		return "", errors.New("JWT invalid claims")
-	}
+			c.Set("publicKey", pubKey)
+			c.Set("service", serviceKey)
 
-	return claims["publicKey"].(string), nil
+			return next(c)
+		}
+	}
 }
