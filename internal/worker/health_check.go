@@ -34,17 +34,15 @@ func (w *DispatchHealthCheckWorker) Work(ctx context.Context, _ *river.Job[Dispa
 	}
 
 	if len(otx) < 1 {
-		w.wc.logg.Debug("dispatch health check: no failed otx found")
 		return nil
 	}
 
 	for _, v := range otx {
 		if v.DispatchStatus == store.IN_NETWORK {
-			if v.UpdatedAt.Sub(time.Now()) < time.Minute*1 {
-				break
+			if time.Since(v.UpdatedAt) > time.Minute {
+				w.wc.logg.Warn("dispatch health check: found failed otx", "otx_id", v.ID, "tracking_id", v.TrackingID, "account", v.SignerAccount, "status", v.DispatchStatus)
 			}
 		}
-		w.wc.logg.Warn("dispatch health check: found failed otx", "otx_id", v.ID, "tracking_id", v.TrackingID, "account", v.SignerAccount, "status", v.DispatchStatus)
 	}
 
 	return nil

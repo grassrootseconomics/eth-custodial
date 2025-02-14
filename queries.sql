@@ -172,5 +172,5 @@ WHERE otx_id = $2;
 SELECT otx.id, otx.tracking_id, otx.otx_type, keystore.public_key, otx.raw_tx, otx.tx_hash, otx.nonce, otx.replaced, otx.created_at, otx.updated_at, dispatch.status FROM keystore
 INNER JOIN otx ON keystore.id = otx.signer_account
 INNER JOIN dispatch ON otx.id = dispatch.otx_id
-WHERE dispatch.status NOT IN ('SUCCESS', 'REVERTED', 'PENDING')
+WHERE dispatch.status NOT IN ('SUCCESS', 'REVERTED', 'PENDING') AND otx.otx_type NOT IN ('GENERIC_SIGN', 'OTHER_MANUAL')
 ORDER BY otx.id ASC LIMIT 100;
