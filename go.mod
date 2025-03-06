@@ -12,7 +12,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/google/uuid v1.6.0
 	github.com/grassrootseconomics/eth-tracker v1.4.2-rc
-	github.com/grassrootseconomics/ethutils v1.3.0
+	github.com/grassrootseconomics/ethutils v1.3.1
 	github.com/jackc/pgx/v5 v5.7.1
 	github.com/jackc/tern/v2 v2.2.3
 	github.com/kamikazechaser/common v1.0.0
