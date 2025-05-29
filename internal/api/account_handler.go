@@ -112,12 +112,16 @@ func (a *API) accountStatusHandler(c echo.Context) error {
 		return handlePostgresError(c, err)
 	}
 
+	if networkNonce > 0 {
+		networkNonce--
+	}
+
 	return c.JSON(http.StatusOK, apiresp.OKResponse{
 		Ok:          true,
 		Description: "Custodial account status",
 		Result: map[string]any{
 			"gasBalance":    gasBalance.String(),
-			"networkNonce":  networkNonce - 1,
+			"networkNonce":  networkNonce,
 			"internalNonce": internalNonce,
 			"active":        active,
 		},
