@@ -88,6 +88,10 @@ func (a *API) accountStatusHandler(c echo.Context) error {
 		return err
 	}
 
+	if networkNonce > 0 {
+		networkNonce--
+	}
+
 	tx, err := a.store.Pool().Begin(c.Request().Context())
 	if err != nil {
 		return err
