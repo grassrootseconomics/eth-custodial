@@ -12,11 +12,6 @@ import (
 	"github.com/riverqueue/river"
 )
 
-// 0xE1CB2DbaB6b6feFe34B2AaA47b83EeE79E8D36f8 - cUSD
-// 0x36C77CC277e73CCcd199d1989828739722Fe5450 - testToken
-// 0x6E757C04Dcf764f7b06AFC428eD75773CDAC7fDc  - pool
-// 0x47690CC4C0c91be612A643D85195F4D57488dE97-  limiter
-// 0x0bca6353f80bBe401233d5Ed7732cEACEb13bc88 - quoter
 type (
 	PoolDepositArgs struct {
 		TrackingID   string `json:"trackingId"`
@@ -32,7 +27,7 @@ type (
 	}
 )
 
-func (PoolDepositArgs) Kind() string { return store.POOL_DEPSOIT }
+func (PoolDepositArgs) Kind() string { return store.POOL_DEPOSIT }
 
 func (w *PoolDepositWorker) Work(ctx context.Context, job *river.Job[PoolDepositArgs]) error {
 	tx, err := w.wc.store.Pool().Begin(ctx)
@@ -216,7 +211,7 @@ func (w *PoolDepositWorker) Work(ctx context.Context, job *river.Job[PoolDeposit
 
 	otxID, err := w.wc.store.InsertOTX(ctx, tx, store.OTX{
 		TrackingID:    job.Args.TrackingID,
-		OTXType:       store.POOL_DEPSOIT,
+		OTXType:       store.POOL_DEPOSIT,
 		SignerAccount: job.Args.From,
 		RawTx:         rawTxHex,
 		TxHash:        builtTx.Hash().Hex(),
