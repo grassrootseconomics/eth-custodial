@@ -15,6 +15,7 @@ const (
 	Withdraw          = "withdraw"
 	Deposit           = "deposit"
 	Sweep             = "sweep"
+	Add               = "add"
 )
 
 var abi = map[string]*w3.Func{
@@ -33,4 +34,6 @@ var abi = map[string]*w3.Func{
 	// Pool
 	Withdraw: w3.MustNewFunc("withdraw(address,address,uint256)", ""),
 	Deposit:  w3.MustNewFunc("deposit(address,uint256)", ""),
+	// TokenIndex
+	Add: w3.MustNewFunc("add(address)", "bool"),
 }

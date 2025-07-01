@@ -35,6 +35,7 @@ const (
 	GENERIC_SIGN          string = "GENERIC_SIGN"
 	STANDARD_TOKEN_DEPLOY string = "STANDARD_TOKEN_DEPLOY"
 	TRANSFER_OWNERSHIP    string = "TRANSFER_OWNERSHIP"
+	TOKEN_INDEX_ADD       string = "TOKEN_INDEX_ADD"
 )
 
 func (pg *Pg) InsertOTX(ctx context.Context, tx pgx.Tx, otx OTX) (uint64, error) {
