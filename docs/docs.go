@@ -163,6 +163,57 @@ const docTemplate = `{
                 }
             }
         },
+        "/contracts/erc20": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "ERC20 deploy request",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Contracts"
+                ],
+                "summary": "ERC20 deploy request",
+                "parameters": [
+                    {
+                        "description": "ERC20 deploy request",
+                        "name": "transferRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.ERC20DeployRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.OKResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/otx/track/{trackingId}": {
             "get": {
                 "security": [
@@ -393,6 +444,57 @@ const docTemplate = `{
                 }
             }
         },
+        "/token/sweep": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Sign a token sweep request",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Sign"
+                ],
+                "summary": "Sign a token sweep request",
+                "parameters": [
+                    {
+                        "description": "Sweep request",
+                        "name": "sweepRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.SweepRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.OKResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/token/transfer": {
             "post": {
                 "security": [
@@ -446,6 +548,37 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "api.ERC20DeployRequest": {
+            "type": "object",
+            "required": [
+                "decimals",
+                "initialMintee",
+                "initialSupply",
+                "name",
+                "owner",
+                "symbol"
+            ],
+            "properties": {
+                "decimals": {
+                    "type": "integer"
+                },
+                "initialMintee": {
+                    "type": "string"
+                },
+                "initialSupply": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "owner": {
+                    "type": "string"
+                },
+                "symbol": {
+                    "type": "string"
+                }
+            }
+        },
         "api.ErrResponse": {
             "type": "object",
             "properties": {
@@ -525,6 +658,25 @@ const docTemplate = `{
                 }
             }
         },
+        "api.SweepRequest": {
+            "type": "object",
+            "required": [
+                "from",
+                "to",
+                "tokenAddress"
+            ],
+            "properties": {
+                "from": {
+                    "type": "string"
+                },
+                "to": {
+                    "type": "string"
+                },
+                "tokenAddress": {
+                    "type": "string"
+                }
+            }
+        },
         "api.TransferRequest": {
             "type": "object",
             "required": [
@@ -550,10 +702,10 @@ const docTemplate = `{
         }
     },
     "securityDefinitions": {
-        "ApiKeyAuth": {
-            "description": "Service API Key",
+        "TokenAuth": {
+            "description": "Service API Token",
             "type": "apiKey",
-            "name": "X-GE-KEY",
+            "name": "Authorization",
             "in": "header"
         }
     }

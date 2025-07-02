@@ -1,5 +1,27 @@
 basePath: /api/v2
 definitions:
+  api.ERC20DeployRequest:
+    properties:
+      decimals:
+        type: integer
+      initialMintee:
+        type: string
+      initialSupply:
+        type: string
+      name:
+        type: string
+      owner:
+        type: string
+      symbol:
+        type: string
+    required:
+    - decimals
+    - initialMintee
+    - initialSupply
+    - name
+    - owner
+    - symbol
+    type: object
   api.ErrResponse:
     properties:
       description:
@@ -53,6 +75,19 @@ definitions:
     - fromTokenAddress
     - poolAddress
     - toTokenAddress
+    type: object
+  api.SweepRequest:
+    properties:
+      from:
+        type: string
+      to:
+        type: string
+      tokenAddress:
+        type: string
+    required:
+    - from
+    - to
+    - tokenAddress
     type: object
   api.TransferRequest:
     properties:
@@ -172,6 +207,38 @@ paths:
       summary: Check a custodial account's status
       tags:
       - Account
+  /contracts/erc20:
+    post:
+      consumes:
+      - application/json
+      description: ERC20 deploy request
+      parameters:
+      - description: ERC20 deploy request
+        in: body
+        name: transferRequest
+        required: true
+        schema:
+          $ref: '#/definitions/api.ERC20DeployRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.OKResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: ERC20 deploy request
+      tags:
+      - Contracts
   /otx/track/{trackingId}:
     get:
       consumes:
@@ -316,6 +383,38 @@ paths:
       summary: Get the current system information
       tags:
       - System
+  /token/sweep:
+    post:
+      consumes:
+      - application/json
+      description: Sign a token sweep request
+      parameters:
+      - description: Sweep request
+        in: body
+        name: sweepRequest
+        required: true
+        schema:
+          $ref: '#/definitions/api.SweepRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.OKResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Sign a token sweep request
+      tags:
+      - Sign
   /token/transfer:
     post:
       consumes:
@@ -349,9 +448,9 @@ paths:
       tags:
       - Sign
 securityDefinitions:
-  ApiKeyAuth:
-    description: Service API Key
+  TokenAuth:
+    description: Service API Token
     in: header
-    name: X-GE-KEY
+    name: Authorization
     type: apiKey
 swagger: "2.0"

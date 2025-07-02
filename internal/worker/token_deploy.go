@@ -76,7 +76,7 @@ func (w *TokenDeployWorker) Work(ctx context.Context, job *river.Job[TokenDeploy
 		ContractByteCode: byteCode,
 		GasFeeCap:        gasSettings.GasFeeCap,
 		GasTipCap:        gasSettings.GasTipCap,
-		GasLimit:         gasSettings.GasLimit,
+		GasLimit:         contract.MaxGasLimit(),
 		Nonce:            nonce,
 	})
 	if err != nil {
@@ -114,6 +114,54 @@ func (w *TokenDeployWorker) Work(ctx context.Context, job *river.Job[TokenDeploy
 	})
 
 	contractAddress := crypto.CreateAddress(common.HexToAddress(systemKeypair.Public), nonce)
+
+	addData, err := abi[Add].EncodeArgs(contractAddress)
+	if err != nil {
+		return err
+	}
+
+	addNonce, err := w.wc.store.AcquireNonce(ctx, tx, systemKeypair.Public)
+	if err != nil {
+		return err
+	}
+
+	builtAddTx, err := w.wc.chainProvider.SignContractExecutionTx(privateKey, ethutils.ContractExecutionTxOpts{
+		ContractAddress: w.tokenIndex,
+		InputData:       addData,
+		GasFeeCap:       gasSettings.GasFeeCap,
+		GasTipCap:       gasSettings.GasTipCap,
+		GasLimit:        gasSettings.GasLimit,
+		Nonce:           addNonce,
+	})
+	if err != nil {
+		return err
+	}
+
+	rawAddTx, err := builtAddTx.MarshalBinary()
+	if err != nil {
+		return err
+	}
+
+	rawAddTxHex := hexutil.Encode(rawAddTx)
+
+	addOTXID, err := w.wc.store.InsertOTX(ctx, tx, store.OTX{
+		TrackingID:    job.Args.TrackingID,
+		OTXType:       store.TOKEN_INDEX_ADD,
+		SignerAccount: systemKeypair.Public,
+		RawTx:         rawAddTxHex,
+		TxHash:        builtAddTx.Hash().Hex(),
+		Nonce:         addNonce,
+	})
+	if err != nil {
+		return err
+	}
+
+	if err := w.wc.store.InsertDispatchTx(ctx, tx, store.DispatchTx{
+		OTXID:  addOTXID,
+		Status: store.PENDING,
+	}); err != nil {
+		return err
+	}
 
 	initialSupply, err := StringToBigInt(job.Args.InitialSupply, false)
 	if err != nil {
@@ -221,54 +269,6 @@ func (w *TokenDeployWorker) Work(ctx context.Context, job *river.Job[TokenDeploy
 		return err
 	}
 
-	addData, err := abi[Add].EncodeArgs(contractAddress)
-	if err != nil {
-		return err
-	}
-
-	addNonce, err := w.wc.store.AcquireNonce(ctx, tx, systemKeypair.Public)
-	if err != nil {
-		return err
-	}
-
-	builtAddTx, err := w.wc.chainProvider.SignContractExecutionTx(privateKey, ethutils.ContractExecutionTxOpts{
-		ContractAddress: w.tokenIndex,
-		InputData:       addData,
-		GasFeeCap:       gasSettings.GasFeeCap,
-		GasTipCap:       gasSettings.GasTipCap,
-		GasLimit:        gasSettings.GasLimit,
-		Nonce:           addNonce,
-	})
-	if err != nil {
-		return err
-	}
-
-	rawAddTx, err := builtAddTx.MarshalBinary()
-	if err != nil {
-		return err
-	}
-
-	rawAddTxHex := hexutil.Encode(rawAddTx)
-
-	addOTXID, err := w.wc.store.InsertOTX(ctx, tx, store.OTX{
-		TrackingID:    job.Args.TrackingID,
-		OTXType:       store.TOKEN_INDEX_ADD,
-		SignerAccount: systemKeypair.Public,
-		RawTx:         rawAddTxHex,
-		TxHash:        builtAddTx.Hash().Hex(),
-		Nonce:         addNonce,
-	})
-	if err != nil {
-		return err
-	}
-
-	if err := w.wc.store.InsertDispatchTx(ctx, tx, store.DispatchTx{
-		OTXID:  addOTXID,
-		Status: store.PENDING,
-	}); err != nil {
-		return err
-	}
-
 	_, err = w.wc.queueClient.InsertManyTx(ctx, tx, []river.InsertManyParams{
 		{
 			Args: DispatchArgs{
@@ -283,8 +283,8 @@ func (w *TokenDeployWorker) Work(ctx context.Context, job *river.Job[TokenDeploy
 		{
 			Args: DispatchArgs{
 				TrackingID: job.Args.TrackingID,
-				OTXID:      mintToOTXID,
-				RawTx:      rawMintToTxHex,
+				OTXID:      addOTXID,
+				RawTx:      rawAddTxHex,
 			},
 			InsertOpts: &river.InsertOpts{
 				Priority: 2,
@@ -293,8 +293,8 @@ func (w *TokenDeployWorker) Work(ctx context.Context, job *river.Job[TokenDeploy
 		{
 			Args: DispatchArgs{
 				TrackingID: job.Args.TrackingID,
-				OTXID:      transferOwnershipOTXID,
-				RawTx:      rawTransferOwnershipTxHex,
+				OTXID:      mintToOTXID,
+				RawTx:      rawMintToTxHex,
 			},
 			InsertOpts: &river.InsertOpts{
 				Priority: 3,
@@ -303,8 +303,8 @@ func (w *TokenDeployWorker) Work(ctx context.Context, job *river.Job[TokenDeploy
 		{
 			Args: DispatchArgs{
 				TrackingID: job.Args.TrackingID,
-				OTXID:      addOTXID,
-				RawTx:      rawAddTxHex,
+				OTXID:      transferOwnershipOTXID,
+				RawTx:      rawTransferOwnershipTxHex,
 			},
 			InsertOpts: &river.InsertOpts{
 				Priority: 4,
