@@ -60,6 +60,15 @@ type (
 		Cursor  int    `query:"cursor" validate:"number"`
 		Next    bool   `query:"next"`
 	}
+
+	ERC20DeployRequest struct {
+		Name          string `json:"name" validate:"required"`
+		Symbol        string `json:"symbol" validate:"required"`
+		Decimals      uint8  `json:"decimals" validate:"required,number,gt=0"`
+		InitialSupply string `json:"initialSupply" validate:"required,number,gt=0"`
+		InitialMintee string `json:"initialMintee" validate:"required,eth_addr_checksum"`
+		Owner         string `json:"owner" validate:"required,eth_addr_checksum"`
+	}
 )
 
 const (

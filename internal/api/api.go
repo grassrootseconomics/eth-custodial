@@ -105,7 +105,7 @@ func New(o APIOpts) *API {
 			LogURI:      true,
 			LogError:    true,
 			HandleError: true,
-			LogValuesFunc: func(c echo.Context, v middleware.RequestLoggerValues) error {
+			LogValuesFunc: func(_ echo.Context, v middleware.RequestLoggerValues) error {
 				if v.Error == nil {
 					o.Logg.LogAttrs(context.Background(), slog.LevelInfo, "REQUEST",
 						slog.String("uri", v.URI),
@@ -156,6 +156,7 @@ func New(o APIOpts) *API {
 	apiGroup.POST("/pool/quote", api.poolQuoteHandler)
 	apiGroup.POST("/pool/swap", api.poolSwapHandler)
 	apiGroup.POST("/pool/deposit", api.poolDepositHandler)
+	apiGroup.POST("/contracts/erc20", api.contractsERC20Handler)
 
 	api.router = router
 	api.logg.Debug("API initialized", "listen_address", api.router)
