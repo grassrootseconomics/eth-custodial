@@ -69,7 +69,7 @@ func (w *DispatchHealthCheckWorker) Work(ctx context.Context, _ *river.Job[Dispa
 			}
 		}
 		for i, v := range receipts {
-			if v.BlockNumber != nil {
+			if v != nil && v.BlockNumber != nil {
 				if v.Status == 1 {
 					updateDispatchStatus := store.DispatchTx{
 						OTXID:  txsToCheck[i].ID,
