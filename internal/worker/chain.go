@@ -16,6 +16,7 @@ const (
 	Deposit           = "deposit"
 	Sweep             = "sweep"
 	Add               = "add"
+	SetQuoter         = "setQuoter"
 )
 
 var abi = map[string]*w3.Func{
@@ -32,8 +33,9 @@ var abi = map[string]*w3.Func{
 	// CustodialRegistrationProxy
 	Register: w3.MustNewFunc("register(address)", ""),
 	// Pool
-	Withdraw: w3.MustNewFunc("withdraw(address,address,uint256)", ""),
-	Deposit:  w3.MustNewFunc("deposit(address,uint256)", ""),
+	Withdraw:  w3.MustNewFunc("withdraw(address,address,uint256)", ""),
+	Deposit:   w3.MustNewFunc("deposit(address,uint256)", ""),
+	SetQuoter: w3.MustNewFunc("setQuoter(address)", ""),
 	// TokenIndex
 	Add: w3.MustNewFunc("add(address)", "bool"),
 }

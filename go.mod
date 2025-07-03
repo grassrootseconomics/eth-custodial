@@ -12,7 +12,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/grassrootseconomics/eth-tracker v1.7.2-celo-rc
 	github.com/grassrootseconomics/ethutils v1.4.0
-	github.com/grassrootseconomics/ge-publish v1.3.0-stable
+	github.com/grassrootseconomics/ge-publish v1.4.2-stable
 	github.com/jackc/pgx/v5 v5.7.5
 	github.com/jackc/tern/v2 v2.3.3
 	github.com/kamikazechaser/common v1.0.0
@@ -28,7 +28,7 @@ require (
 	github.com/nats-io/nats.go v1.43.0
 	github.com/riverqueue/river v0.23.1
 	github.com/riverqueue/river/riverdriver/riverpgxv5 v0.23.1
-	github.com/swaggo/swag/v2 v2.0.0-rc4
+	github.com/swaggo/swag v1.16.4
 )
 
 require (
@@ -77,7 +77,6 @@ require (
 	github.com/nats-io/nkeys v0.4.11 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/riverqueue/river/riverdriver v0.23.1 // indirect
 	github.com/riverqueue/river/rivershared v0.23.1 // indirect
@@ -87,7 +86,6 @@ require (
 	github.com/spf13/cast v1.9.2 // indirect
 	github.com/stretchr/testify v1.10.0 // indirect
 	github.com/supranational/blst v0.3.15 // indirect
-	github.com/sv-tools/openapi v0.2.1 // indirect
 	github.com/tidwall/gjson v1.18.0 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.1 // indirect
@@ -107,6 +105,5 @@ require (
 	golang.org/x/text v0.26.0 // indirect
 	golang.org/x/time v0.12.0 // indirect
 	golang.org/x/tools v0.34.0 // indirect
-	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

@@ -98,10 +98,8 @@ github.com/grassrootseconomics/eth-tracker v1.7.2-celo-rc h1:m0BX4brkPQ9JV/yYL2t
 github.com/grassrootseconomics/eth-tracker v1.7.2-celo-rc/go.mod h1:sozWQ/ryva121mbV/BO6kelFrHjqds3aCRKPqGHTRzc=
 github.com/grassrootseconomics/ethutils v1.4.0 h1:1QRLhOhY7GFoY27IlW9WoVoQuKDIGRjlFiPDiUWDN8Y=
 github.com/grassrootseconomics/ethutils v1.4.0/go.mod h1:7RCNwDj1wfgWt8CV4p7cQuZWPPI5fjwl/piq7NthaWg=
-github.com/grassrootseconomics/ge-publish v1.2.1-stable h1:Q+I8aeN++Fk4XUDplpPlN+gVTwjP5f1y+HL9MiTJRbk=
-github.com/grassrootseconomics/ge-publish v1.2.1-stable/go.mod h1:U778dzeCt3Z7V6ER6kRSUiBUq0XKV2jwPpZfz3M1hYg=
-github.com/grassrootseconomics/ge-publish v1.3.0-stable h1:nagRkVFRe3L+Z6KOiIDyg+k3IrsbANTcd0Bn09gwT9s=
-github.com/grassrootseconomics/ge-publish v1.3.0-stable/go.mod h1:U778dzeCt3Z7V6ER6kRSUiBUq0XKV2jwPpZfz3M1hYg=
+github.com/grassrootseconomics/ge-publish v1.4.2-stable h1:JZ6fkLqdAuak5uaDYjd5GXeY5oTnPnvaSjFCkBOqtZs=
+github.com/grassrootseconomics/ge-publish v1.4.2-stable/go.mod h1:U778dzeCt3Z7V6ER6kRSUiBUq0XKV2jwPpZfz3M1hYg=
 github.com/holiman/bloomfilter/v2 v2.0.3 h1:73e0e/V0tCydx14a0SCYS/EWCxgwLZ18CZcZKVu0fao=
 github.com/holiman/bloomfilter/v2 v2.0.3/go.mod h1:zpoh+gs7qcpqrHr3dB55AMiJwo0iURXE7ZOP9L9hSkA=
 github.com/holiman/uint256 v1.3.2 h1:a9EgMPSC1AAaj1SZL5zIQD3WbwTuHrMGOerLjGmM/TA=
@@ -246,10 +244,8 @@ github.com/stretchr/testify v1.10.0 h1:Xv5erBjTwe/5IxqUQTdXv5kgmIvbHo3QQyRwhJsOf
 github.com/stretchr/testify v1.10.0/go.mod h1:r2ic/lqez/lEtzL7wO/rwa5dbSLXVDPFyf8C91i36aY=
 github.com/supranational/blst v0.3.15 h1:rd9viN6tfARE5wv3KZJ9H8e1cg0jXW8syFCcsbHa76o=
 github.com/supranational/blst v0.3.15/go.mod h1:jZJtfjgudtNl4en1tzwPIV3KjUnQUvG3/j+w+fVonLw=
-github.com/sv-tools/openapi v0.2.1 h1:ES1tMQMJFGibWndMagvdoo34T1Vllxr1Nlm5wz6b1aA=
-github.com/sv-tools/openapi v0.2.1/go.mod h1:k5VuZamTw1HuiS9p2Wl5YIDWzYnHG6/FgPOSFXLAhGg=
-github.com/swaggo/swag/v2 v2.0.0-rc4 h1:SZ8cK68gcV6cslwrJMIOqPkJELRwq4gmjvk77MrvHvY=
-github.com/swaggo/swag/v2 v2.0.0-rc4/go.mod h1:Ow7Y8gF16BTCDn8YxZbyKn8FkMLRUHekv1kROJZpbvE=
+github.com/swaggo/swag v1.16.4 h1:clWJtd9LStiG3VeijiCfOVODP6VpHtKdQy9ELFG3s1A=
+github.com/swaggo/swag v1.16.4/go.mod h1:VBsHJRsDvfYvqoiMKnsdwhNV9LEMHgEDZcyVYX0sxPg=
 github.com/tidwall/gjson v1.14.2/go.mod h1:/wbyibRr2FHMks5tjHJ5F8dMZh3AcwJEMf5vlfC0lxk=
 github.com/tidwall/gjson v1.18.0 h1:FIDeeyB800efLX89e5a8Y0BNH+LOngJyGrIWxG2FKQY=
 github.com/tidwall/gjson v1.18.0/go.mod h1:/wbyibRr2FHMks5tjHJ5F8dMZh3AcwJEMf5vlfC0lxk=

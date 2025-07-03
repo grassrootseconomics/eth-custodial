@@ -26,7 +26,7 @@ MC4CAQAwBQYDK2VwBCIEIMJ3D6UBk/inMyoPWNPYybNIA0TEinMrWiMEMvoCodXE
 -----END PRIVATE KEY-----"""
 
 [postgres]
-dsn = "postgres://postgres:postgres@127.0.0.1:5432/ge_celo_custodial"
+dsn = "postgres://postgres:postgres@127.0.0.1:5432/eth_custodial"
 
 [workers]
 max = 0
@@ -37,7 +37,7 @@ oracle_type = "static"
 [chain]
 id = 1337
 rpc_endpoint = "http://localhost:8545"
-ge_registry = "0xE979a64D375F5D363d7cecF3c93B9aFD40Ba9f55"
+ge_registry = "0xEA7a52e565C43598011cC5f509b8252Eb3e8dbE5"
 # Certain chains implement the gas token as an ERC20 token as well. We block any transfer related to it at the API level.
 banned_tokens = ["0x471EcE3750Da237f93B8E339c536989b8978a438"]
 

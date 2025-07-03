@@ -69,6 +69,12 @@ type (
 		InitialMintee string `json:"initialMintee" validate:"required,eth_addr_checksum"`
 		Owner         string `json:"owner" validate:"required,eth_addr_checksum"`
 	}
+
+	PoolDeployRequest struct {
+		Name   string `json:"name" validate:"required"`
+		Symbol string `json:"symbol" validate:"required"`
+		Owner  string `json:"owner" validate:"required,eth_addr_checksum"`
+	}
 )
 
 const (

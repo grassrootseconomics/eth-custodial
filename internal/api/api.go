@@ -157,6 +157,7 @@ func New(o APIOpts) *API {
 	apiGroup.POST("/pool/swap", api.poolSwapHandler)
 	apiGroup.POST("/pool/deposit", api.poolDepositHandler)
 	apiGroup.POST("/contracts/erc20", api.contractsERC20Handler)
+	apiGroup.POST("/contracts/pool", api.contractsPoolHandler)
 
 	api.router = router
 	api.logg.Debug("API initialized", "listen_address", api.router)

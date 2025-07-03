@@ -158,6 +158,10 @@ func setupWorkers(wc *WorkerContainer) (*river.Workers, error) {
 		return nil, err
 	}
 
+	if err := river.AddWorkerSafely(workers, &PoolDeployWorker{wc: wc, poolIndex: wc.registry[ethutils.PoolIndex]}); err != nil {
+		return nil, err
+	}
+
 	return workers, nil
 }
 

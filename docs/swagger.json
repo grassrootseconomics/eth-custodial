@@ -208,6 +208,57 @@
                 }
             }
         },
+        "/contracts/pool": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Pool deploy request",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Contracts"
+                ],
+                "summary": "Pool deploy request",
+                "parameters": [
+                    {
+                        "description": "Pool deploy request",
+                        "name": "poolRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.PoolDeployRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.OKResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/otx/track/{trackingId}": {
             "get": {
                 "security": [
@@ -599,6 +650,25 @@
                 "result": {
                     "type": "object",
                     "additionalProperties": {}
+                }
+            }
+        },
+        "api.PoolDeployRequest": {
+            "type": "object",
+            "required": [
+                "name",
+                "owner",
+                "symbol"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "owner": {
+                    "type": "string"
+                },
+                "symbol": {
+                    "type": "string"
                 }
             }
         },

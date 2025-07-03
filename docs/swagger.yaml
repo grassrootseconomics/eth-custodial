@@ -41,6 +41,19 @@ definitions:
         additionalProperties: {}
         type: object
     type: object
+  api.PoolDeployRequest:
+    properties:
+      name:
+        type: string
+      owner:
+        type: string
+      symbol:
+        type: string
+    required:
+    - name
+    - owner
+    - symbol
+    type: object
   api.PoolDepositRequest:
     properties:
       amount:
@@ -237,6 +250,38 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: ERC20 deploy request
+      tags:
+      - Contracts
+  /contracts/pool:
+    post:
+      consumes:
+      - application/json
+      description: Pool deploy request
+      parameters:
+      - description: Pool deploy request
+        in: body
+        name: poolRequest
+        required: true
+        schema:
+          $ref: '#/definitions/api.PoolDeployRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.OKResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Pool deploy request
       tags:
       - Contracts
   /otx/track/{trackingId}:

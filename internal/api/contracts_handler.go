@@ -66,3 +66,58 @@ func (a *API) contractsERC20Handler(c echo.Context) error {
 		},
 	})
 }
+
+// PoolHandler godoc
+//
+//	@Summary		Pool deploy request
+//	@Description	Pool deploy request
+//	@Tags			Contracts
+//	@Accept			json
+//	@Produce		json
+//	@Param			poolRequest	body		apiresp.PoolDeployRequest	true	"Pool deploy request"
+//	@Success		200			{object}	apiresp.OKResponse
+//	@Failure		400			{object}	apiresp.ErrResponse
+//	@Failure		500			{object}	apiresp.ErrResponse
+//	@Security		ApiKeyAuth
+//	@Router			/contracts/pool [post]
+func (a *API) contractsPoolHandler(c echo.Context) error {
+	req := apiresp.PoolDeployRequest{}
+
+	if err := c.Bind(&req); err != nil {
+		return handleBindError(c)
+	}
+
+	if err := c.Validate(req); err != nil {
+		return handleValidateError(c)
+	}
+
+	tx, err := a.store.Pool().Begin(c.Request().Context())
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(c.Request().Context())
+
+	trackingID := uuid.NewString()
+
+	_, err = a.queueClient.InsertTx(c.Request().Context(), tx, worker.PoolDeployArgs{
+		TrackingID: trackingID,
+		Name:       req.Name,
+		Symbol:     req.Symbol,
+		Owner:      req.Owner,
+	}, nil)
+	if err != nil {
+		return handlePostgresError(c, err)
+	}
+
+	if err := tx.Commit(c.Request().Context()); err != nil {
+		return handlePostgresError(c, err)
+	}
+
+	return c.JSON(http.StatusOK, apiresp.OKResponse{
+		Ok:          true,
+		Description: "Pool deploy request successfully created",
+		Result: map[string]any{
+			"trackingId": trackingID,
+		},
+	})
+}
