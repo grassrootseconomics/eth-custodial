@@ -9,6 +9,7 @@ mode = "standalone"
 metrics = true
 
 [api]
+prod = false
 address = ":5003"
 docs = true
 jrpc = true

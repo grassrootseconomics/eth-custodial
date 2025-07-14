@@ -10,6 +10,7 @@ import (
 	apiresp "github.com/grassrootseconomics/eth-custodial/pkg/api"
 	"github.com/grassrootseconomics/ethutils"
 	"github.com/labstack/echo/v4"
+	"github.com/lmittmann/w3"
 	"github.com/lmittmann/w3/module/eth"
 )
 
@@ -107,7 +108,12 @@ func (a *API) contractsPoolHandler(c echo.Context) error {
 		return handleValidateError(c)
 	}
 
-	exists, err := a.alreadyExists(c.Request().Context(), a.registry[ethutils.PoolIndex], req.Symbol)
+	poolIndex := a.registry[ethutils.PoolIndex]
+	if a.prod {
+		poolIndex = w3.A("0x01eD8Fe01a2Ca44Cb26D00b1309d7D777471D00C")
+	}
+
+	exists, err := a.alreadyExists(c.Request().Context(), poolIndex, req.Symbol)
 	if err != nil {
 		return err
 	}

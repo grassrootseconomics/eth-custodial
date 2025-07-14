@@ -25,6 +25,8 @@ type (
 		EnableMetrics bool
 		EnableDocs    bool
 		JRPC          bool
+		// TODO: temporary patch for prod because poolIndex doesn't exisit in the entry point registry
+		Prod          bool
 		ListenAddress string
 		Build         string
 		Registry      map[string]common.Address
@@ -42,6 +44,7 @@ type (
 	API struct {
 		listenAddress string
 		build         string
+		prod          bool
 		registry      map[string]common.Address
 		signingKey    crypto.PrivateKey
 		verifyingKey  crypto.PublicKey
@@ -64,6 +67,7 @@ const (
 
 func New(o APIOpts) *API {
 	api := &API{
+		prod:          o.Prod,
 		build:         o.Build,
 		registry:      o.Registry,
 		signingKey:    o.SigningKey,

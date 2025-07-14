@@ -208,6 +208,7 @@ func initAPI() *api.API {
 	worker := initWorker()
 
 	return api.New(api.APIOpts{
+		Prod:          ko.Bool("api.prod"),
 		EnableMetrics: ko.Bool("service.metrics"),
 		EnableDocs:    ko.Bool("api.docs"),
 		JRPC:          ko.Bool("api.jrpc"),
