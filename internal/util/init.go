@@ -49,5 +49,9 @@ func InitConfig(lo *slog.Logger, confFilePath string) *koanf.Koanf {
 		os.Exit(1)
 	}
 
+	if os.Getenv("DEBUG") != "" || os.Getenv("DEV") != "" {
+		ko.Print()
+	}
+
 	return ko
 }
