@@ -45,6 +45,7 @@ func (a *API) contractsERC20Handler(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, apiresp.ErrResponse{
 			Ok:          false,
 			Description: "Token with this symbol already exists",
+			ErrCode:     apiresp.ErrSymbolAlreadyExists,
 		})
 	}
 
@@ -114,6 +115,7 @@ func (a *API) contractsPoolHandler(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, apiresp.ErrResponse{
 			Ok:          false,
 			Description: "Token with this symbol already exists",
+			ErrCode:     apiresp.ErrSymbolAlreadyExists,
 		})
 	}
 

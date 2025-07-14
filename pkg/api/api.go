@@ -86,4 +86,5 @@ const (
 	ErrJWTAuth                 = "E06"
 	ErrNoRecordFound           = "E07"
 	ErrBannedToken             = "E08"
+	ErrSymbolAlreadyExists     = "E09"
 )
