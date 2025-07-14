@@ -37,7 +37,7 @@ func (a *API) transferHandler(c echo.Context) error {
 	if a.isBannedToken(req.TokenAddress) {
 		return c.JSON(http.StatusForbidden, apiresp.ErrResponse{
 			Ok:          false,
-			Description: fmt.Sprintf("Not allowed to interact with token"),
+			Description: fmt.Sprintf("Not allowed to interact with token %s", req.TokenAddress),
 			ErrCode:     apiresp.ErrBannedToken,
 		})
 	}
@@ -113,7 +113,7 @@ func (a *API) sweepHandler(c echo.Context) error {
 	if a.isBannedToken(req.TokenAddress) {
 		return c.JSON(http.StatusForbidden, apiresp.ErrResponse{
 			Ok:          false,
-			Description: fmt.Sprintf("Not allowed to interact with token"),
+			Description: fmt.Sprintf("Not allowed to interact with token %s", req.TokenAddress),
 			ErrCode:     apiresp.ErrBannedToken,
 		})
 	}

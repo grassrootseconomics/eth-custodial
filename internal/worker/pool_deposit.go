@@ -58,7 +58,7 @@ func (w *PoolDepositWorker) Work(ctx context.Context, job *river.Job[PoolDeposit
 		return err
 	}
 
-	resetApprovalInput, err := abi[Approve].EncodeArgs(
+	resetApprovalInput, err := Abi[Approve].EncodeArgs(
 		ethutils.HexToAddress(job.Args.PoolAddress),
 		big.NewInt(0),
 	)
@@ -120,7 +120,7 @@ func (w *PoolDepositWorker) Work(ctx context.Context, job *river.Job[PoolDeposit
 		return err
 	}
 
-	setApprovalInput, err := abi[Approve].EncodeArgs(
+	setApprovalInput, err := Abi[Approve].EncodeArgs(
 		ethutils.HexToAddress(job.Args.PoolAddress),
 		bumpedApprovalAmount,
 	)
@@ -182,7 +182,7 @@ func (w *PoolDepositWorker) Work(ctx context.Context, job *river.Job[PoolDeposit
 		return err
 	}
 
-	input, err := abi[Deposit].EncodeArgs(
+	input, err := Abi[Deposit].EncodeArgs(
 		ethutils.HexToAddress(job.Args.TokenAddress),
 		amount,
 	)

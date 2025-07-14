@@ -5,6 +5,7 @@ import (
 	"crypto"
 	"log/slog"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/go-playground/validator/v10"
 	"github.com/grassrootseconomics/eth-custodial/internal/gas"
 	"github.com/grassrootseconomics/eth-custodial/internal/store"
@@ -26,6 +27,7 @@ type (
 		JRPC          bool
 		ListenAddress string
 		Build         string
+		Registry      map[string]common.Address
 		CORS          []string
 		VerifyingKey  crypto.PublicKey
 		SigningKey    crypto.PrivateKey
@@ -40,6 +42,7 @@ type (
 	API struct {
 		listenAddress string
 		build         string
+		registry      map[string]common.Address
 		signingKey    crypto.PrivateKey
 		verifyingKey  crypto.PublicKey
 		store         store.Store
@@ -62,6 +65,7 @@ const (
 func New(o APIOpts) *API {
 	api := &API{
 		build:         o.Build,
+		registry:      o.Registry,
 		signingKey:    o.SigningKey,
 		verifyingKey:  o.VerifyingKey,
 		listenAddress: o.ListenAddress,

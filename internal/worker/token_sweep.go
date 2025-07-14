@@ -49,7 +49,7 @@ func (w *TokenSweepWorker) Work(ctx context.Context, job *river.Job[TokenSweepAr
 		return err
 	}
 
-	input, err := abi[Sweep].EncodeArgs(
+	input, err := Abi[Sweep].EncodeArgs(
 		ethutils.HexToAddress(job.Args.To),
 	)
 	if err != nil {

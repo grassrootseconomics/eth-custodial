@@ -55,7 +55,7 @@ func (w *TokenTransferWorker) Work(ctx context.Context, job *river.Job[TokenTran
 		return err
 	}
 
-	input, err := abi[Transfer].EncodeArgs(
+	input, err := Abi[Transfer].EncodeArgs(
 		ethutils.HexToAddress(job.Args.To),
 		amount,
 	)

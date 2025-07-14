@@ -259,7 +259,7 @@ func (w *PoolDeployWorker) Work(ctx context.Context, job *river.Job[PoolDeployAr
 	}
 
 	// Add SwapPool to PoolIndex
-	addToPoolIndexData, err := abi[Add].EncodeArgs(swapPoolAddress)
+	addToPoolIndexData, err := Abi[Add].EncodeArgs(swapPoolAddress)
 	if err != nil {
 		return err
 	}
@@ -308,7 +308,7 @@ func (w *PoolDeployWorker) Work(ctx context.Context, job *river.Job[PoolDeployAr
 	}
 
 	// Call setQuoter on SwapPool
-	setQuoterData, err := abi[SetQuoter].EncodeArgs(priceIndexQuoterAddress)
+	setQuoterData, err := Abi[SetQuoter].EncodeArgs(priceIndexQuoterAddress)
 	if err != nil {
 		return err
 	}
@@ -359,7 +359,7 @@ func (w *PoolDeployWorker) Work(ctx context.Context, job *river.Job[PoolDeployAr
 	ownerAddress := common.HexToAddress(job.Args.Owner)
 
 	// Transfer ownership of Limiter
-	transferLimiterOwnershipData, err := abi[TransferOwnership].EncodeArgs(ownerAddress)
+	transferLimiterOwnershipData, err := Abi[TransferOwnership].EncodeArgs(ownerAddress)
 	if err != nil {
 		return err
 	}
@@ -408,7 +408,7 @@ func (w *PoolDeployWorker) Work(ctx context.Context, job *river.Job[PoolDeployAr
 	}
 
 	// Transfer ownership of TokenIndex
-	transferTokenIndexOwnershipData, err := abi[TransferOwnership].EncodeArgs(ownerAddress)
+	transferTokenIndexOwnershipData, err := Abi[TransferOwnership].EncodeArgs(ownerAddress)
 	if err != nil {
 		return err
 	}
@@ -457,7 +457,7 @@ func (w *PoolDeployWorker) Work(ctx context.Context, job *river.Job[PoolDeployAr
 	}
 
 	// Transfer ownership of SwapPool
-	transferSwapPoolOwnershipData, err := abi[TransferOwnership].EncodeArgs(ownerAddress)
+	transferSwapPoolOwnershipData, err := Abi[TransferOwnership].EncodeArgs(ownerAddress)
 	if err != nil {
 		return err
 	}
@@ -506,7 +506,7 @@ func (w *PoolDeployWorker) Work(ctx context.Context, job *river.Job[PoolDeployAr
 	}
 
 	// Transfer ownership of PriceIndexQuoter
-	transferPriceIndexQuoterOwnershipData, err := abi[TransferOwnership].EncodeArgs(ownerAddress)
+	transferPriceIndexQuoterOwnershipData, err := Abi[TransferOwnership].EncodeArgs(ownerAddress)
 	if err != nil {
 		return err
 	}

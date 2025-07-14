@@ -17,9 +17,10 @@ const (
 	Sweep             = "sweep"
 	Add               = "add"
 	SetQuoter         = "setQuoter"
+	AddressOf         = "addressOf"
 )
 
-var abi = map[string]*w3.Func{
+var Abi = map[string]*w3.Func{
 	// ERC20
 	Approve:           w3.MustNewFunc("approve(address, uint256)", "bool"),
 	MintTo:            w3.MustNewFunc("mintTo(address, uint256)", "bool"),
@@ -37,5 +38,6 @@ var abi = map[string]*w3.Func{
 	Deposit:   w3.MustNewFunc("deposit(address,uint256)", ""),
 	SetQuoter: w3.MustNewFunc("setQuoter(address)", ""),
 	// TokenIndex
-	Add: w3.MustNewFunc("add(address)", "bool"),
+	Add:       w3.MustNewFunc("add(address)", "bool"),
+	AddressOf: w3.MustNewFunc("addressOf(bytes32)", "address"),
 }

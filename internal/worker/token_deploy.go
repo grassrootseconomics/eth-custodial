@@ -115,7 +115,7 @@ func (w *TokenDeployWorker) Work(ctx context.Context, job *river.Job[TokenDeploy
 
 	contractAddress := crypto.CreateAddress(common.HexToAddress(systemKeypair.Public), nonce)
 
-	addData, err := abi[Add].EncodeArgs(contractAddress)
+	addData, err := Abi[Add].EncodeArgs(contractAddress)
 	if err != nil {
 		return err
 	}
@@ -168,7 +168,7 @@ func (w *TokenDeployWorker) Work(ctx context.Context, job *river.Job[TokenDeploy
 		return err
 	}
 
-	mintToData, err := abi[MintTo].EncodeArgs(
+	mintToData, err := Abi[MintTo].EncodeArgs(
 		common.HexToAddress(job.Args.InitialMintee),
 		initialSupply,
 	)
@@ -219,7 +219,7 @@ func (w *TokenDeployWorker) Work(ctx context.Context, job *river.Job[TokenDeploy
 		return err
 	}
 
-	transferOwnershipData, err := abi[TransferOwnership].EncodeArgs(
+	transferOwnershipData, err := Abi[TransferOwnership].EncodeArgs(
 		common.HexToAddress(job.Args.Owner),
 	)
 	if err != nil {

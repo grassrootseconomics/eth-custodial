@@ -56,7 +56,7 @@ func (w *AccountCreateWorker) Work(ctx context.Context, job *river.Job[AccountCr
 		return err
 	}
 
-	input, err := abi[Register].EncodeArgs(ethutils.HexToAddress(job.Args.KeyPair.Public))
+	input, err := Abi[Register].EncodeArgs(ethutils.HexToAddress(job.Args.KeyPair.Public))
 	if err != nil {
 		return err
 	}

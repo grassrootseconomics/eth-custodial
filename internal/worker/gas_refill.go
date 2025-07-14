@@ -48,7 +48,7 @@ func (w *GasRefillWorker) Work(ctx context.Context, job *river.Job[GasRefillArgs
 		ctx,
 		eth.CallFunc(
 			w.gasFaucet,
-			abi[NextTime],
+			Abi[NextTime],
 			w3.A(job.Args.Address),
 		).Returns(&nextTime),
 	); err != nil {
@@ -64,7 +64,7 @@ func (w *GasRefillWorker) Work(ctx context.Context, job *river.Job[GasRefillArgs
 		ctx,
 		eth.CallFunc(
 			w.gasFaucet,
-			abi[Check],
+			Abi[Check],
 			w3.A(job.Args.Address),
 		).Returns(&checkStatus),
 	); err != nil {
@@ -91,7 +91,7 @@ func (w *GasRefillWorker) Work(ctx context.Context, job *river.Job[GasRefillArgs
 		return err
 	}
 
-	input, err := abi[GiveTo].EncodeArgs(w3.A(job.Args.Address))
+	input, err := Abi[GiveTo].EncodeArgs(w3.A(job.Args.Address))
 	if err != nil {
 		return err
 	}

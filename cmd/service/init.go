@@ -213,6 +213,7 @@ func initAPI() *api.API {
 		JRPC:          ko.Bool("api.jrpc"),
 		ListenAddress: ko.MustString("api.address"),
 		CORS:          ko.MustStrings("api.cors"),
+		Registry:      loadRegistry(),
 		SigningKey:    privateKey,
 		VerifyingKey:  publicKey,
 		GasOracle:     loadGasOracle(),

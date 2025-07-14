@@ -1,12 +1,16 @@
 package api
 
 import (
+	"context"
 	"net/http"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/google/uuid"
 	"github.com/grassrootseconomics/eth-custodial/internal/worker"
 	apiresp "github.com/grassrootseconomics/eth-custodial/pkg/api"
+	"github.com/grassrootseconomics/ethutils"
 	"github.com/labstack/echo/v4"
+	"github.com/lmittmann/w3/module/eth"
 )
 
 // ERC20Handler godoc
@@ -31,6 +35,17 @@ func (a *API) contractsERC20Handler(c echo.Context) error {
 
 	if err := c.Validate(req); err != nil {
 		return handleValidateError(c)
+	}
+
+	exists, err := a.alreadyExists(c.Request().Context(), a.registry[ethutils.TokenIndex], req.Symbol)
+	if err != nil {
+		return err
+	}
+	if exists {
+		return c.JSON(http.StatusBadRequest, apiresp.ErrResponse{
+			Ok:          false,
+			Description: "Token with this symbol already exists",
+		})
 	}
 
 	tx, err := a.store.Pool().Begin(c.Request().Context())
@@ -91,6 +106,17 @@ func (a *API) contractsPoolHandler(c echo.Context) error {
 		return handleValidateError(c)
 	}
 
+	exists, err := a.alreadyExists(c.Request().Context(), a.registry[ethutils.PoolIndex], req.Symbol)
+	if err != nil {
+		return err
+	}
+	if exists {
+		return c.JSON(http.StatusBadRequest, apiresp.ErrResponse{
+			Ok:          false,
+			Description: "Token with this symbol already exists",
+		})
+	}
+
 	tx, err := a.store.Pool().Begin(c.Request().Context())
 	if err != nil {
 		return err
@@ -120,4 +146,17 @@ func (a *API) contractsPoolHandler(c echo.Context) error {
 			"trackingId": trackingID,
 		},
 	})
+}
+
+func (a *API) alreadyExists(ctx context.Context, index common.Address, tokenSymbol string) (bool, error) {
+	var address common.Address
+
+	if err := a.chainProvider.Client.CallCtx(
+		ctx,
+		eth.CallFunc(index, worker.Abi[worker.AddressOf], common.BytesToHash(common.RightPadBytes([]byte(tokenSymbol), 32))).Returns(&address),
+	); err != nil {
+		return false, err
+	}
+
+	return address != common.Address{}, nil
 }
