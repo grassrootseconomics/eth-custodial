@@ -179,6 +179,7 @@ func initWorker() *worker.WorkerContainer {
 		Logg:          lo,
 		Pub:           loadPub(),
 		ChainProvider: loadChainProvider(),
+		Prod:          ko.Bool("workers.prod"),
 	}
 
 	if ko.Int("workers.max") <= 0 {

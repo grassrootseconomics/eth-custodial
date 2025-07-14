@@ -31,6 +31,7 @@ dsn = "postgres://postgres:postgres@127.0.0.1:5432/eth_custodial"
 
 [workers]
 max = 0
+prod = false
 
 [gas]
 oracle_type = "static"

@@ -10,6 +10,7 @@ import (
 	"github.com/grassrootseconomics/eth-custodial/pkg/event"
 	"github.com/grassrootseconomics/ethutils"
 	"github.com/grassrootseconomics/ge-publish/pkg/contract"
+	"github.com/lmittmann/w3"
 	"github.com/riverqueue/river"
 )
 
@@ -23,8 +24,7 @@ type (
 
 	PoolDeployWorker struct {
 		river.WorkerDefaults[PoolDeployArgs]
-		wc        *WorkerContainer
-		poolIndex common.Address
+		wc *WorkerContainer
 	}
 )
 
@@ -269,8 +269,13 @@ func (w *PoolDeployWorker) Work(ctx context.Context, job *river.Job[PoolDeployAr
 		return err
 	}
 
+	poolIndex := w.wc.registry[ethutils.PoolIndex]
+	if w.wc.prod {
+		poolIndex = w3.A("0x01eD8Fe01a2Ca44Cb26D00b1309d7D777471D00C")
+	}
+
 	builtAddToPoolIndexTx, err := w.wc.chainProvider.SignContractExecutionTx(privateKey, ethutils.ContractExecutionTxOpts{
-		ContractAddress: w.poolIndex,
+		ContractAddress: poolIndex,
 		InputData:       addToPoolIndexData,
 		GasFeeCap:       gasSettings.GasFeeCap,
 		GasTipCap:       gasSettings.GasTipCap,

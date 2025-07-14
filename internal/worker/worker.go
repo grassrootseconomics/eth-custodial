@@ -26,6 +26,8 @@ type (
 		Logg                *slog.Logger
 		ChainProvider       *ethutils.Provider
 		Pub                 *pub.Pub
+		// TODO: temporary patch for prod because poolIndex doesn't exist in the entry point registry
+		Prod bool
 	}
 
 	signer struct {
@@ -41,6 +43,7 @@ type (
 		logg          *slog.Logger
 		pub           *pub.Pub
 		chainProvider *ethutils.Provider
+		prod          bool
 	}
 )
 
@@ -58,6 +61,7 @@ func New(o WorkerOpts) (*WorkerContainer, error) {
 		logg:          o.Logg,
 		pub:           o.Pub,
 		chainProvider: o.ChainProvider,
+		prod:          o.Prod,
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), migrationTimeout)
@@ -158,7 +162,7 @@ func setupWorkers(wc *WorkerContainer) (*river.Workers, error) {
 		return nil, err
 	}
 
-	if err := river.AddWorkerSafely(workers, &PoolDeployWorker{wc: wc, poolIndex: wc.registry[ethutils.PoolIndex]}); err != nil {
+	if err := river.AddWorkerSafely(workers, &PoolDeployWorker{wc: wc}); err != nil {
 		return nil, err
 	}
 
