@@ -100,6 +100,8 @@ github.com/grassrootseconomics/ethutils v1.4.0 h1:1QRLhOhY7GFoY27IlW9WoVoQuKDIGR
 github.com/grassrootseconomics/ethutils v1.4.0/go.mod h1:7RCNwDj1wfgWt8CV4p7cQuZWPPI5fjwl/piq7NthaWg=
 github.com/grassrootseconomics/ge-publish v1.4.2-stable h1:JZ6fkLqdAuak5uaDYjd5GXeY5oTnPnvaSjFCkBOqtZs=
 github.com/grassrootseconomics/ge-publish v1.4.2-stable/go.mod h1:U778dzeCt3Z7V6ER6kRSUiBUq0XKV2jwPpZfz3M1hYg=
+github.com/grassrootseconomics/ge-publish v1.4.3-stable h1:Cumfthcb78vXnmEC7ixk5jIq1lwRcjyS8CQU7LGvHjA=
+github.com/grassrootseconomics/ge-publish v1.4.3-stable/go.mod h1:U778dzeCt3Z7V6ER6kRSUiBUq0XKV2jwPpZfz3M1hYg=
 github.com/holiman/bloomfilter/v2 v2.0.3 h1:73e0e/V0tCydx14a0SCYS/EWCxgwLZ18CZcZKVu0fao=
 github.com/holiman/bloomfilter/v2 v2.0.3/go.mod h1:zpoh+gs7qcpqrHr3dB55AMiJwo0iURXE7ZOP9L9hSkA=
 github.com/holiman/uint256 v1.3.2 h1:a9EgMPSC1AAaj1SZL5zIQD3WbwTuHrMGOerLjGmM/TA=
