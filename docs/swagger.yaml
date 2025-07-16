@@ -2,10 +2,12 @@ components:
   schemas:
     api.DemurrageERC20DeployRequest:
       properties:
-        decayLevel:
-          type: string
         decimals:
           type: integer
+        demurragePeriod:
+          type: string
+        demurrageRate:
+          type: string
         initialMintee:
           type: string
         initialSupply:
@@ -14,20 +16,18 @@ components:
           type: string
         owner:
           type: string
-        periodMinutes:
-          type: string
         sinkAddress:
           type: string
         symbol:
           type: string
       required:
-      - decayLevel
       - decimals
+      - demurragePeriod
+      - demurrageRate
       - initialMintee
       - initialSupply
       - name
       - owner
-      - periodMinutes
       - sinkAddress
       - symbol
       type: object
@@ -36,7 +36,6 @@ components:
         decimals:
           type: integer
         expiryTimestamp:
-          minLength: 0
           type: string
         initialMintee:
           type: string

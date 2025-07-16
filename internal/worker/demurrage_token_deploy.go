@@ -17,16 +17,16 @@ import (
 )
 
 type DemurrageTokenDeployArgs struct {
-	TrackingID    string `json:"trackingId"`
-	Name          string `json:"name"`
-	Symbol        string `json:"symbol"`
-	Decimals      uint8  `json:"decimals"`
-	InitialSupply string `json:"initialSupply"`
-	InitialMintee string `json:"initialMintee"`
-	Owner         string `json:"owner"`
-	SinkAddress   string `json:"sinkAddress"`
-	DecayLevel    string `json:"decayLevel"`
-	PeriodMinutes string `json:"periodMinutes"`
+	TrackingID      string `json:"trackingId"`
+	Name            string `json:"name"`
+	Symbol          string `json:"symbol"`
+	Decimals        uint8  `json:"decimals"`
+	InitialSupply   string `json:"initialSupply"`
+	InitialMintee   string `json:"initialMintee"`
+	Owner           string `json:"owner"`
+	SinkAddress     string `json:"sinkAddress"`
+	DemurrageRate   string `json:"demurrageRate"`
+	DemurragePeriod string `json:"demurragePeriod"`
 }
 
 type DemurrageTokenDeployWorker struct {
@@ -64,11 +64,11 @@ func (w *DemurrageTokenDeployWorker) Work(ctx context.Context, job *river.Job[De
 		return err
 	}
 
-	demurrageRate, err := strconv.ParseInt(job.Args.DecayLevel, 10, 64)
+	demurrageRate, err := strconv.ParseInt(job.Args.DemurrageRate, 10, 64)
 	if err != nil {
 		return err
 	}
-	demurragePeriod, err := strconv.ParseInt(job.Args.PeriodMinutes, 10, 64)
+	demurragePeriod, err := strconv.ParseInt(job.Args.DemurragePeriod, 10, 64)
 	if err != nil {
 		return err
 	}

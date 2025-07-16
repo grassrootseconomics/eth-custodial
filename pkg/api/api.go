@@ -78,15 +78,15 @@ type (
 	}
 
 	DemurrageERC20DeployRequest struct {
-		Name          string `json:"name" validate:"required"`
-		Symbol        string `json:"symbol" validate:"required"`
-		Decimals      uint8  `json:"decimals" validate:"required,number,gt=0"`
-		InitialSupply string `json:"initialSupply" validate:"required"`
-		InitialMintee string `json:"initialMintee" validate:"required,eth_addr_checksum"`
-		Owner         string `json:"owner" validate:"required,eth_addr_checksum"`
-		SinkAddress   string `json:"sinkAddress" validate:"required,eth_addr_checksum"`
-		DecayLevel    string `json:"decayLevel" validate:"required"`
-		PeriodMinutes string `json:"periodMinutes" validate:"required"`
+		Name            string `json:"name" validate:"required"`
+		Symbol          string `json:"symbol" validate:"required"`
+		Decimals        uint8  `json:"decimals" validate:"required,number,gt=0"`
+		InitialSupply   string `json:"initialSupply" validate:"required"`
+		InitialMintee   string `json:"initialMintee" validate:"required,eth_addr_checksum"`
+		Owner           string `json:"owner" validate:"required,eth_addr_checksum"`
+		SinkAddress     string `json:"sinkAddress" validate:"required,eth_addr_checksum"`
+		DemurrageRate   string `json:"demurrageRate" validate:"required"`
+		DemurragePeriod string `json:"demurragePeriod" validate:"required"`
 	}
 )
 

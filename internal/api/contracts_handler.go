@@ -207,15 +207,15 @@ func (a *API) contractsDemurrageERC20Handler(c echo.Context) error {
 	trackingID := uuid.NewString()
 
 	_, err = a.queueClient.InsertTx(c.Request().Context(), tx, worker.DemurrageTokenDeployArgs{
-		TrackingID:    trackingID,
-		Name:          req.Name,
-		Symbol:        req.Symbol,
-		Decimals:      req.Decimals,
-		InitialSupply: req.InitialSupply,
-		InitialMintee: req.InitialMintee,
-		Owner:         req.Owner,
-		DecayLevel:    req.DecayLevel,
-		PeriodMinutes: req.PeriodMinutes,
+		TrackingID:      trackingID,
+		Name:            req.Name,
+		Symbol:          req.Symbol,
+		Decimals:        req.Decimals,
+		InitialSupply:   req.InitialSupply,
+		InitialMintee:   req.InitialMintee,
+		Owner:           req.Owner,
+		DemurrageRate:   req.DemurrageRate,
+		DemurragePeriod: req.DemurragePeriod,
 	}, nil)
 	if err != nil {
 		return handlePostgresError(c, err)
