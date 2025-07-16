@@ -7,7 +7,7 @@ require (
 	github.com/VictoriaMetrics/metrics v1.38.0
 	github.com/ethereum/go-ethereum v1.16.0
 	github.com/georgysavva/scany/v2 v2.1.4
-	github.com/go-playground/validator/v10 v10.26.0
+	github.com/go-playground/validator/v10 v10.27.0
 	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/google/uuid v1.6.0
 	github.com/grassrootseconomics/eth-tracker v1.7.2-celo-rc
