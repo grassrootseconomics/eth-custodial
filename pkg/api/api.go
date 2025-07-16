@@ -22,7 +22,7 @@ type (
 		From         string `json:"from" validate:"required,eth_addr_checksum"`
 		To           string `json:"to" validate:"required,eth_addr_checksum"`
 		TokenAddress string `json:"tokenAddress" validate:"required,eth_addr_checksum"`
-		Amount       string `json:"amount" validate:"required,number,gt=0"`
+		Amount       string `json:"amount" validate:"required"`
 	}
 
 	SweepRequest struct {
@@ -36,14 +36,14 @@ type (
 		FromTokenAddress string `json:"fromTokenAddress" validate:"required,eth_addr_checksum"`
 		ToTokenAddress   string `json:"toTokenAddress" validate:"required,eth_addr_checksum"`
 		PoolAddress      string `json:"poolAddress" validate:"required,eth_addr_checksum"`
-		Amount           string `json:"amount" validate:"required,number,gt=0"`
+		Amount           string `json:"amount" validate:"required"`
 	}
 
 	PoolDepositRequest struct {
 		From         string `json:"from" validate:"required,eth_addr_checksum"`
 		TokenAddress string `json:"tokenAddress" validate:"required,eth_addr_checksum"`
 		PoolAddress  string `json:"poolAddress" validate:"required,eth_addr_checksum"`
-		Amount       string `json:"amount" validate:"required,number,gt=0"`
+		Amount       string `json:"amount" validate:"required"`
 	}
 
 	AccountAddressParam struct {
@@ -65,10 +65,10 @@ type (
 		Name            string `json:"name" validate:"required"`
 		Symbol          string `json:"symbol" validate:"required"`
 		Decimals        uint8  `json:"decimals" validate:"required,number,gt=0"`
-		InitialSupply   string `json:"initialSupply" validate:"required,number,gt=0"`
+		InitialSupply   string `json:"initialSupply" validate:"required"`
 		InitialMintee   string `json:"initialMintee" validate:"required,eth_addr_checksum"`
 		Owner           string `json:"owner" validate:"required,eth_addr_checksum"`
-		ExpiryTimestamp string `json:"expiryTimestamp,omitempty" validate:"omitempty,number,gte=0"`
+		ExpiryTimestamp string `json:"expiryTimestamp,omitempty" validate:"omitempty"`
 	}
 
 	PoolDeployRequest struct {
@@ -81,12 +81,12 @@ type (
 		Name          string `json:"name" validate:"required"`
 		Symbol        string `json:"symbol" validate:"required"`
 		Decimals      uint8  `json:"decimals" validate:"required,number,gt=0"`
-		InitialSupply string `json:"initialSupply" validate:"required,number,gt=0"`
+		InitialSupply string `json:"initialSupply" validate:"required"`
 		InitialMintee string `json:"initialMintee" validate:"required,eth_addr_checksum"`
 		Owner         string `json:"owner" validate:"required,eth_addr_checksum"`
 		SinkAddress   string `json:"sinkAddress" validate:"required,eth_addr_checksum"`
-		DecayLevel    string `json:"decayLevel" validate:"required,number,gt=0,lt=100"`
-		PeriodMinutes string `json:"periodMinutes" validate:"required,number,gt=1440"`
+		DecayLevel    string `json:"decayLevel" validate:"required"`
+		PeriodMinutes string `json:"periodMinutes" validate:"required"`
 	}
 )
 
