@@ -12,7 +12,6 @@ import (
 //	@Summary		Get the current system information
 //	@Description	Get the current system information
 //	@Tags			System
-//	@Accept			*/*
 //	@Produce		json
 //	@Success		200	{object}	apiresp.OKResponse
 //	@Failure		500	{object}	apiresp.ErrResponse

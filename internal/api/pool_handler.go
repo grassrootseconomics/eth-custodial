@@ -23,7 +23,7 @@ var getQuoteFunc = w3.MustNewFunc("getQuote(address,address,uint256)", "uint256"
 //	@Tags			Sign
 //	@Accept			json
 //	@Produce		json
-//	@Param			transferRequest	body		apiresp.PoolSwapRequest	true	"Pool swap request"
+//	@Param			poolSwapRequest	body		apiresp.PoolSwapRequest	true	"Pool swap request"
 //	@Success		200				{object}	apiresp.OKResponse
 //	@Failure		400				{object}	apiresp.ErrResponse
 //	@Failure		500				{object}	apiresp.ErrResponse
@@ -100,10 +100,10 @@ func (a *API) poolSwapHandler(c echo.Context) error {
 //	@Tags			Sign
 //	@Accept			json
 //	@Produce		json
-//	@Param			transferRequest	body		apiresp.PoolDepositRequest	true	"Pool deposit request"
-//	@Success		200				{object}	apiresp.OKResponse
-//	@Failure		400				{object}	apiresp.ErrResponse
-//	@Failure		500				{object}	apiresp.ErrResponse
+//	@Param			poolDepositRequest	body		apiresp.PoolDepositRequest	true	"Pool deposit request"
+//	@Success		200					{object}	apiresp.OKResponse
+//	@Failure		400					{object}	apiresp.ErrResponse
+//	@Failure		500					{object}	apiresp.ErrResponse
 //	@Security		ApiKeyAuth
 //	@Router			/pool/deposit [post]
 func (a *API) poolDepositHandler(c echo.Context) error {
@@ -178,7 +178,7 @@ func (a *API) poolDepositHandler(c echo.Context) error {
 //	@Tags			Sign
 //	@Accept			json
 //	@Produce		json
-//	@Param			transferRequest	body		apiresp.PoolSwapRequest	true	"Get a pool swap quote"
+//	@Param			poolSwapRequest	body		apiresp.PoolSwapRequest	true	"Get a pool swap quote"
 //	@Success		200				{object}	apiresp.OKResponse
 //	@Failure		400				{object}	apiresp.ErrResponse
 //	@Failure		500				{object}	apiresp.ErrResponse

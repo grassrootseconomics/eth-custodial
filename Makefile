@@ -17,7 +17,7 @@ run:
 
 docs:
 	swag fmt --dir internal/api/
-	swag init --parseDependency --dir internal/api/ -g swagger.go
+	swag init --v3.1 --parseDependency --dir internal/api/ -g swagger.go
 
 gen-service-token:
 	${BUILD_CONF} ${DEBUG} go run cmd/gen-service-token/main.go -service localdev

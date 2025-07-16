@@ -19,13 +19,12 @@ import (
 //	@license.name	AGPL-3.0
 //	@license.url	https://www.gnu.org/licenses/agpl-3.0.en.html
 
-//	@securityDefinitions.apikey	TokenAuth
+//	@securityDefinitions.apikey	ApiKeyAuth
 //	@in							header
 //	@name						Authorization
 //	@description				Service API Token
 
-//	@host		localhost:5003
-//	@BasePath	/api/v2
+//	@servers	localhost:5003/api/v2
 
 func (a *API) docsHandler(c echo.Context) error {
 	htmlContent, err := scalar.ApiReferenceHTML(&scalar.Options{

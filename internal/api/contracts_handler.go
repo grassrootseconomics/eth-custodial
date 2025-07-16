@@ -21,10 +21,10 @@ import (
 //	@Tags			Contracts
 //	@Accept			json
 //	@Produce		json
-//	@Param			transferRequest	body		apiresp.ERC20DeployRequest	true	"ERC20 deploy request"
-//	@Success		200				{object}	apiresp.OKResponse
-//	@Failure		400				{object}	apiresp.ErrResponse
-//	@Failure		500				{object}	apiresp.ErrResponse
+//	@Param			erc20DeployRequest	body		apiresp.ERC20DeployRequest	true	"ERC20 deploy request"
+//	@Success		200					{object}	apiresp.OKResponse
+//	@Failure		400					{object}	apiresp.ErrResponse
+//	@Failure		500					{object}	apiresp.ErrResponse
 //	@Security		ApiKeyAuth
 //	@Router			/contracts/erc20 [post]
 func (a *API) contractsERC20Handler(c echo.Context) error {
@@ -92,10 +92,10 @@ func (a *API) contractsERC20Handler(c echo.Context) error {
 //	@Tags			Contracts
 //	@Accept			json
 //	@Produce		json
-//	@Param			poolRequest	body		apiresp.PoolDeployRequest	true	"Pool deploy request"
-//	@Success		200			{object}	apiresp.OKResponse
-//	@Failure		400			{object}	apiresp.ErrResponse
-//	@Failure		500			{object}	apiresp.ErrResponse
+//	@Param			poolDeployRequest	body		apiresp.PoolDeployRequest	true	"Pool deploy request"
+//	@Success		200					{object}	apiresp.OKResponse
+//	@Failure		400					{object}	apiresp.ErrResponse
+//	@Failure		500					{object}	apiresp.ErrResponse
 //	@Security		ApiKeyAuth
 //	@Router			/contracts/pool [post]
 func (a *API) contractsPoolHandler(c echo.Context) error {
@@ -164,10 +164,10 @@ func (a *API) contractsPoolHandler(c echo.Context) error {
 //	@Tags			Contracts
 //	@Accept			json
 //	@Produce		json
-//	@Param			transferRequest	body	apiresp.DemurrageERC20DeployRequest	true	"Demurrage ERC20 deploy request"
-//	@Success		200	{object}	apiresp.OKResponse
-//	@Failure		400	{object}	apiresp.ErrResponse
-//	@Failure		500	{object}	apiresp.ErrResponse
+//	@Param			demurrageERC20DeployRequest	body		apiresp.DemurrageERC20DeployRequest	true	"Demurrage ERC20 deploy request"
+//	@Success		200							{object}	apiresp.OKResponse
+//	@Failure		400							{object}	apiresp.ErrResponse
+//	@Failure		500							{object}	apiresp.ErrResponse
 //	@Security		ApiKeyAuth
 //	@Router			/contracts/erc20-demurrage [post]
 func (a *API) contractsDemurrageERC20Handler(c echo.Context) error {

@@ -1,124 +1,166 @@
-basePath: /api/v2
-definitions:
-  api.ERC20DeployRequest:
-    properties:
-      decimals:
-        type: integer
-      initialMintee:
-        type: string
-      initialSupply:
-        type: string
-      name:
-        type: string
-      owner:
-        type: string
-      symbol:
-        type: string
-    required:
-    - decimals
-    - initialMintee
-    - initialSupply
-    - name
-    - owner
-    - symbol
-    type: object
-  api.ErrResponse:
-    properties:
-      description:
-        type: string
-      errorCode:
-        type: string
-      ok:
-        type: boolean
-    type: object
-  api.OKResponse:
-    properties:
-      description:
-        type: string
-      ok:
-        type: boolean
-      result:
-        additionalProperties: {}
-        type: object
-    type: object
-  api.PoolDeployRequest:
-    properties:
-      name:
-        type: string
-      owner:
-        type: string
-      symbol:
-        type: string
-    required:
-    - name
-    - owner
-    - symbol
-    type: object
-  api.PoolDepositRequest:
-    properties:
-      amount:
-        type: string
-      from:
-        type: string
-      poolAddress:
-        type: string
-      tokenAddress:
-        type: string
-    required:
-    - amount
-    - from
-    - poolAddress
-    - tokenAddress
-    type: object
-  api.PoolSwapRequest:
-    properties:
-      amount:
-        type: string
-      from:
-        type: string
-      fromTokenAddress:
-        type: string
-      poolAddress:
-        type: string
-      toTokenAddress:
-        type: string
-    required:
-    - amount
-    - from
-    - fromTokenAddress
-    - poolAddress
-    - toTokenAddress
-    type: object
-  api.SweepRequest:
-    properties:
-      from:
-        type: string
-      to:
-        type: string
-      tokenAddress:
-        type: string
-    required:
-    - from
-    - to
-    - tokenAddress
-    type: object
-  api.TransferRequest:
-    properties:
-      amount:
-        type: string
-      from:
-        type: string
-      to:
-        type: string
-      tokenAddress:
-        type: string
-    required:
-    - amount
-    - from
-    - to
-    - tokenAddress
-    type: object
-host: localhost:5003
+components:
+  schemas:
+    api.DemurrageERC20DeployRequest:
+      properties:
+        decayLevel:
+          type: string
+        decimals:
+          type: integer
+        initialMintee:
+          type: string
+        initialSupply:
+          type: string
+        name:
+          type: string
+        owner:
+          type: string
+        periodMinutes:
+          type: string
+        sinkAddress:
+          type: string
+        symbol:
+          type: string
+      required:
+      - decayLevel
+      - decimals
+      - initialMintee
+      - initialSupply
+      - name
+      - owner
+      - periodMinutes
+      - sinkAddress
+      - symbol
+      type: object
+    api.ERC20DeployRequest:
+      properties:
+        decimals:
+          type: integer
+        expiryTimestamp:
+          minLength: 0
+          type: string
+        initialMintee:
+          type: string
+        initialSupply:
+          type: string
+        name:
+          type: string
+        owner:
+          type: string
+        symbol:
+          type: string
+      required:
+      - decimals
+      - initialMintee
+      - initialSupply
+      - name
+      - owner
+      - symbol
+      type: object
+    api.ErrResponse:
+      properties:
+        description:
+          type: string
+        errorCode:
+          type: string
+        ok:
+          type: boolean
+      type: object
+    api.OKResponse:
+      properties:
+        description:
+          type: string
+        ok:
+          type: boolean
+        result:
+          additionalProperties: {}
+          type: object
+      type: object
+    api.PoolDeployRequest:
+      properties:
+        name:
+          type: string
+        owner:
+          type: string
+        symbol:
+          type: string
+      required:
+      - name
+      - owner
+      - symbol
+      type: object
+    api.PoolDepositRequest:
+      properties:
+        amount:
+          type: string
+        from:
+          type: string
+        poolAddress:
+          type: string
+        tokenAddress:
+          type: string
+      required:
+      - amount
+      - from
+      - poolAddress
+      - tokenAddress
+      type: object
+    api.PoolSwapRequest:
+      properties:
+        amount:
+          type: string
+        from:
+          type: string
+        fromTokenAddress:
+          type: string
+        poolAddress:
+          type: string
+        toTokenAddress:
+          type: string
+      required:
+      - amount
+      - from
+      - fromTokenAddress
+      - poolAddress
+      - toTokenAddress
+      type: object
+    api.SweepRequest:
+      properties:
+        from:
+          type: string
+        to:
+          type: string
+        tokenAddress:
+          type: string
+      required:
+      - from
+      - to
+      - tokenAddress
+      type: object
+    api.TransferRequest:
+      properties:
+        amount:
+          type: string
+        from:
+          type: string
+        to:
+          type: string
+        tokenAddress:
+          type: string
+      required:
+      - amount
+      - from
+      - to
+      - tokenAddress
+      type: object
+  securitySchemes:
+    "":
+      description: Service API Token
+      in: header
+      name: Authorization
+      type: apiKey
+externalDocs:
+  description: ""
+  url: ""
 info:
   contact:
     email: devops@grassecon.org
@@ -131,23 +173,29 @@ info:
   termsOfService: https://grassecon.org/pages/terms-and-conditions.html
   title: ETH Custodial API
   version: "2.0"
+openapi: 3.1.0
 paths:
   /account/create:
     post:
-      consumes:
-      - '*/*'
       description: Create a new custodial account
-      produces:
-      - application/json
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              type: string
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.OKResponse'
           description: OK
-          schema:
-            $ref: '#/definitions/api.OKResponse'
         "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.ErrResponse'
           description: Internal Server Error
-          schema:
-            $ref: '#/definitions/api.ErrResponse'
       security:
       - ApiKeyAuth: []
       summary: Create a new custodial account
@@ -155,39 +203,48 @@ paths:
       - Account
   /account/otx/{address}:
     get:
-      consumes:
-      - '*/*'
       description: Get an accounts OTX's (Origin transaction)
       parameters:
       - description: Account
         in: path
         name: address
         required: true
-        type: string
+        schema:
+          type: string
       - description: Next
         in: query
         name: next
-        type: boolean
+        schema:
+          type: boolean
       - description: Cursor
         in: query
         name: cursor
-        type: integer
+        schema:
+          type: integer
       - description: Per page
         in: query
         name: perPage
         required: true
-        type: integer
-      produces:
-      - application/json
+        schema:
+          type: integer
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              type: string
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.OKResponse'
           description: OK
-          schema:
-            $ref: '#/definitions/api.OKResponse'
         "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.ErrResponse'
           description: Internal Server Error
-          schema:
-            $ref: '#/definitions/api.ErrResponse'
       security:
       - ApiKeyAuth: []
       summary: Get an accounts OTX's (Origin transaction)
@@ -195,26 +252,32 @@ paths:
       - Account
   /account/status/{address}:
     get:
-      consumes:
-      - '*/*'
       description: Check a custodial account's status
       parameters:
       - description: Account address
         in: path
         name: address
         required: true
-        type: string
-      produces:
-      - application/json
+        schema:
+          type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              type: string
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.OKResponse'
           description: OK
-          schema:
-            $ref: '#/definitions/api.OKResponse'
         "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.ErrResponse'
           description: Internal Server Error
-          schema:
-            $ref: '#/definitions/api.ErrResponse'
       security:
       - ApiKeyAuth: []
       summary: Check a custodial account's status
@@ -222,63 +285,101 @@ paths:
       - Account
   /contracts/erc20:
     post:
-      consumes:
-      - application/json
       description: ERC20 deploy request
-      parameters:
-      - description: ERC20 deploy request
-        in: body
-        name: transferRequest
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/api.ERC20DeployRequest'
+        description: ERC20 deploy request
         required: true
-        schema:
-          $ref: '#/definitions/api.ERC20DeployRequest'
-      produces:
-      - application/json
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.OKResponse'
           description: OK
-          schema:
-            $ref: '#/definitions/api.OKResponse'
         "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.ErrResponse'
           description: Bad Request
-          schema:
-            $ref: '#/definitions/api.ErrResponse'
         "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.ErrResponse'
           description: Internal Server Error
-          schema:
-            $ref: '#/definitions/api.ErrResponse'
       security:
       - ApiKeyAuth: []
       summary: ERC20 deploy request
       tags:
       - Contracts
-  /contracts/pool:
+  /contracts/erc20-demurrage:
     post:
-      consumes:
-      - application/json
-      description: Pool deploy request
-      parameters:
-      - description: Pool deploy request
-        in: body
-        name: poolRequest
+      description: Demurrage ERC20 deploy request
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/api.DemurrageERC20DeployRequest'
+        description: Demurrage ERC20 deploy request
         required: true
-        schema:
-          $ref: '#/definitions/api.PoolDeployRequest'
-      produces:
-      - application/json
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.OKResponse'
           description: OK
-          schema:
-            $ref: '#/definitions/api.OKResponse'
         "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.ErrResponse'
           description: Bad Request
-          schema:
-            $ref: '#/definitions/api.ErrResponse'
         "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.ErrResponse'
           description: Internal Server Error
-          schema:
-            $ref: '#/definitions/api.ErrResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Demurrage ERC20 deploy request
+      tags:
+      - Contracts
+  /contracts/pool:
+    post:
+      description: Pool deploy request
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/api.PoolDeployRequest'
+        description: Pool deploy request
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.OKResponse'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.ErrResponse'
+          description: Bad Request
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.ErrResponse'
+          description: Internal Server Error
       security:
       - ApiKeyAuth: []
       summary: Pool deploy request
@@ -286,26 +387,32 @@ paths:
       - Contracts
   /otx/track/{trackingId}:
     get:
-      consumes:
-      - '*/*'
       description: Track an OTX's (Origin transaction) chain status
       parameters:
       - description: Tracking ID
         in: path
         name: trackingId
         required: true
-        type: string
-      produces:
-      - application/json
+        schema:
+          type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              type: string
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.OKResponse'
           description: OK
-          schema:
-            $ref: '#/definitions/api.OKResponse'
         "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.ErrResponse'
           description: Internal Server Error
-          schema:
-            $ref: '#/definitions/api.ErrResponse'
       security:
       - ApiKeyAuth: []
       summary: Track an OTX's (Origin transaction) chain status
@@ -313,31 +420,33 @@ paths:
       - OTX
   /pool/deposit:
     post:
-      consumes:
-      - application/json
       description: Pool deposit request
-      parameters:
-      - description: Pool deposit request
-        in: body
-        name: transferRequest
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/api.PoolDepositRequest'
+        description: Pool deposit request
         required: true
-        schema:
-          $ref: '#/definitions/api.PoolDepositRequest'
-      produces:
-      - application/json
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.OKResponse'
           description: OK
-          schema:
-            $ref: '#/definitions/api.OKResponse'
         "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.ErrResponse'
           description: Bad Request
-          schema:
-            $ref: '#/definitions/api.ErrResponse'
         "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.ErrResponse'
           description: Internal Server Error
-          schema:
-            $ref: '#/definitions/api.ErrResponse'
       security:
       - ApiKeyAuth: []
       summary: Pool deposit request
@@ -345,31 +454,33 @@ paths:
       - Sign
   /pool/quote:
     post:
-      consumes:
-      - application/json
       description: Get a pool swap quote
-      parameters:
-      - description: Get a pool swap quote
-        in: body
-        name: transferRequest
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/api.PoolSwapRequest'
+        description: Get a pool swap quote
         required: true
-        schema:
-          $ref: '#/definitions/api.PoolSwapRequest'
-      produces:
-      - application/json
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.OKResponse'
           description: OK
-          schema:
-            $ref: '#/definitions/api.OKResponse'
         "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.ErrResponse'
           description: Bad Request
-          schema:
-            $ref: '#/definitions/api.ErrResponse'
         "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.ErrResponse'
           description: Internal Server Error
-          schema:
-            $ref: '#/definitions/api.ErrResponse'
       security:
       - ApiKeyAuth: []
       summary: Get a pool swap quote
@@ -377,31 +488,33 @@ paths:
       - Sign
   /pool/swap:
     post:
-      consumes:
-      - application/json
       description: Pool swap request
-      parameters:
-      - description: Pool swap request
-        in: body
-        name: transferRequest
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/api.PoolSwapRequest'
+        description: Pool swap request
         required: true
-        schema:
-          $ref: '#/definitions/api.PoolSwapRequest'
-      produces:
-      - application/json
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.OKResponse'
           description: OK
-          schema:
-            $ref: '#/definitions/api.OKResponse'
         "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.ErrResponse'
           description: Bad Request
-          schema:
-            $ref: '#/definitions/api.ErrResponse'
         "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.ErrResponse'
           description: Internal Server Error
-          schema:
-            $ref: '#/definitions/api.ErrResponse'
       security:
       - ApiKeyAuth: []
       summary: Pool swap request
@@ -409,20 +522,20 @@ paths:
       - Sign
   /system:
     get:
-      consumes:
-      - '*/*'
       description: Get the current system information
-      produces:
-      - application/json
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.OKResponse'
           description: OK
-          schema:
-            $ref: '#/definitions/api.OKResponse'
         "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.ErrResponse'
           description: Internal Server Error
-          schema:
-            $ref: '#/definitions/api.ErrResponse'
       security:
       - ApiKeyAuth: []
       summary: Get the current system information
@@ -430,31 +543,33 @@ paths:
       - System
   /token/sweep:
     post:
-      consumes:
-      - application/json
       description: Sign a token sweep request
-      parameters:
-      - description: Sweep request
-        in: body
-        name: sweepRequest
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/api.SweepRequest'
+        description: Sweep request
         required: true
-        schema:
-          $ref: '#/definitions/api.SweepRequest'
-      produces:
-      - application/json
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.OKResponse'
           description: OK
-          schema:
-            $ref: '#/definitions/api.OKResponse'
         "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.ErrResponse'
           description: Bad Request
-          schema:
-            $ref: '#/definitions/api.ErrResponse'
         "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.ErrResponse'
           description: Internal Server Error
-          schema:
-            $ref: '#/definitions/api.ErrResponse'
       security:
       - ApiKeyAuth: []
       summary: Sign a token sweep request
@@ -462,40 +577,35 @@ paths:
       - Sign
   /token/transfer:
     post:
-      consumes:
-      - application/json
       description: Sign a token transfer request
-      parameters:
-      - description: Transfer request
-        in: body
-        name: transferRequest
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/api.TransferRequest'
+        description: Transfer request
         required: true
-        schema:
-          $ref: '#/definitions/api.TransferRequest'
-      produces:
-      - application/json
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.OKResponse'
           description: OK
-          schema:
-            $ref: '#/definitions/api.OKResponse'
         "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.ErrResponse'
           description: Bad Request
-          schema:
-            $ref: '#/definitions/api.ErrResponse'
         "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.ErrResponse'
           description: Internal Server Error
-          schema:
-            $ref: '#/definitions/api.ErrResponse'
       security:
       - ApiKeyAuth: []
       summary: Sign a token transfer request
       tags:
       - Sign
-securityDefinitions:
-  TokenAuth:
-    description: Service API Token
-    in: header
-    name: Authorization
-    type: apiKey
-swagger: "2.0"
