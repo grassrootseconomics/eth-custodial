@@ -62,18 +62,31 @@ type (
 	}
 
 	ERC20DeployRequest struct {
-		Name          string `json:"name" validate:"required"`
-		Symbol        string `json:"symbol" validate:"required"`
-		Decimals      uint8  `json:"decimals" validate:"required,number,gt=0"`
-		InitialSupply string `json:"initialSupply" validate:"required,number,gt=0"`
-		InitialMintee string `json:"initialMintee" validate:"required,eth_addr_checksum"`
-		Owner         string `json:"owner" validate:"required,eth_addr_checksum"`
+		Name            string `json:"name" validate:"required"`
+		Symbol          string `json:"symbol" validate:"required"`
+		Decimals        uint8  `json:"decimals" validate:"required,number,gt=0"`
+		InitialSupply   string `json:"initialSupply" validate:"required,number,gt=0"`
+		InitialMintee   string `json:"initialMintee" validate:"required,eth_addr_checksum"`
+		Owner           string `json:"owner" validate:"required,eth_addr_checksum"`
+		ExpiryTimestamp string `json:"expiryTimestamp,omitempty" validate:"omitempty,number,gte=0"`
 	}
 
 	PoolDeployRequest struct {
 		Name   string `json:"name" validate:"required"`
 		Symbol string `json:"symbol" validate:"required"`
 		Owner  string `json:"owner" validate:"required,eth_addr_checksum"`
+	}
+
+	DemurrageERC20DeployRequest struct {
+		Name          string `json:"name" validate:"required"`
+		Symbol        string `json:"symbol" validate:"required"`
+		Decimals      uint8  `json:"decimals" validate:"required,number,gt=0"`
+		InitialSupply string `json:"initialSupply" validate:"required,number,gt=0"`
+		InitialMintee string `json:"initialMintee" validate:"required,eth_addr_checksum"`
+		Owner         string `json:"owner" validate:"required,eth_addr_checksum"`
+		SinkAddress   string `json:"sinkAddress" validate:"required,eth_addr_checksum"`
+		DecayLevel    string `json:"decayLevel" validate:"required,number,gt=0,lt=100"`
+		PeriodMinutes string `json:"periodMinutes" validate:"required,number,gt=1440"`
 	}
 )
 

@@ -12,7 +12,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/grassrootseconomics/eth-tracker v1.7.2-celo-rc
 	github.com/grassrootseconomics/ethutils v1.4.0
-	github.com/grassrootseconomics/ge-publish v1.4.3-stable
+	github.com/grassrootseconomics/ge-publish v1.5.0-stable
 	github.com/jackc/pgx/v5 v5.7.5
 	github.com/jackc/tern/v2 v2.3.3
 	github.com/kamikazechaser/common v1.0.0

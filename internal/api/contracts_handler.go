@@ -59,13 +59,14 @@ func (a *API) contractsERC20Handler(c echo.Context) error {
 	trackingID := uuid.NewString()
 
 	_, err = a.queueClient.InsertTx(c.Request().Context(), tx, worker.TokenDeployArgs{
-		TrackingID:    trackingID,
-		Name:          req.Name,
-		Symbol:        req.Symbol,
-		Decimals:      req.Decimals,
-		InitialSupply: req.InitialSupply,
-		InitialMintee: req.InitialMintee,
-		Owner:         req.Owner,
+		TrackingID:      trackingID,
+		Name:            req.Name,
+		Symbol:          req.Symbol,
+		Decimals:        req.Decimals,
+		InitialSupply:   req.InitialSupply,
+		InitialMintee:   req.InitialMintee,
+		Owner:           req.Owner,
+		ExpiryTimestamp: req.ExpiryTimestamp,
 	}, nil)
 	if err != nil {
 		return handlePostgresError(c, err)
@@ -150,6 +151,83 @@ func (a *API) contractsPoolHandler(c echo.Context) error {
 	return c.JSON(http.StatusOK, apiresp.OKResponse{
 		Ok:          true,
 		Description: "Pool deploy request successfully created",
+		Result: map[string]any{
+			"trackingId": trackingID,
+		},
+	})
+}
+
+// DemurrageERC20Handler godoc
+//
+//	@Summary		Demurrage ERC20 deploy request
+//	@Description	Demurrage ERC20 deploy request
+//	@Tags			Contracts
+//	@Accept			json
+//	@Produce		json
+//	@Param			transferRequest	body	apiresp.DemurrageERC20DeployRequest	true	"Demurrage ERC20 deploy request"
+//	@Success		200	{object}	apiresp.OKResponse
+//	@Failure		400	{object}	apiresp.ErrResponse
+//	@Failure		500	{object}	apiresp.ErrResponse
+//	@Security		ApiKeyAuth
+//	@Router			/contracts/erc20-demurrage [post]
+func (a *API) contractsDemurrageERC20Handler(c echo.Context) error {
+	req := apiresp.DemurrageERC20DeployRequest{}
+
+	if err := c.Bind(&req); err != nil {
+		return handleBindError(c)
+	}
+
+	if err := c.Validate(req); err != nil {
+		return handleValidateError(c)
+	}
+
+	poolIndex := a.registry[ethutils.PoolIndex]
+	if a.prod {
+		poolIndex = w3.A("0x01eD8Fe01a2Ca44Cb26D00b1309d7D777471D00C")
+	}
+
+	exists, err := a.alreadyExists(c.Request().Context(), poolIndex, req.Symbol)
+	if err != nil {
+		return err
+	}
+	if exists {
+		return c.JSON(http.StatusBadRequest, apiresp.ErrResponse{
+			Ok:          false,
+			Description: "Token with this symbol already exists",
+			ErrCode:     apiresp.ErrSymbolAlreadyExists,
+		})
+	}
+
+	tx, err := a.store.Pool().Begin(c.Request().Context())
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(c.Request().Context())
+
+	trackingID := uuid.NewString()
+
+	_, err = a.queueClient.InsertTx(c.Request().Context(), tx, worker.DemurrageTokenDeployArgs{
+		TrackingID:    trackingID,
+		Name:          req.Name,
+		Symbol:        req.Symbol,
+		Decimals:      req.Decimals,
+		InitialSupply: req.InitialSupply,
+		InitialMintee: req.InitialMintee,
+		Owner:         req.Owner,
+		DecayLevel:    req.DecayLevel,
+		PeriodMinutes: req.PeriodMinutes,
+	}, nil)
+	if err != nil {
+		return handlePostgresError(c, err)
+	}
+
+	if err := tx.Commit(c.Request().Context()); err != nil {
+		return handlePostgresError(c, err)
+	}
+
+	return c.JSON(http.StatusOK, apiresp.OKResponse{
+		Ok:          true,
+		Description: "Demurrage ERC20 deploy request successfully created",
 		Result: map[string]any{
 			"trackingId": trackingID,
 		},

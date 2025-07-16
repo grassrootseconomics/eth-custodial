@@ -3,6 +3,7 @@ package worker
 import (
 	"context"
 	"math/big"
+	"strconv"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -11,31 +12,32 @@ import (
 	"github.com/grassrootseconomics/eth-custodial/pkg/event"
 	"github.com/grassrootseconomics/ethutils"
 	"github.com/grassrootseconomics/ge-publish/pkg/contract"
+	gepubutil "github.com/grassrootseconomics/ge-publish/pkg/util"
 	"github.com/riverqueue/river"
 )
 
-type (
-	TokenDeployArgs struct {
-		TrackingID      string `json:"trackingId"`
-		Name            string `json:"name"`
-		Symbol          string `json:"symbol"`
-		Decimals        uint8  `json:"decimals"`
-		InitialSupply   string `json:"initialSupply"`
-		InitialMintee   string `json:"initialMintee"`
-		Owner           string `json:"owner"`
-		ExpiryTimestamp string `json:"expiryTimestamp,omitempty"`
-	}
+type DemurrageTokenDeployArgs struct {
+	TrackingID    string `json:"trackingId"`
+	Name          string `json:"name"`
+	Symbol        string `json:"symbol"`
+	Decimals      uint8  `json:"decimals"`
+	InitialSupply string `json:"initialSupply"`
+	InitialMintee string `json:"initialMintee"`
+	Owner         string `json:"owner"`
+	SinkAddress   string `json:"sinkAddress"`
+	DecayLevel    string `json:"decayLevel"`
+	PeriodMinutes string `json:"periodMinutes"`
+}
 
-	TokenDeployWorker struct {
-		river.WorkerDefaults[TokenDeployArgs]
-		wc         *WorkerContainer
-		tokenIndex common.Address
-	}
-)
+type DemurrageTokenDeployWorker struct {
+	river.WorkerDefaults[DemurrageTokenDeployArgs]
+	wc         *WorkerContainer
+	tokenIndex common.Address
+}
 
-func (TokenDeployArgs) Kind() string { return store.STANDARD_TOKEN_DEPLOY }
+func (DemurrageTokenDeployArgs) Kind() string { return store.DEMURRAGE_TOKEN_DEPLOY }
 
-func (w *TokenDeployWorker) Work(ctx context.Context, job *river.Job[TokenDeployArgs]) error {
+func (w *DemurrageTokenDeployWorker) Work(ctx context.Context, job *river.Job[DemurrageTokenDeployArgs]) error {
 	tx, err := w.wc.store.Pool().Begin(ctx)
 	if err != nil {
 		return err
@@ -62,28 +64,29 @@ func (w *TokenDeployWorker) Work(ctx context.Context, job *river.Job[TokenDeploy
 		return err
 	}
 
-	expiry := big.NewInt(0)
-	if job.Args.ExpiryTimestamp != "" {
-		tmp, ok := new(big.Int).SetString(job.Args.ExpiryTimestamp, 10)
-		if ok {
-			expiry = tmp
-		}
+	demurrageRate, err := strconv.ParseInt(job.Args.DecayLevel, 10, 64)
+	if err != nil {
+		return err
+	}
+	demurragePeriod, err := strconv.ParseInt(job.Args.PeriodMinutes, 10, 64)
+	if err != nil {
+		return err
+	}
+	decayLevel, err := gepubutil.CalculateDecayLevel(demurrageRate, demurragePeriod)
+	if err != nil {
+		return err
 	}
 
-	otxType := store.STANDARD_TOKEN_DEPLOY
-	if expiry.Cmp(big.NewInt(0)) > 0 {
-		otxType = store.EXPIRING_TOKEN_DEPLOY
-	}
-
-	contract := contract.NewERC20(contract.ERC20ConstructorArgs{
-		Name:            job.Args.Name,
-		Symbol:          job.Args.Symbol,
-		Decimals:        job.Args.Decimals,
-		ExpiryTimestamp: expiry,
+	contract := contract.NewERC20Demurrage(contract.ERC20DemurrageConstructorArgs{
+		Name:               job.Args.Name,
+		Symbol:             job.Args.Symbol,
+		Decimals:           job.Args.Decimals,
+		DecayLevel:         decayLevel,
+		PeriodMinutes:      big.NewInt(demurragePeriod),
+		DefaultSinkAddress: common.HexToAddress(job.Args.SinkAddress),
 	})
 	byteCode, err := contract.Bytecode()
 	if err != nil {
-		return err
 	}
 
 	builtContractDeployTx, err := w.wc.chainProvider.SignContractPublishTx(privateKey, ethutils.ContractPublishTxOpts{
@@ -106,7 +109,7 @@ func (w *TokenDeployWorker) Work(ctx context.Context, job *river.Job[TokenDeploy
 
 	deployContractOTXID, err := w.wc.store.InsertOTX(ctx, tx, store.OTX{
 		TrackingID:    job.Args.TrackingID,
-		OTXType:       otxType,
+		OTXType:       store.DEMURRAGE_TOKEN_DEPLOY,
 		SignerAccount: systemKeypair.Public,
 		RawTx:         rawContractDeployTxHex,
 		TxHash:        builtContractDeployTx.Hash().Hex(),
@@ -335,4 +338,5 @@ func (w *TokenDeployWorker) Work(ctx context.Context, job *river.Job[TokenDeploy
 	})
 
 	return tx.Commit(ctx)
+
 }

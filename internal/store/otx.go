@@ -43,6 +43,8 @@ const (
 	PRICEINDEXQUOTER_DEPLOY string = "PRICEINDEXQUOTER_DEPLOY"
 	POOL_INDEX_ADD          string = "POOL_INDEX_ADD"
 	SET_QUOTER              string = "SET_QUOTER"
+	DEMURRAGE_TOKEN_DEPLOY  string = "DEMURRAGE_TOKEN_DEPLOY"
+	EXPIRING_TOKEN_DEPLOY   string = "EXPIRING_TOKEN_DEPLOY"
 )
 
 func (pg *Pg) InsertOTX(ctx context.Context, tx pgx.Tx, otx OTX) (uint64, error) {
