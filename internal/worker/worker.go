@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
+	ensclient "github.com/grassrootseconomics/eth-custodial/internal/ens_client"
 	"github.com/grassrootseconomics/eth-custodial/internal/gas"
 	"github.com/grassrootseconomics/eth-custodial/internal/pub"
 	"github.com/grassrootseconomics/eth-custodial/internal/store"
@@ -26,6 +27,7 @@ type (
 		Logg                *slog.Logger
 		ChainProvider       *ethutils.Provider
 		Pub                 *pub.Pub
+		EnsClient           *ensclient.EnsClient
 		// TODO: temporary patch for prod because poolIndex doesn't exist in the entry point registry
 		Prod bool
 	}
@@ -43,6 +45,7 @@ type (
 		logg          *slog.Logger
 		pub           *pub.Pub
 		chainProvider *ethutils.Provider
+		ensClient     *ensclient.EnsClient
 		prod          bool
 	}
 )
@@ -61,6 +64,7 @@ func New(o WorkerOpts) (*WorkerContainer, error) {
 		logg:          o.Logg,
 		pub:           o.Pub,
 		chainProvider: o.ChainProvider,
+		ensClient:     o.EnsClient,
 		prod:          o.Prod,
 	}
 

@@ -2,10 +2,12 @@ package worker
 
 import (
 	"context"
+	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
+	ensclient "github.com/grassrootseconomics/eth-custodial/internal/ens_client"
 	"github.com/grassrootseconomics/eth-custodial/internal/store"
 	"github.com/grassrootseconomics/eth-custodial/pkg/event"
 	"github.com/grassrootseconomics/ethutils"
@@ -663,6 +665,21 @@ func (w *PoolDeployWorker) Work(ctx context.Context, job *river.Job[PoolDeployAr
 	})
 	if err != nil {
 		return err
+	}
+
+	// Best effort ENS registration
+	ensHint := strings.ToLower(job.Args.Symbol) + ensclient.SuffixENSName
+	ensInput := ensclient.RegisterInput{
+		Address: swapPoolAddress.Hex(),
+		Hint:    ensHint,
+	}
+
+	_, err = w.wc.ensClient.Register(ctx, ensInput)
+	if err != nil {
+		w.wc.logg.Warn("failed to register ENS name", "error", err, "hint", ensHint, "address", swapPoolAddress.Hex())
+		// Don't fail the entire transaction if ENS registration fails
+	} else {
+		w.wc.logg.Info("successfully registered ENS name", "hint", ensHint, "address", swapPoolAddress.Hex())
 	}
 
 	w.wc.pub.Send(ctx, event.Event{
