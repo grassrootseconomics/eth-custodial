@@ -216,6 +216,7 @@ func (a *API) contractsDemurrageERC20Handler(c echo.Context) error {
 		Owner:           req.Owner,
 		DemurrageRate:   req.DemurrageRate,
 		DemurragePeriod: req.DemurragePeriod,
+		SinkAddress:     req.SinkAddress,
 	}, nil)
 	if err != nil {
 		return handlePostgresError(c, err)
