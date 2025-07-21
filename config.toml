@@ -47,3 +47,7 @@ banned_tokens = ["0x471EcE3750Da237f93B8E339c536989b8978a438"]
 endpoint = "nats://127.0.0.1:4222"
 id = "eth-custodial-1"
 persist_duration_hrs = 48
+
+[ens]
+endpoint = "http://localhost:5015"
+api_key = ""

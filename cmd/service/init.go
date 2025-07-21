@@ -8,6 +8,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/grassrootseconomics/eth-custodial/internal/api"
+	ensclient "github.com/grassrootseconomics/eth-custodial/internal/ens_client"
 	"github.com/grassrootseconomics/eth-custodial/internal/gas"
 	internaljs "github.com/grassrootseconomics/eth-custodial/internal/jetstream"
 	"github.com/grassrootseconomics/eth-custodial/internal/pub"
@@ -29,6 +30,7 @@ var (
 	registry        map[string]common.Address
 	workerContainer *worker.WorkerContainer
 	apiServer       *api.API
+	ensClient       *ensclient.EnsClient
 
 	js       jetstream.JetStream
 	natsConn *nats.Conn
@@ -143,6 +145,19 @@ func loadPub() *pub.Pub {
 	return jsPub
 }
 
+func loadEnsClient() *ensclient.EnsClient {
+	if ensClient != nil {
+		return ensClient
+	}
+
+	ensClient = ensclient.New(
+		ko.MustString("ens.api_key"),
+		ko.MustString("ens.endpoint"),
+	)
+
+	return ensClient
+}
+
 func initSub() *sub.Sub {
 	if jsSub != nil {
 		return jsSub
@@ -179,6 +194,7 @@ func initWorker() *worker.WorkerContainer {
 		Logg:          lo,
 		Pub:           loadPub(),
 		ChainProvider: loadChainProvider(),
+		EnsClient:     loadEnsClient(),
 		Prod:          ko.Bool("workers.prod"),
 	}
 
