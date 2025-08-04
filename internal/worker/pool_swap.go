@@ -188,10 +188,11 @@ func (w *PoolSwapWorker) Work(ctx context.Context, job *river.Job[PoolSwapArgs])
 		return err
 	}
 
-	input, err := Abi[Withdraw].EncodeArgs(
+	input, err := Abi[WithdrawDeductFees].EncodeArgs(
 		ethutils.HexToAddress(job.Args.ToTokenAddress),
 		ethutils.HexToAddress(job.Args.FromTokenAddress),
 		amount,
+		true,
 	)
 	if err != nil {
 		return err
