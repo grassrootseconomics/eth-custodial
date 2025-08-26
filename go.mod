@@ -5,7 +5,7 @@ go 1.24
 require (
 	github.com/MarceloPetrucio/go-scalar-api-reference v0.0.0-20240521013641-ce5d2efe0e06
 	github.com/VictoriaMetrics/metrics v1.38.0
-	github.com/ethereum/go-ethereum v1.16.0
+	github.com/ethereum/go-ethereum v1.16.2
 	github.com/georgysavva/scany/v2 v2.1.4
 	github.com/go-playground/validator/v10 v10.26.0
 	github.com/golang-jwt/jwt/v5 v5.2.2
@@ -24,7 +24,7 @@ require (
 	github.com/knadh/koanf/v2 v2.2.1
 	github.com/labstack/echo-jwt/v4 v4.3.1
 	github.com/labstack/echo/v4 v4.13.4
-	github.com/lmittmann/w3 v0.19.5
+	github.com/lmittmann/w3 v0.20.2
 	github.com/nats-io/nats.go v1.43.0
 	github.com/riverqueue/river v0.23.1
 	github.com/riverqueue/river/riverdriver/riverpgxv5 v0.23.1
