@@ -118,6 +118,14 @@ func (a *API) sweepHandler(c echo.Context) error {
 		})
 	}
 
+	if a.stopPretiumLeak(req.To, req.TokenAddress) {
+		return c.JSON(http.StatusForbidden, apiresp.ErrResponse{
+			Ok:          false,
+			Description: fmt.Sprintf("Transfers of token %s to the Pretium address are not allowed", req.TokenAddress),
+			ErrCode:     apiresp.ErrPretiumLeak,
+		})
+	}
+
 	tx, err := a.store.Pool().Begin(c.Request().Context())
 	if err != nil {
 		return handlePostgresError(c, err)

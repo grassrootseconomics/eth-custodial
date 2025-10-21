@@ -100,4 +100,5 @@ const (
 	ErrNoRecordFound           = "E07"
 	ErrBannedToken             = "E08"
 	ErrSymbolAlreadyExists     = "E09"
+	ErrPretiumLeak             = "E10"
 )
