@@ -1,6 +1,8 @@
 package api
 
 import (
+	"strings"
+
 	"github.com/go-playground/validator/v10"
 )
 
@@ -35,7 +37,8 @@ func (a *API) isBannedToken(tokenAddress string) bool {
 // This is a temporary stopgap to prevent people from accddentally sending their normal vouchers to pretium
 // true stops the transfer, false allows it
 func (a *API) stopPretiumLeak(toAddress string, tokenAddress string) bool {
-	if toAddress != pretiumAddress {
+	a.logg.Info("stopPretiumLeak called", "to", toAddress, "token", tokenAddress, "pretiumAddr", pretiumAddress)
+	if !strings.EqualFold(toAddress, pretiumAddress) {
 		return false
 	}
 	a.logg.Info("checking for pretium leak", "to", toAddress, "token", tokenAddress)
