@@ -241,6 +241,6 @@ func initAPI() *api.API {
 		Logg:           lo,
 		Debug:          true,
 		BannedTokens:   ko.Strings("chain.banned_tokens"),
-		PretiumAddress: ko.MustString("chain,pretium_address"),
+		PretiumAddress: ko.MustString("chain.pretium_address"),
 	})
 }
