@@ -8,6 +8,8 @@ type Validator struct {
 	ValidatorProvider *validator.Validate
 }
 
+const pretiumAddress = "0x8005ee53E57aB11E11eAA4EFe07Ee3835Dc02F98"
+
 var pretiumAllowedTokens = map[string]struct{}{
 	"0x765DE816845861e75A25fCA122bb6898B8B1282a": {},
 	"0x48065fbBE25f71C9282ddf5e1cD6D6A887483D5e": {},
@@ -33,9 +35,10 @@ func (a *API) isBannedToken(tokenAddress string) bool {
 // This is a temporary stopgap to prevent people from accddentally sending their normal vouchers to pretium
 // true stops the transfer, false allows it
 func (a *API) stopPretiumLeak(toAddress string, tokenAddress string) bool {
-	if toAddress != a.pretiumAddress {
+	if toAddress != pretiumAddress {
 		return false
 	}
+	a.logg.Info("checking for pretium leak", "to", toAddress, "token", tokenAddress)
 
 	_, allowed := pretiumAllowedTokens[tokenAddress]
 	return !allowed

@@ -26,37 +26,35 @@ type (
 		EnableDocs    bool
 		JRPC          bool
 		// TODO: temporary patch for prod because poolIndex doesn't exisit in the entry point registry
-		Prod           bool
-		ListenAddress  string
-		Build          string
-		Registry       map[string]common.Address
-		CORS           []string
-		VerifyingKey   crypto.PublicKey
-		SigningKey     crypto.PrivateKey
-		Store          store.Store
-		Logg           *slog.Logger
-		ChainProvider  *ethutils.Provider
-		GasOracle      gas.GasOracle
-		QueueClient    *river.Client[pgx.Tx]
-		BannedTokens   []string
-		PretiumAddress string
+		Prod          bool
+		ListenAddress string
+		Build         string
+		Registry      map[string]common.Address
+		CORS          []string
+		VerifyingKey  crypto.PublicKey
+		SigningKey    crypto.PrivateKey
+		Store         store.Store
+		Logg          *slog.Logger
+		ChainProvider *ethutils.Provider
+		GasOracle     gas.GasOracle
+		QueueClient   *river.Client[pgx.Tx]
+		BannedTokens  []string
 	}
 
 	API struct {
-		listenAddress  string
-		build          string
-		prod           bool
-		registry       map[string]common.Address
-		signingKey     crypto.PrivateKey
-		verifyingKey   crypto.PublicKey
-		store          store.Store
-		gasOracle      gas.GasOracle
-		logg           *slog.Logger
-		chainProvider  *ethutils.Provider
-		router         *echo.Echo
-		queueClient    *river.Client[pgx.Tx]
-		bannedTokens   map[string]struct{}
-		pretiumAddress string
+		listenAddress string
+		build         string
+		prod          bool
+		registry      map[string]common.Address
+		signingKey    crypto.PrivateKey
+		verifyingKey  crypto.PublicKey
+		store         store.Store
+		gasOracle     gas.GasOracle
+		logg          *slog.Logger
+		chainProvider *ethutils.Provider
+		router        *echo.Echo
+		queueClient   *river.Client[pgx.Tx]
+		bannedTokens  map[string]struct{}
 	}
 )
 
@@ -69,19 +67,18 @@ const (
 
 func New(o APIOpts) *API {
 	api := &API{
-		prod:           o.Prod,
-		build:          o.Build,
-		registry:       o.Registry,
-		signingKey:     o.SigningKey,
-		verifyingKey:   o.VerifyingKey,
-		listenAddress:  o.ListenAddress,
-		logg:           o.Logg,
-		store:          o.Store,
-		gasOracle:      o.GasOracle,
-		chainProvider:  o.ChainProvider,
-		queueClient:    o.QueueClient,
-		bannedTokens:   make(map[string]struct{}, len(o.BannedTokens)),
-		pretiumAddress: o.PretiumAddress,
+		prod:          o.Prod,
+		build:         o.Build,
+		registry:      o.Registry,
+		signingKey:    o.SigningKey,
+		verifyingKey:  o.VerifyingKey,
+		listenAddress: o.ListenAddress,
+		logg:          o.Logg,
+		store:         o.Store,
+		gasOracle:     o.GasOracle,
+		chainProvider: o.ChainProvider,
+		queueClient:   o.QueueClient,
+		bannedTokens:  make(map[string]struct{}, len(o.BannedTokens)),
 	}
 
 	for _, addr := range o.BannedTokens {

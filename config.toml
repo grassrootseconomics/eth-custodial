@@ -42,7 +42,6 @@ rpc_endpoint = "http://localhost:8545"
 ge_registry = "0xEA7a52e565C43598011cC5f509b8252Eb3e8dbE5"
 # Certain chains implement the gas token as an ERC20 token as well. We block any transfer related to it at the API level.
 banned_tokens = ["0x471EcE3750Da237f93B8E339c536989b8978a438"]
-pretium_address = ["0x8005ee53e57AB11E11EAa4EFe07eE3835DC02f98"]
 
 [jetstream]
 endpoint = "nats://127.0.0.1:4222"
