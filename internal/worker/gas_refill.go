@@ -72,7 +72,7 @@ func (w *GasRefillWorker) Work(ctx context.Context, job *river.Job[GasRefillArgs
 	}
 
 	if !checkStatus {
-		w.wc.logg.Warn("gas poke check fail", "address", job.Args.Address)
+		w.wc.logg.Debug("gas poke check fail", "address", job.Args.Address)
 		return nil
 	}
 
