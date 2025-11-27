@@ -3,6 +3,9 @@ package worker
 import (
 	"errors"
 	"math/big"
+
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/grassrootseconomics/ethutils"
 )
 
 var ErrInvalidNumberString = errors.New("invalid number string")
@@ -23,4 +26,9 @@ func StringToBigInt(numberString string, bump bool) (*big.Int, error) {
 	}
 
 	return n, nil
+}
+
+func addDivviRefferalTag(p *ethutils.Provider, inputData []byte, user common.Address) []byte {
+	referralTag := p.GetReferalTag(user)
+	return ethutils.ConcatBytes(inputData, referralTag)
 }

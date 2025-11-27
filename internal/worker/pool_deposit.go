@@ -68,7 +68,7 @@ func (w *PoolDepositWorker) Work(ctx context.Context, job *river.Job[PoolDeposit
 
 	builtResetApprovalTx, err := w.wc.chainProvider.SignContractExecutionTx(privateKey, ethutils.ContractExecutionTxOpts{
 		ContractAddress: ethutils.HexToAddress(job.Args.TokenAddress),
-		InputData:       resetApprovalInput,
+		InputData:       addDivviRefferalTag(w.wc.chainProvider, resetApprovalInput, ethutils.HexToAddress(job.Args.From)),
 		GasFeeCap:       gasSettings.GasFeeCap,
 		GasTipCap:       gasSettings.GasTipCap,
 		GasLimit:        gasSettings.GasLimit,
@@ -130,7 +130,7 @@ func (w *PoolDepositWorker) Work(ctx context.Context, job *river.Job[PoolDeposit
 
 	builtSetApprovalTx, err := w.wc.chainProvider.SignContractExecutionTx(privateKey, ethutils.ContractExecutionTxOpts{
 		ContractAddress: ethutils.HexToAddress(job.Args.TokenAddress),
-		InputData:       setApprovalInput,
+		InputData:       addDivviRefferalTag(w.wc.chainProvider, setApprovalInput, ethutils.HexToAddress(job.Args.From)),
 		GasFeeCap:       gasSettings.GasFeeCap,
 		GasTipCap:       gasSettings.GasTipCap,
 		GasLimit:        gasSettings.GasLimit,
@@ -192,7 +192,7 @@ func (w *PoolDepositWorker) Work(ctx context.Context, job *river.Job[PoolDeposit
 
 	builtTx, err := w.wc.chainProvider.SignContractExecutionTx(privateKey, ethutils.ContractExecutionTxOpts{
 		ContractAddress: ethutils.HexToAddress(job.Args.PoolAddress),
-		InputData:       input,
+		InputData:       addDivviRefferalTag(w.wc.chainProvider, input, ethutils.HexToAddress(job.Args.From)),
 		GasFeeCap:       gasSettings.GasFeeCap,
 		GasTipCap:       gasSettings.GasTipCap,
 		GasLimit:        gasSettings.GasLimit,

@@ -82,7 +82,11 @@ func loadChainProvider() *ethutils.Provider {
 		return chainProvider
 	}
 
-	chainProvider = ethutils.NewProvider(ko.MustString("chain.rpc_endpoint"), ko.MustInt64("chain.id"))
+	chainProvider = ethutils.NewProvider(
+		ko.MustString("chain.rpc_endpoint"),
+		ko.MustInt64("chain.id"),
+		ethutils.WithDivviConsumerAddress(ko.MustString("chain.divvi_consumer")),
+	)
 	return chainProvider
 }
 
@@ -164,13 +168,20 @@ func initSub() *sub.Sub {
 	}
 	var err error
 
-	jsSub, err = sub.NewSub(sub.SubObts{
+	subopts := sub.SubObts{
+		Provider:   loadChainProvider(),
 		Store:      loadStore(),
 		JS:         loadJetStream(),
 		ConsumerID: ko.MustString("jetstream.id"),
 		Pub:        loadPub(),
 		Logg:       lo,
-	})
+	}
+	if ko.MustInt64("chain.id") == ethutils.CeloMainnet {
+		lo.Info("activating divvi submissions on celo mainnet")
+		subopts.ActivateDivviSubmissions = true
+	}
+
+	jsSub, err = sub.NewSub(subopts)
 	if err != nil {
 		lo.Error("could not load jetstream sub", "error", err)
 		os.Exit(1)

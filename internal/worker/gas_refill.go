@@ -103,7 +103,7 @@ func (w *GasRefillWorker) Work(ctx context.Context, job *river.Job[GasRefillArgs
 
 	builtTx, err := w.wc.chainProvider.SignContractExecutionTx(privateKey, ethutils.ContractExecutionTxOpts{
 		ContractAddress: w.gasFaucet,
-		InputData:       input,
+		InputData:       addDivviRefferalTag(w.wc.chainProvider, input, ethutils.HexToAddress(systemKeypair.Public)),
 		GasFeeCap:       gasSettings.GasFeeCap,
 		GasTipCap:       gasSettings.GasTipCap,
 		GasLimit:        gasSettings.GasLimit,

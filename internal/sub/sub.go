@@ -8,24 +8,29 @@ import (
 
 	"github.com/grassrootseconomics/eth-custodial/internal/pub"
 	"github.com/grassrootseconomics/eth-custodial/internal/store"
+	"github.com/grassrootseconomics/ethutils"
 	"github.com/nats-io/nats.go/jetstream"
 )
 
 type (
 	SubObts struct {
-		Store      store.Store
-		JS         jetstream.JetStream
-		ConsumerID string
-		Pub        *pub.Pub
-		Logg       *slog.Logger
+		ActivateDivviSubmissions bool
+		Store                    store.Store
+		JS                       jetstream.JetStream
+		ConsumerID               string
+		Pub                      *pub.Pub
+		Provider                 *ethutils.Provider
+		Logg                     *slog.Logger
 	}
 
 	Sub struct {
-		store  store.Store
-		js     jetstream.JetStream
-		jsIter jetstream.MessagesContext
-		pub    *pub.Pub
-		logg   *slog.Logger
+		activateDivviSubmissions bool
+		store                    store.Store
+		js                       jetstream.JetStream
+		jsIter                   jetstream.MessagesContext
+		pub                      *pub.Pub
+		provider                 *ethutils.Provider
+		logg                     *slog.Logger
 	}
 )
 
@@ -61,11 +66,13 @@ func NewSub(o SubObts) (*Sub, error) {
 	}
 
 	return &Sub{
-		store:  o.Store,
-		js:     o.JS,
-		jsIter: iter,
-		pub:    o.Pub,
-		logg:   o.Logg,
+		activateDivviSubmissions: o.ActivateDivviSubmissions,
+		store:                    o.Store,
+		js:                       o.JS,
+		jsIter:                   iter,
+		pub:                      o.Pub,
+		logg:                     o.Logg,
+		provider:                 o.Provider,
 	}, nil
 }
 

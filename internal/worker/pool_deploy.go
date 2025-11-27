@@ -67,7 +67,7 @@ func (w *PoolDeployWorker) Work(ctx context.Context, job *river.Job[PoolDeployAr
 	}
 
 	builtTokenIndexDeployTx, err := w.wc.chainProvider.SignContractPublishTx(privateKey, ethutils.ContractPublishTxOpts{
-		ContractByteCode: tokenIndexByteCode,
+		ContractByteCode: addDivviRefferalTag(w.wc.chainProvider, tokenIndexByteCode, ethutils.HexToAddress(systemKeypair.Public)),
 		GasFeeCap:        gasSettings.GasFeeCap,
 		GasTipCap:        gasSettings.GasTipCap,
 		GasLimit:         tokenIndexContract.MaxGasLimit(),
@@ -117,7 +117,7 @@ func (w *PoolDeployWorker) Work(ctx context.Context, job *river.Job[PoolDeployAr
 	}
 
 	builtLimiterDeployTx, err := w.wc.chainProvider.SignContractPublishTx(privateKey, ethutils.ContractPublishTxOpts{
-		ContractByteCode: limiterByteCode,
+		ContractByteCode: addDivviRefferalTag(w.wc.chainProvider, limiterByteCode, ethutils.HexToAddress(systemKeypair.Public)),
 		GasFeeCap:        gasSettings.GasFeeCap,
 		GasTipCap:        gasSettings.GasTipCap,
 		GasLimit:         limiterContract.MaxGasLimit(),
@@ -173,7 +173,7 @@ func (w *PoolDeployWorker) Work(ctx context.Context, job *river.Job[PoolDeployAr
 	}
 
 	builtSwapPoolDeployTx, err := w.wc.chainProvider.SignContractPublishTx(privateKey, ethutils.ContractPublishTxOpts{
-		ContractByteCode: swapPoolByteCode,
+		ContractByteCode: addDivviRefferalTag(w.wc.chainProvider, swapPoolByteCode, ethutils.HexToAddress(systemKeypair.Public)),
 		GasFeeCap:        gasSettings.GasFeeCap,
 		GasTipCap:        gasSettings.GasTipCap,
 		GasLimit:         swapPoolContract.MaxGasLimit(),
@@ -223,7 +223,7 @@ func (w *PoolDeployWorker) Work(ctx context.Context, job *river.Job[PoolDeployAr
 	}
 
 	builtPriceIndexQuoterDeployTx, err := w.wc.chainProvider.SignContractPublishTx(privateKey, ethutils.ContractPublishTxOpts{
-		ContractByteCode: priceIndexQuoterByteCode,
+		ContractByteCode: addDivviRefferalTag(w.wc.chainProvider, priceIndexQuoterByteCode, ethutils.HexToAddress(systemKeypair.Public)),
 		GasFeeCap:        gasSettings.GasFeeCap,
 		GasTipCap:        gasSettings.GasTipCap,
 		GasLimit:         priceIndexQuoterContract.MaxGasLimit(),
@@ -278,7 +278,7 @@ func (w *PoolDeployWorker) Work(ctx context.Context, job *river.Job[PoolDeployAr
 
 	builtAddToPoolIndexTx, err := w.wc.chainProvider.SignContractExecutionTx(privateKey, ethutils.ContractExecutionTxOpts{
 		ContractAddress: poolIndex,
-		InputData:       addToPoolIndexData,
+		InputData:       addDivviRefferalTag(w.wc.chainProvider, addToPoolIndexData, ethutils.HexToAddress(systemKeypair.Public)),
 		GasFeeCap:       gasSettings.GasFeeCap,
 		GasTipCap:       gasSettings.GasTipCap,
 		GasLimit:        gasSettings.GasLimit,
@@ -327,7 +327,7 @@ func (w *PoolDeployWorker) Work(ctx context.Context, job *river.Job[PoolDeployAr
 
 	builtSetQuoterTx, err := w.wc.chainProvider.SignContractExecutionTx(privateKey, ethutils.ContractExecutionTxOpts{
 		ContractAddress: swapPoolAddress,
-		InputData:       setQuoterData,
+		InputData:       addDivviRefferalTag(w.wc.chainProvider, setQuoterData, ethutils.HexToAddress(systemKeypair.Public)),
 		GasFeeCap:       gasSettings.GasFeeCap,
 		GasTipCap:       gasSettings.GasTipCap,
 		GasLimit:        gasSettings.GasLimit,
@@ -378,7 +378,7 @@ func (w *PoolDeployWorker) Work(ctx context.Context, job *river.Job[PoolDeployAr
 
 	builtTransferLimiterOwnershipTx, err := w.wc.chainProvider.SignContractExecutionTx(privateKey, ethutils.ContractExecutionTxOpts{
 		ContractAddress: limiterAddress,
-		InputData:       transferLimiterOwnershipData,
+		InputData:       addDivviRefferalTag(w.wc.chainProvider, transferLimiterOwnershipData, ethutils.HexToAddress(systemKeypair.Public)),
 		GasFeeCap:       gasSettings.GasFeeCap,
 		GasTipCap:       gasSettings.GasTipCap,
 		GasLimit:        gasSettings.GasLimit,
@@ -427,7 +427,7 @@ func (w *PoolDeployWorker) Work(ctx context.Context, job *river.Job[PoolDeployAr
 
 	builtTransferTokenIndexOwnershipTx, err := w.wc.chainProvider.SignContractExecutionTx(privateKey, ethutils.ContractExecutionTxOpts{
 		ContractAddress: tokenIndexAddress,
-		InputData:       transferTokenIndexOwnershipData,
+		InputData:       addDivviRefferalTag(w.wc.chainProvider, transferTokenIndexOwnershipData, ethutils.HexToAddress(systemKeypair.Public)),
 		GasFeeCap:       gasSettings.GasFeeCap,
 		GasTipCap:       gasSettings.GasTipCap,
 		GasLimit:        gasSettings.GasLimit,
@@ -476,7 +476,7 @@ func (w *PoolDeployWorker) Work(ctx context.Context, job *river.Job[PoolDeployAr
 
 	builtTransferSwapPoolOwnershipTx, err := w.wc.chainProvider.SignContractExecutionTx(privateKey, ethutils.ContractExecutionTxOpts{
 		ContractAddress: swapPoolAddress,
-		InputData:       transferSwapPoolOwnershipData,
+		InputData:       addDivviRefferalTag(w.wc.chainProvider, transferSwapPoolOwnershipData, ethutils.HexToAddress(systemKeypair.Public)),
 		GasFeeCap:       gasSettings.GasFeeCap,
 		GasTipCap:       gasSettings.GasTipCap,
 		GasLimit:        gasSettings.GasLimit,
@@ -525,7 +525,7 @@ func (w *PoolDeployWorker) Work(ctx context.Context, job *river.Job[PoolDeployAr
 
 	builtTransferPriceIndexQuoterOwnershipTx, err := w.wc.chainProvider.SignContractExecutionTx(privateKey, ethutils.ContractExecutionTxOpts{
 		ContractAddress: priceIndexQuoterAddress,
-		InputData:       transferPriceIndexQuoterOwnershipData,
+		InputData:       addDivviRefferalTag(w.wc.chainProvider, transferPriceIndexQuoterOwnershipData, ethutils.HexToAddress(systemKeypair.Public)),
 		GasFeeCap:       gasSettings.GasFeeCap,
 		GasTipCap:       gasSettings.GasTipCap,
 		GasLimit:        gasSettings.GasLimit,

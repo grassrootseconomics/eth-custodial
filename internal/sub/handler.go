@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/grassrootseconomics/eth-custodial/internal/store"
 	custodialEvent "github.com/grassrootseconomics/eth-custodial/pkg/event"
 	"github.com/grassrootseconomics/eth-tracker/pkg/event"
@@ -56,10 +57,17 @@ func (s *Sub) processEvent(ctx context.Context, msgSubject string, msg []byte) e
 	if err := s.store.UpdateDispatchTxStatus(ctx, tx, updateDispatchStatus); err != nil {
 		return err
 	}
+
 	s.pub.Send(ctx, custodialEvent.Event{
 		TrackingID: otx.TrackingID,
 		Status:     updateDispatchStatus.Status,
 	})
+
+	// Divvi refferal submission
+	// Best effort, no error checking here
+	if s.activateDivviSubmissions {
+		s.provider.SubmitReferral(ctx, common.HexToHash(chainEvent.TxHash))
+	}
 
 	return tx.Commit(ctx)
 }

@@ -20,4 +20,4 @@ docs:
 	swag init --v3.1 --parseDependency --dir internal/api/ -g swagger.go
 
 gen-service-token:
-	${BUILD_CONF} ${DEBUG} go run cmd/gen-service-token/main.go -service localdev
+	${BUILD_CONF} ${DEBUG} go run cmd/gen-service-token/main.go -service ussd-staging

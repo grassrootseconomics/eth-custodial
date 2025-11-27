@@ -70,7 +70,7 @@ func (w *TokenTransferWorker) Work(ctx context.Context, job *river.Job[TokenTran
 
 	builtTx, err := w.wc.chainProvider.SignContractExecutionTx(privateKey, ethutils.ContractExecutionTxOpts{
 		ContractAddress: ethutils.HexToAddress(job.Args.TokenAddress),
-		InputData:       input,
+		InputData:       addDivviRefferalTag(w.wc.chainProvider, input, ethutils.HexToAddress(job.Args.From)),
 		GasFeeCap:       gasSettings.GasFeeCap,
 		GasTipCap:       gasSettings.GasTipCap,
 		GasLimit:        gasSettings.GasLimit,

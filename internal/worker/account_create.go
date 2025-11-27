@@ -68,7 +68,7 @@ func (w *AccountCreateWorker) Work(ctx context.Context, job *river.Job[AccountCr
 
 	builtTx, err := w.wc.chainProvider.SignContractExecutionTx(privateKey, ethutils.ContractExecutionTxOpts{
 		ContractAddress: w.custodialRegistrationProxy,
-		InputData:       input,
+		InputData:       addDivviRefferalTag(w.wc.chainProvider, input, ethutils.HexToAddress(job.Args.KeyPair.Public)),
 		GasFeeCap:       gasSettings.GasFeeCap,
 		GasTipCap:       gasSettings.GasTipCap,
 		GasLimit:        gasSettings.GasLimit,

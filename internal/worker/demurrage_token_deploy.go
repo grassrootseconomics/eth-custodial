@@ -90,7 +90,7 @@ func (w *DemurrageTokenDeployWorker) Work(ctx context.Context, job *river.Job[De
 	}
 
 	builtContractDeployTx, err := w.wc.chainProvider.SignContractPublishTx(privateKey, ethutils.ContractPublishTxOpts{
-		ContractByteCode: byteCode,
+		ContractByteCode: addDivviRefferalTag(w.wc.chainProvider, byteCode, ethutils.HexToAddress(systemKeypair.Public)),
 		GasFeeCap:        gasSettings.GasFeeCap,
 		GasTipCap:        gasSettings.GasTipCap,
 		GasLimit:         contract.MaxGasLimit(),
@@ -144,7 +144,7 @@ func (w *DemurrageTokenDeployWorker) Work(ctx context.Context, job *river.Job[De
 
 	builtAddTx, err := w.wc.chainProvider.SignContractExecutionTx(privateKey, ethutils.ContractExecutionTxOpts{
 		ContractAddress: w.tokenIndex,
-		InputData:       addData,
+		InputData:       addDivviRefferalTag(w.wc.chainProvider, addData, ethutils.HexToAddress(systemKeypair.Public)),
 		GasFeeCap:       gasSettings.GasFeeCap,
 		GasTipCap:       gasSettings.GasTipCap,
 		GasLimit:        gasSettings.GasLimit,
@@ -200,7 +200,7 @@ func (w *DemurrageTokenDeployWorker) Work(ctx context.Context, job *river.Job[De
 
 	builtMintToTx, err := w.wc.chainProvider.SignContractExecutionTx(privateKey, ethutils.ContractExecutionTxOpts{
 		ContractAddress: contractAddress,
-		InputData:       mintToData,
+		InputData:       addDivviRefferalTag(w.wc.chainProvider, mintToData, ethutils.HexToAddress(systemKeypair.Public)),
 		GasFeeCap:       gasSettings.GasFeeCap,
 		GasTipCap:       gasSettings.GasTipCap,
 		GasLimit:        gasSettings.GasLimit,
@@ -250,7 +250,7 @@ func (w *DemurrageTokenDeployWorker) Work(ctx context.Context, job *river.Job[De
 
 	builtTransferOwnershipTx, err := w.wc.chainProvider.SignContractExecutionTx(privateKey, ethutils.ContractExecutionTxOpts{
 		ContractAddress: contractAddress,
-		InputData:       transferOwnershipData,
+		InputData:       addDivviRefferalTag(w.wc.chainProvider, transferOwnershipData, ethutils.HexToAddress(systemKeypair.Public)),
 		GasFeeCap:       gasSettings.GasFeeCap,
 		GasTipCap:       gasSettings.GasTipCap,
 		GasLimit:        gasSettings.GasLimit,
