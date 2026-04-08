@@ -97,7 +97,7 @@ func New(o WorkerOpts) (*WorkerContainer, error) {
 			},
 		},
 		Workers:      workers,
-		PeriodicJobs: setupHealthCheck(),
+		PeriodicJobs: setupPeriodicJobs(),
 		Logger:       o.Logg,
 	})
 	if err != nil {
@@ -181,7 +181,7 @@ func setupWorkers(wc *WorkerContainer) (*river.Workers, error) {
 	return workers, nil
 }
 
-func setupHealthCheck() []*river.PeriodicJob {
+func setupPeriodicJobs() []*river.PeriodicJob {
 	return []*river.PeriodicJob{
 		river.NewPeriodicJob(
 			river.PeriodicInterval(healthCheckInterval),

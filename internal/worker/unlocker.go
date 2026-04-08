@@ -5,6 +5,7 @@ import (
 	"errors"
 	"math/big"
 	"strings"
+	"time"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -37,7 +38,7 @@ func (w *UnlockerWorker) Work(ctx context.Context, _ *river.Job[UnlockerArgs]) e
 	}
 
 	if len(stuckOTXs) == 0 {
-		w.wc.logg.Debug("unlocker: no stuck transactions older than 5 minutes")
+		w.wc.logg.Debug("unlocker: no stuck transactions older than configured threshold", "threshold", unlockerInterval)
 		return nil
 	}
 
@@ -136,7 +137,7 @@ func (w *UnlockerWorker) sendRawTx(ctx context.Context, rawTx []byte) error {
 		}
 		return callErrs[0]
 	} else if err != nil {
-		return err
+		return handleNetworkError(err)
 	}
 
 	return nil
@@ -152,7 +153,9 @@ func (w *UnlockerWorker) checkReceipt(ctx context.Context, otx *store.OTX) error
 	}
 
 	status := store.REVERTED
-	if receipt != nil && receipt.Status == 1 {
+	if receipt == nil {
+		return nil
+	} else if receipt.Status == 1 {
 		status = store.SUCCESS
 	}
 
@@ -172,6 +175,10 @@ func (w *UnlockerWorker) resignAndResubmit(ctx context.Context, otx *store.OTX) 
 
 	if originalTx.To() == nil {
 		return nil
+	}
+
+	if originalTx.Type() != types.DynamicFeeTxType {
+		return errors.New("cannot re-sign non-dynamic-fee transaction")
 	}
 
 	gasSettings, err := w.wc.gasOracle.GetSettings()
@@ -268,6 +275,7 @@ func (w *UnlockerWorker) setStatus(ctx context.Context, otxID uint64, status str
 }
 
 func (w *UnlockerWorker) getStuckOTXs(ctx context.Context) ([]*store.OTX, error) {
+	cutoff := time.Now().Add(-unlockerInterval)
 	rows, err := w.wc.store.Pool().Query(ctx, `
 		SELECT otx.id, otx.tracking_id, otx.otx_type, keystore.public_key, otx.raw_tx, otx.tx_hash,
 		       otx.nonce, otx.replaced, otx.created_at, otx.updated_at, dispatch.status
@@ -276,9 +284,9 @@ func (w *UnlockerWorker) getStuckOTXs(ctx context.Context) ([]*store.OTX, error)
 		INNER JOIN dispatch ON otx.id = dispatch.otx_id
 		WHERE dispatch.status NOT IN ('SUCCESS', 'REVERTED', 'PENDING', 'EXTERNAL_DISPATCH')
 		  AND otx.otx_type NOT IN ('GENERIC_SIGN', 'OTHER_MANUAL')
-		  AND dispatch.updated_at <= NOW() - INTERVAL '5 minutes'
+		  AND dispatch.updated_at <= $1
 		ORDER BY otx.id ASC
-		LIMIT 100`)
+		LIMIT 100`, cutoff)
 	if err != nil {
 		return nil, err
 	}
