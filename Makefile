@@ -21,3 +21,9 @@ docs:
 
 gen-service-token:
 	${BUILD_CONF} ${DEBUG} go run cmd/gen-service-token/main.go -service ussd-staging
+
+unlocker-dry-run:
+	${BUILD_CONF} ${DEBUG} go run cmd/unlocker/main.go -dry-run
+
+unlocker-run:
+	${BUILD_CONF} ${DEBUG} go run cmd/unlocker/main.go
