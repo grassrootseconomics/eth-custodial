@@ -53,6 +53,7 @@ type (
 const (
 	migrationTimeout    = 15 * time.Second
 	healthCheckInterval = 2 * time.Minute
+	unlockerInterval    = 5 * time.Minute
 )
 
 func New(o WorkerOpts) (*WorkerContainer, error) {
@@ -96,7 +97,7 @@ func New(o WorkerOpts) (*WorkerContainer, error) {
 			},
 		},
 		Workers:      workers,
-		PeriodicJobs: setupHealthCheck(),
+		PeriodicJobs: setupPeriodicJobs(),
 		Logger:       o.Logg,
 	})
 	if err != nil {
@@ -173,15 +174,28 @@ func setupWorkers(wc *WorkerContainer) (*river.Workers, error) {
 		return nil, err
 	}
 
+	if err := river.AddWorkerSafely(workers, &UnlockerWorker{wc: wc}); err != nil {
+		return nil, err
+	}
+
 	return workers, nil
 }
 
-func setupHealthCheck() []*river.PeriodicJob {
+func setupPeriodicJobs() []*river.PeriodicJob {
 	return []*river.PeriodicJob{
 		river.NewPeriodicJob(
 			river.PeriodicInterval(healthCheckInterval),
 			func() (river.JobArgs, *river.InsertOpts) {
 				return DispatchHealthCheckArgs{}, nil
+			},
+			&river.PeriodicJobOpts{
+				RunOnStart: true,
+			},
+		),
+		river.NewPeriodicJob(
+			river.PeriodicInterval(unlockerInterval),
+			func() (river.JobArgs, *river.InsertOpts) {
+				return UnlockerArgs{}, nil
 			},
 			&river.PeriodicJobOpts{
 				RunOnStart: true,
