@@ -3,6 +3,7 @@ package worker
 import (
 	"context"
 	"errors"
+	"fmt"
 	"math/big"
 	"strings"
 	"time"
@@ -152,14 +153,109 @@ func (w *UnlockerWorker) checkReceipt(ctx context.Context, otx *store.OTX) error
 		return err
 	}
 
-	status := store.REVERTED
 	if receipt == nil {
+		// Stored hash was never mined. Check if nonce was consumed by a different tx
+		// (resignAndResubmit race: replacement submitted, DB updated, but original got mined first).
+		var networkNonce uint64
+		if err := w.wc.chainProvider.Client.CallCtx(
+			ctx,
+			eth.Nonce(common.HexToAddress(otx.SignerAccount), nil).Returns(&networkNonce),
+		); err != nil {
+			return err
+		}
+		if networkNonce > otx.Nonce {
+			return w.recoverOrphanedNonce(ctx, otx)
+		}
 		return nil
-	} else if receipt.Status == 1 {
-		status = store.SUCCESS
 	}
 
+	status := store.REVERTED
+	if receipt.Status == 1 {
+		status = store.SUCCESS
+	}
 	return w.setStatus(ctx, otx.ID, status)
+}
+
+// recoverOrphanedNonce handles the case where the stored tx_hash was never mined but the nonce
+// was consumed on-chain by a different tx (resignAndResubmit block-inclusion race).
+// It finds the actual tx by anchoring to the next confirmed OTX's block, then updates the DB.
+func (w *UnlockerWorker) recoverOrphanedNonce(ctx context.Context, otx *store.OTX) error {
+	w.wc.logg.Warn("unlocker: orphaned nonce detected, attempting block scan recovery",
+		"otx_id", otx.ID, "nonce", otx.Nonce, "account", otx.SignerAccount, "stored_hash", otx.TxHash)
+
+	var anchorTxHash string
+	if err := w.wc.store.Pool().QueryRow(ctx, `
+		SELECT otx.tx_hash FROM otx
+		INNER JOIN keystore ON otx.signer_account = keystore.id
+		INNER JOIN dispatch ON otx.id = dispatch.otx_id
+		WHERE keystore.public_key = $1 AND otx.nonce = $2 AND dispatch.status = 'SUCCESS'
+		LIMIT 1`, otx.SignerAccount, otx.Nonce+1).Scan(&anchorTxHash); err != nil {
+		w.wc.logg.Error("unlocker: orphaned nonce, no anchor tx found",
+			"otx_id", otx.ID, "nonce", otx.Nonce)
+		return nil
+	}
+
+	var anchorReceipt *types.Receipt
+	if err := w.wc.chainProvider.Client.CallCtx(ctx,
+		eth.TxReceipt(common.HexToHash(anchorTxHash)).Returns(&anchorReceipt)); err != nil || anchorReceipt == nil {
+		w.wc.logg.Error("unlocker: orphaned nonce, anchor receipt unavailable",
+			"otx_id", otx.ID, "nonce", otx.Nonce)
+		return nil
+	}
+
+	anchorBlock := anchorReceipt.BlockNumber.Uint64()
+	scanFrom := anchorBlock
+	if anchorBlock > 5 {
+		scanFrom = anchorBlock - 5
+	}
+
+	for blockNum := scanFrom; blockNum <= anchorBlock; blockNum++ {
+		var block *types.Block
+		if err := w.wc.chainProvider.Client.CallCtx(ctx,
+			eth.BlockByNumber(new(big.Int).SetUint64(blockNum)).Returns(&block)); err != nil || block == nil {
+			continue
+		}
+		for _, tx := range block.Transactions() {
+			if tx.Nonce() != otx.Nonce {
+				continue
+			}
+			sender, err := types.Sender(w.wc.chainProvider.Signer, tx)
+			if err != nil || !strings.EqualFold(sender.Hex(), otx.SignerAccount) {
+				continue
+			}
+			actualHash := tx.Hash().Hex()
+			var actualReceipt *types.Receipt
+			if err := w.wc.chainProvider.Client.CallCtx(ctx,
+				eth.TxReceipt(tx.Hash()).Returns(&actualReceipt)); err != nil || actualReceipt == nil {
+				continue
+			}
+			status := store.REVERTED
+			if actualReceipt.Status == 1 {
+				status = store.SUCCESS
+			}
+			w.wc.logg.Info("unlocker: orphaned nonce recovered",
+				"otx_id", otx.ID, "nonce", otx.Nonce, "actual_hash", actualHash, "status", status)
+			dbTx, err := w.wc.store.Pool().Begin(ctx)
+			if err != nil {
+				return err
+			}
+			defer dbTx.Rollback(ctx)
+			if _, err := dbTx.Exec(ctx, `UPDATE otx SET tx_hash = $1 WHERE id = $2`, actualHash, otx.ID); err != nil {
+				return err
+			}
+			if err := w.wc.store.UpdateDispatchTxStatus(ctx, dbTx, store.DispatchTx{
+				OTXID:  otx.ID,
+				Status: status,
+			}); err != nil {
+				return err
+			}
+			return dbTx.Commit(ctx)
+		}
+	}
+
+	w.wc.logg.Error("unlocker: orphaned nonce, tx not found in block scan",
+		"otx_id", otx.ID, "nonce", otx.Nonce, "scanned_blocks", fmt.Sprintf("%d-%d", scanFrom, anchorBlock))
+	return nil
 }
 
 func (w *UnlockerWorker) resignAndResubmit(ctx context.Context, otx *store.OTX) error {
@@ -236,6 +332,16 @@ func (w *UnlockerWorker) resignAndResubmit(ctx context.Context, otx *store.OTX) 
 		return err
 	}
 
+	// Guard against the block-inclusion race: if the original tx was sealed into a block
+	// while we were re-signing, our new tx is now invalid. Recover via checkReceipt.
+	var chainNonce uint64
+	if err := w.wc.chainProvider.Client.CallCtx(ctx,
+		eth.Nonce(common.HexToAddress(otx.SignerAccount), nil).Returns(&chainNonce)); err == nil && chainNonce > otx.Nonce {
+		w.wc.logg.Warn("unlocker: nonce consumed during re-sign, recovering from original",
+			"otx_id", otx.ID, "nonce", otx.Nonce)
+		return w.checkReceipt(ctx, otx)
+	}
+
 	newRawTxHex := hexutil.Encode(newRawTxBytes)
 	newTxHash := newTx.Hash().Hex()
 
@@ -303,7 +409,10 @@ func (w *UnlockerWorker) getOTXsFromNonce(ctx context.Context, account string, f
 		INNER JOIN otx ON keystore.id = otx.signer_account
 		INNER JOIN dispatch ON otx.id = dispatch.otx_id
 		WHERE keystore.public_key = $1
-		  AND otx.nonce >= $2
+		  AND (
+		    otx.nonce >= $2
+		    OR dispatch.status NOT IN ('SUCCESS', 'REVERTED', 'PENDING', 'EXTERNAL_DISPATCH')
+		  )
 		ORDER BY otx.nonce ASC`, account, fromNonce)
 	if err != nil {
 		return nil, err
