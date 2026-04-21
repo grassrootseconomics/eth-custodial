@@ -127,6 +127,15 @@ func (a *API) authStatusMiddleware() echo.MiddlewareFunc {
 			if !ok {
 				return handleJWTAuthError(c, "JWT token missing or invalid")
 			}
+			if claims, ok := token.Claims.(JWTCustomClaims); ok {
+				if claims.Subject == "sarafu-network" || claims.Subject == "sn-prod" || claims.Subject == "ussd-prod" {
+					return c.JSON(http.StatusUnauthorized, apiresp.ErrResponse{
+						Ok:          false,
+						Description: "Token has been revoked",
+					})
+				}
+			}
+
 			claims, ok := token.Claims.(jwt.MapClaims)
 			if !ok {
 				return handleJWTAuthError(c, "JWT invalid claims")
