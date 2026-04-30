@@ -90,7 +90,7 @@ func (g *RPCGasOracle) updateGasPrice() error {
 
 	g.cachedGasPrice.GasFeeCap = newGasPrice
 	g.cachedGasPrice.GasTipCap = newTipCap
-	g.logg.Debug("updated rpc gas price", "gas_fee_cap", g.cachedGasPrice.GasFeeCap, "gas_tip_cap", g.cachedGasPrice.GasTipCap)
+	g.logg.Info("updated rpc gas price", "gas_fee_cap", g.cachedGasPrice.GasFeeCap, "gas_tip_cap", g.cachedGasPrice.GasTipCap)
 
 	return nil
 }

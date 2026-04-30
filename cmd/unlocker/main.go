@@ -6,11 +6,13 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"io"
 	"log/slog"
 	"math/big"
 	"net"
 	"net/url"
 	"os"
+	"sort"
 	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -42,13 +44,14 @@ func init() {
 	flag.StringVar(&migrationsFlag, "migrations", "migrations/", "Migrations folder location")
 	flag.StringVar(&rpcFlag, "rpc", "", "Comma-separated RPC endpoints (overrides config)")
 	flag.BoolVar(&dryRun, "dry-run", false, "Log actions without executing")
+}
+
+func main() {
 	flag.Parse()
 
 	lo = util.InitLogger()
 	ko = util.InitConfig(lo, confFlag)
-}
 
-func main() {
 	ctx := context.Background()
 
 	pgStore, err := store.NewPgStore(store.PgOpts{
@@ -100,6 +103,7 @@ func main() {
 	lo.Info("found stuck transactions", "count", len(stuckOTXs))
 
 	affectedAccounts := affectedAccountSet(stuckOTXs)
+	noGasAccounts := make(map[string]struct{})
 
 	var stats struct {
 		resubmitted int
@@ -194,6 +198,13 @@ func main() {
 
 				newRawTxHex, newTxHash, err := resignAndSubmit(ctx, clients, pgStore, signer, otx, account)
 				if err != nil {
+					if classifyRPCError(err) == "no_gas" {
+						lo.Warn("re-sign requires gas top-up, skipping remaining txs", "account", account, "otx_id", otx.ID)
+						noGasAccounts[account] = struct{}{}
+						skipAccount = true
+						stats.skipped++
+						continue
+					}
 					lo.Error("re-sign failed", "otx_id", otx.ID, "error", err)
 					stats.failed++
 					continue
@@ -209,6 +220,7 @@ func main() {
 
 			case "no_gas":
 				lo.Warn("account has insufficient gas, skipping remaining txs", "account", account)
+				noGasAccounts[account] = struct{}{}
 				skipAccount = true
 				stats.skipped++
 
@@ -226,6 +238,13 @@ func main() {
 		"skipped", stats.skipped,
 		"failed", stats.failed,
 	)
+
+	if len(noGasAccounts) > 0 {
+		lo.Warn("accounts requiring gas top-up detected", "count", len(noGasAccounts))
+		if err := printGasTopupCSV(os.Stdout, noGasAccounts, "0.5"); err != nil {
+			lo.Error("failed to print gas top-up csv", "error", err)
+		}
+	}
 }
 
 func parseRPCEndpoints() []string {
@@ -285,6 +304,24 @@ func affectedAccountSet(otxs []*store.OTX) map[string]struct{} {
 		accounts[otx.SignerAccount] = struct{}{}
 	}
 	return accounts
+}
+
+func printGasTopupCSV(w io.Writer, accounts map[string]struct{}, amount string) error {
+	for _, account := range sortedAccounts(accounts) {
+		if _, err := fmt.Fprintf(w, "%s,%s\n", account, amount); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func sortedAccounts(accounts map[string]struct{}) []string {
+	list := make([]string, 0, len(accounts))
+	for account := range accounts {
+		list = append(list, account)
+	}
+	sort.Strings(list)
+	return list
 }
 
 // getOTXsFromNonce returns all OTXs for an account with nonce >= fromNonce, ordered by nonce ASC.
@@ -561,10 +598,10 @@ func classifyRPCError(err error) string {
 	switch {
 	case strings.Contains(msg, "nonce too low"):
 		return "nonce_low"
-	case strings.Contains(msg, "transaction underpriced"):
-		return "gas_price"
 	case strings.Contains(msg, "replacement transaction underpriced"):
 		return "replacement_underpriced"
+	case strings.Contains(msg, "transaction underpriced"), strings.Contains(msg, "gas fee cap is below the minimum base fee"):
+		return "gas_price"
 	case strings.Contains(msg, "insufficient funds for gas"):
 		return "no_gas"
 	case isNetworkError(err):

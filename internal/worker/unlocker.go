@@ -422,7 +422,11 @@ func (w *UnlockerWorker) getOTXsFromNonce(ctx context.Context, account string, f
 	return scanOTXRows(rows)
 }
 
-func scanOTXRows(rows interface{ Next() bool; Scan(...any) error; Err() error }) ([]*store.OTX, error) {
+func scanOTXRows(rows interface {
+	Next() bool
+	Scan(...any) error
+	Err() error
+}) ([]*store.OTX, error) {
 	var otxs []*store.OTX
 	for rows.Next() {
 		o := &store.OTX{}
@@ -456,7 +460,7 @@ func unlockerClassifyRPCError(err error) string {
 		return "nonce_low"
 	case strings.Contains(msg, "replacement transaction underpriced"):
 		return "replacement_underpriced"
-	case strings.Contains(msg, "transaction underpriced"):
+	case strings.Contains(msg, "transaction underpriced"), strings.Contains(msg, "gas fee cap is below the minimum base fee"):
 		return "gas_price"
 	case strings.Contains(msg, "insufficient funds for gas"):
 		return "no_gas"

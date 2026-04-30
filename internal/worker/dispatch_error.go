@@ -34,12 +34,12 @@ func handleJSONRPCError(errMsg string) error {
 	switch {
 	case strings.Contains(errMsg, "insufficient funds for gas"):
 		return ErrInsufficientGas
-	case strings.Contains(errMsg, "transaction underpriced"):
+	case strings.Contains(errMsg, "replacement transaction underpriced"):
+		return ErrReplacementTxUnderpriced
+	case strings.Contains(errMsg, "transaction underpriced"), strings.Contains(errMsg, "gas fee cap is below the minimum base fee"):
 		return ErrGasPriceTooLow
 	case strings.Contains(errMsg, "nonce too low"):
 		return ErrNonceTooLow
-	case strings.Contains(errMsg, "replacement transaction underpriced"):
-		return ErrReplacementTxUnderpriced
 	default:
 		return nil
 	}
