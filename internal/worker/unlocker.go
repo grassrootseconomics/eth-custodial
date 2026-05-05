@@ -388,7 +388,7 @@ func (w *UnlockerWorker) getStuckOTXs(ctx context.Context) ([]*store.OTX, error)
 		FROM keystore
 		INNER JOIN otx ON keystore.id = otx.signer_account
 		INNER JOIN dispatch ON otx.id = dispatch.otx_id
-		WHERE dispatch.status NOT IN ('SUCCESS', 'REVERTED', 'PENDING', 'EXTERNAL_DISPATCH')
+		WHERE dispatch.status NOT IN ('SUCCESS', 'REVERTED', 'EXTERNAL_DISPATCH')
 		  AND otx.otx_type NOT IN ('GENERIC_SIGN', 'OTHER_MANUAL')
 		  AND dispatch.updated_at <= $1
 		ORDER BY otx.id ASC
@@ -411,7 +411,7 @@ func (w *UnlockerWorker) getOTXsFromNonce(ctx context.Context, account string, f
 		WHERE keystore.public_key = $1
 		  AND (
 		    otx.nonce >= $2
-		    OR dispatch.status NOT IN ('SUCCESS', 'REVERTED', 'PENDING', 'EXTERNAL_DISPATCH')
+		    OR dispatch.status NOT IN ('SUCCESS', 'REVERTED', 'EXTERNAL_DISPATCH')
 		  )
 		ORDER BY otx.nonce ASC`, account, fromNonce)
 	if err != nil {

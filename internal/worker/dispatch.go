@@ -53,28 +53,18 @@ func (w *DisptachWorker) Work(ctx context.Context, job *river.Job[DispatchArgs])
 			if dispatchErr.Err == ErrNetwork {
 				updateTxStatus.Status = store.NETWORK_ERROR
 				w.wc.logg.Error("network related dispatch error", "original_error", dispatchErr.OriginalErr)
-				if err := w.wc.store.UpdateDispatchTxStatus(ctx, tx, updateTxStatus); err != nil {
-					return err
+			} else {
+				w.wc.logg.Error("chain related dispatch error", "error", dispatchErr.Err, "original_error", dispatchErr.OriginalErr)
+				switch dispatchErr.Err {
+				case ErrGasPriceTooLow:
+					updateTxStatus.Status = store.LOW_GAS_PRICE
+				case ErrInsufficientGas:
+					updateTxStatus.Status = store.NO_GAS
+				case ErrNonceTooLow:
+					updateTxStatus.Status = store.LOW_NONCE
+				case ErrReplacementTxUnderpriced:
+					updateTxStatus.Status = store.REPLACEMENT_UNDERPRICED
 				}
-				w.wc.pub.Send(ctx, event.Event{
-					TrackingID: job.Args.TrackingID,
-					Status:     updateTxStatus.Status,
-				})
-
-				// Network errors are transient, so we can keep retrying up to the limit
-				return dispatchErr
-			}
-
-			w.wc.logg.Error("chain related dispatch error", "error", dispatchErr.Err, "original_error", dispatchErr.OriginalErr)
-			switch dispatchErr.Err {
-			case ErrGasPriceTooLow:
-				updateTxStatus.Status = store.LOW_GAS_PRICE
-			case ErrInsufficientGas:
-				updateTxStatus.Status = store.NO_GAS
-			case ErrNonceTooLow:
-				updateTxStatus.Status = store.LOW_NONCE
-			case ErrReplacementTxUnderpriced:
-				updateTxStatus.Status = store.REPLACEMENT_UNDERPRICED
 			}
 
 			if err := w.wc.store.UpdateDispatchTxStatus(ctx, tx, updateTxStatus); err != nil {
@@ -84,6 +74,18 @@ func (w *DisptachWorker) Work(ctx context.Context, job *river.Job[DispatchArgs])
 				TrackingID: job.Args.TrackingID,
 				Status:     updateTxStatus.Status,
 			})
+
+			// Commit the status update before cancelling the job or returning an error.
+			// Without this, the deferred tx.Rollback() discards the status change,
+			// leaving the dispatch stuck in PENDING with no recovery path.
+			if err := tx.Commit(ctx); err != nil {
+				return err
+			}
+
+			if dispatchErr.Err == ErrNetwork {
+				// Network errors are transient, so we can keep retrying up to the limit
+				return dispatchErr
+			}
 
 			_, err := w.wc.queueClient.Insert(ctx, RetrierArgs{
 				TrackingID: job.Args.TrackingID,

@@ -270,7 +270,7 @@ func getStuckOTXs(ctx context.Context, pgStore store.Store) ([]*store.OTX, error
 		FROM keystore
 		INNER JOIN otx ON keystore.id = otx.signer_account
 		INNER JOIN dispatch ON otx.id = dispatch.otx_id
-		WHERE dispatch.status NOT IN ('SUCCESS', 'REVERTED', 'PENDING', 'EXTERNAL_DISPATCH')
+		WHERE dispatch.status NOT IN ('SUCCESS', 'REVERTED', 'EXTERNAL_DISPATCH')
 		  AND otx.otx_type NOT IN ('GENERIC_SIGN', 'OTHER_MANUAL')
 		  AND dispatch.updated_at <= NOW() - INTERVAL '5 minutes'
 		ORDER BY otx.id ASC
